@@ -1,0 +1,9 @@
+.vs/
+build/
+*.pdb
+*.exe
+*.ilk
+*.obj
+*.log
+*.tlog
+cg-gui/x64/Debug/
