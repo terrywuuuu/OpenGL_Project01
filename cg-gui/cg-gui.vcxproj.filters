@@ -97,4 +97,8 @@
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\shaders\DSPhong_Material.fp" />
+    <None Include="..\res\shaders\DSPhong_Material.vp" />
+  </ItemGroup>
 </Project>
