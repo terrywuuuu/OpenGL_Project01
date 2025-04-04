@@ -15,6 +15,7 @@
    5. +MainScene::bodyRotateMatrix() （簡化 `updateModel`）  
    6. LoadModel 把 model 改成 10 個部分  
 2. **ControlWindow**  
-   1. +新增 editor 視窗  
+   1. +新增 editor 視窗
+   2. 新增動作lying face up/down 測試用
 
 程式碼髒髒，勿噴，罷託，隨意改就好。
