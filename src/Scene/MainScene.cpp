@@ -47,6 +47,7 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
+		isActionChange = true;
 		return LoadScene();
 	}
 
@@ -537,15 +538,17 @@ namespace CG
 	{
 		glm::mat4 Rotation[PARTSNUM];
 		glm::mat4 Translation[PARTSNUM];
+
+		float alpha, beta, gamma;// x, y, z
+		static float dir = 0.0;
+		int ind;
+
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			Models[i] = glm::mat4(1.0f);
 			Rotation[i] = glm::mat4(1.0f);
 			Translation[i] = glm::mat4(1.0f);
 		}
-		float alpha, beta, gamma;// x, y, z
-		static float dir = 0.0;
-		int ind;
 
 		if (isActionChange) {// stand, lay faec up, lay face down
 			isActionChange = false;
@@ -555,6 +558,7 @@ namespace CG
 				betas[i] = 0.0f;
 				gammas[i] = 0.0f;
 			}
+
 			switch (action) {
 			case Action::idle:
 			case Action::walk:
@@ -571,34 +575,37 @@ namespace CG
 				break;
 			}
 		}
+		
 		Translation[Body::body] = translate(0, 2.9f + position, 0);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
-		Translation[Body::head] = translate(0, 3.9f, -0.5f);
+		Translation[Body::head] = translate(0, 5.5f, 0);
 		Models[Body::head] = Models[Body::body] * Translation[Body::head] * bodyRotateMatrix(Body::head);
 
-		Translation[Body::left_arm] = translate(3.7f, 1.0f, -0.5f);
+		Translation[Body::left_arm] = translate(3.5f, 4.0f, -1.0f);
+		gammas[Body::left_arm] = -70;
 		Models[Body::left_arm] = Models[Body::body] * Translation[Body::left_arm] * bodyRotateMatrix(Body::left_arm);
 
-		Translation[Body::left_hand] = translate(0, -3.0f, 0);
+		Translation[Body::left_hand] = translate(4.8f, -0.8f, 0);
 		Models[Body::left_hand] = Models[Body::left_arm] * Translation[Body::left_hand] * bodyRotateMatrix(Body::left_hand);
 
-		Translation[Body::right_arm] = translate(-3.9f, 1.7f, -0.5f);
+		Translation[Body::right_arm] = translate(-3.5f, 4.0f, -1.0f);
+		gammas[Body::right_arm] = 70;
 		Models[Body::right_arm] = Models[Body::body] * Translation[Body::right_arm] * bodyRotateMatrix(Body::right_arm);
 
-		Translation[Body::right_hand] = translate(0, -3.0f, 0);
+		Translation[Body::right_hand] = translate(-4.8, -0.8f, 0);
 		Models[Body::right_hand] = Models[Body::right_arm] * Translation[Body::right_hand] * bodyRotateMatrix(Body::right_hand);
 
-		Translation[Body::left_leg] = translate(1.8f, -4.5f, 0);
+		Translation[Body::left_leg] = translate(1.5f, -4.5f, -1.0);
 		Models[Body::left_leg] = Models[Body::body] * Translation[Body::left_leg] * bodyRotateMatrix(Body::left_leg);
 
-		Translation[Body::left_foot] = translate(0, -7.0f, 0);
+		Translation[Body::left_foot] = translate(1.0, -7.0f, 0);
 		Models[Body::left_foot] = Models[Body::left_leg] * Translation[Body::left_foot] * bodyRotateMatrix(Body::left_foot);
 
-		Translation[Body::right_leg] = translate(-1.8f, -4.5f, 0);
+		Translation[Body::right_leg] = translate(-1.0f, -4.5f, -1.0);
 		Models[Body::right_leg] = Models[Body::body] * Translation[Body::right_leg] * bodyRotateMatrix(Body::right_leg);
 
-		Translation[Body::right_foot] = translate(0, -7.0f, 0);
+		Translation[Body::right_foot] = translate(-1.0, -7.0f, 0);
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
 	}
 }
