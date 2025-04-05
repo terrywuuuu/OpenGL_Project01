@@ -73,7 +73,6 @@ namespace CG
 		int action = 0; // idle
 		GLenum mode = 0; // fill
 
-		float angles[PARTSNUM];
 		float position = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;

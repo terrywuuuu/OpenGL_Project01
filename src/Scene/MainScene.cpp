@@ -174,14 +174,14 @@ namespace CG
 				eyeAngley += 10;
 				break;
 			case GLFW_KEY_R:
-				angles[1] -= 15;
-				if (angles[1] == -360) angles[1] = 0;
+				alphas[1] -= 15;
+				if (alphas[1] == -360) alphas[1] = 0;
 				movey = 0;
 				movex = 0;
 				break;
 			case GLFW_KEY_T:
-				angles[2] -= 15;
-				if (angles[2] == -360) angles[2] = 0;
+				alphas[2] -= 15;
+				if (alphas[2] == -360) alphas[2] = 0;
 				movey = 0;
 				movex = 0;
 				break;
@@ -189,7 +189,7 @@ namespace CG
 		}
 	}
 
-	//我不知道那裡用到這個
+	//我不知道那裡用到這個 alpaca
 	//void MainScene::ResetAction()
 	//{
 	//	this->action = 0; // idle
@@ -384,7 +384,9 @@ namespace CG
 			_frame = 0;
 			for (int i = 0; i < PARTSNUM; i++)
 			{
-				angles[i] = 0.0f;
+				alphas[i] = 0.0f;
+				betas[i] = 0.0f;
+				gammas[i] = 0.0f;
 			}
 			position = 0;
 		}
@@ -458,10 +460,7 @@ namespace CG
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
 	{
 		glm::mat4 M = glm::mat4(1.0f);
-		/*if (body == Body::body || body == Body::left_hand || body == Body::right_hand || body == Body::left_foot || body == Body::right_foot)
-			M = rotate(alphas[body], 1, 0, 0) * rotate(betas[body], 0, 1, 0);
-		else*/
-			M = rotate(alphas[body], 1, 0, 0) * rotate(betas[body], 0, 1, 0) * rotate(gammas[body], 0, 0, 1);
+		M = rotate(alphas[body], 1, 0, 0) * rotate(betas[body], 0, 1, 0) * rotate(gammas[body], 0, 0, 1);
 		return M;
 	}
 
@@ -475,7 +474,6 @@ namespace CG
 			Rotation[i] = glm::mat4(1.0f);
 			Translation[i] = glm::mat4(1.0f);
 		}
-		float r, pitch, yaw, roll;
 		float alpha, beta, gamma;// x, y, z
 		static float dir = 0.0;
 		int ind;
