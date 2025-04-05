@@ -1,5 +1,5 @@
 # Build results
 bin/
 obj/
-.vs/cg-gui/
-build/
+/.vs
+/build
