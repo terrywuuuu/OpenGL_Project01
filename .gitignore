@@ -1,6 +1,5 @@
 # Build results
 bin/
 obj/
-
-# User-specific files
-.vs/
+.vs/cg-gui/
+build/
