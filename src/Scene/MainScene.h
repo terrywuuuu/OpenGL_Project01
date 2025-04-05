@@ -124,7 +124,8 @@ namespace CG
 			idle = 0,
 			walk,
 			lay_face_up,
-			lay_face_down
+			lay_face_down,
+			push_up //¥õª×°_§¤
 		};
 	};
 }

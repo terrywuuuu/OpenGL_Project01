@@ -382,15 +382,84 @@ namespace CG
 		if (action == Action::idle)
 		{
 			_frame = 0;
+			// 關掉鎖定動作 gary
+			/*
 			for (int i = 0; i < PARTSNUM; i++)
 			{
 				alphas[i] = 0.0f;
 				betas[i] = 0.0f;
 				gammas[i] = 0.0f;
 			}
+			*/
 			position = 0;
 		}
 		else if (action == Action::walk)
+		{
+			_frame += dt;
+
+			if (_frame > 13)
+			{
+				_frame = 0;
+			}
+
+			int frame = static_cast<int>(_frame);
+
+			switch (frame)
+			{
+			case 0:
+				// 左手臂抬起
+				alphas[Body::left_arm] = -45 * dt;
+				alphas[Body::left_hand] = -30 * dt;
+				// 右手臂抬起
+				alphas[Body::right_arm] = -45 * dt;
+				alphas[Body::right_hand] = -30 * dt;
+				// 腿部初始化
+				alphas[Body::left_leg] = 0;
+				alphas[Body::left_foot] = 0;
+				alphas[Body::right_leg] = 0;
+				alphas[Body::right_foot] = 0;
+				break;
+			case 1:
+			case 2:
+			case 3:
+				// 手臂揮動，腿部前進
+				alphas[Body::left_arm] -= 10 * dt;
+				alphas[Body::right_arm] += 10 * dt;
+				alphas[Body::left_leg] += 15 * dt;
+				alphas[Body::right_leg] -= 15 * dt;
+				position += 0.1 * dt;
+				break;
+			case 4:
+			case 5:
+			case 6:
+				alphas[Body::left_arm] += 10 * dt;
+				alphas[Body::right_arm] -= 10 * dt;
+				alphas[Body::left_leg] -= 15 * dt;
+				alphas[Body::right_leg] += 15 * dt;
+				position -= 0.1 * dt;
+				break;
+			case 7:
+			case 8:
+			case 9:
+				alphas[Body::left_arm] += 10 * dt;
+				alphas[Body::right_arm] -= 10 * dt;
+				alphas[Body::left_leg] -= 15 * dt;
+				alphas[Body::right_leg] += 15 * dt;
+				position += 0.1 * dt;
+				break;
+			case 10:
+			case 11:
+			case 12:
+				alphas[Body::left_arm] -= 10 * dt;
+				alphas[Body::right_arm] += 10 * dt;
+				alphas[Body::left_leg] += 15 * dt;
+				alphas[Body::right_leg] -= 15 * dt;
+				position -= 0.1 * dt;
+				break;
+			}
+		}
+
+		else if (action == Action::push_up)
 		{
 			_frame += dt;
 
@@ -496,6 +565,9 @@ namespace CG
 				break;
 			case Action::lay_face_down:
 				alphas[Body::body] = 90;
+				break;
+			case Action::push_up:
+				alphas[Body::body] = 70;
 				break;
 			}
 		}
