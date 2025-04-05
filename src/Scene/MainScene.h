@@ -12,7 +12,18 @@
 
 #include "Camera.h"
 
-constexpr auto PARTSNUM = 18;
+constexpr auto PARTSNUM = 10;
+//old
+// 0:body	1:ulefthand	2:dlefthand	3:lefthand
+// 4:lshouder	5:head	6:urighthand	7:drighthand
+// 8:righthand	9:rshouder	10:back2	11:dbody
+// 12:uleftleg	13:dleftleg	14:leftfoot	15:urightleg
+// 16:drightleg	17:rightfoot
+
+//new
+// 0:body	1:ulefthand	2:dlefthand	3:head
+// 4:urighthand	5:drighthand	6:uleftleg	7:dleftleg
+// 8:urightleg	9:drightleg
 
 namespace CG
 {
@@ -33,6 +44,7 @@ namespace CG
 		void SetAction(int action);
 
 		void SetMode(int mode);
+		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
 
 	private:
 		auto LoadScene() -> bool;
@@ -42,7 +54,8 @@ namespace CG
 
 		void UpdateAction(double dt);
 		void UpdateModel();
-
+		glm::mat4 bodyRotateMatrix(int body);
+		
 	private:
 		Camera camera;
 
@@ -86,6 +99,34 @@ namespace CG
 
 		glm::mat4 Model;
 		glm::mat4 Models[PARTSNUM];
+
+		float alphas[PARTSNUM];
+		float betas[PARTSNUM];
+		float gammas[PARTSNUM];
+		bool isActionChange;
+		
+
+		enum Body
+		{
+			body = 0,
+			left_arm,
+			left_hand,
+			head,
+			right_arm,
+			right_hand,
+			left_leg,
+			left_foot,
+			right_leg,
+			right_foot
+		};
+
+		enum Action
+		{
+			idle = 0,
+			walk,
+			lay_face_up,
+			lay_face_down
+		};
 	};
 }
 
