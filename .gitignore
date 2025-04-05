@@ -1,2 +1,6 @@
+# Build results
 bin/
 obj/
+
+# User-specific files
+.vs/
