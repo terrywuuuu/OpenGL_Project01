@@ -97,7 +97,7 @@ namespace CG
                 {
                     bool valueChanged = false;
 
-                    // 三個 InputFloat，帶獨特 ID
+                    //x, y, z方向角度
                     if (ImGui::InputFloat((std::string("Alpha##") + std::to_string(i)).c_str(), &alphas[i], 1.0f, 10.0f, "%.1f", ImGuiInputTextFlags_EnterReturnsTrue))
                     {
                         alphas[i] = (alphas[i] < -180.0f) ? -180.0f : (alphas[i] > 180.0f) ? 180.0f : alphas[i];
