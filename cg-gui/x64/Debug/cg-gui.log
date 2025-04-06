@@ -1,4 +1,5 @@
-﻿  MainScene.cpp
+﻿  App.cpp
+  MainScene.cpp
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(95,21): warning C4312: '類型轉換': 將 'GLuint' 轉換為較大的 'void *'
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(107,21): warning C4312: '類型轉換': 將 'GLuint' 轉換為較大的 'void *'
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(119,21): warning C4312: '類型轉換': 將 'GLuint' 轉換為較大的 'void *'
@@ -7,33 +8,50 @@ C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電�
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(366,37): warning C4267: '=': 將 'size_t' 轉換為 'int'，資料可能遺失
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(371,27): warning C4267: '=': 將 'size_t' 轉換為 'int'，資料可能遺失
 C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(376,35): warning C4267: '=': 將 'size_t' 轉換為 'int'，資料可能遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(409,34): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(410,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(412,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(413,36): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(424,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(425,39): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(426,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(427,39): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(428,25): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(433,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(434,39): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(435,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(436,39): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(437,25): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(442,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(443,39): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(444,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(445,39): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(446,25): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(451,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(452,39): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(453,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(454,39): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(455,25): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(524,59): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(473,9): warning C4101: 'alpha': 未參考的區域變數
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(475,7): warning C4101: 'ind': 未參考的區域變數
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(473,16): warning C4101: 'beta': 未參考的區域變數
-C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(473,22): warning C4101: 'gamma': 未參考的區域變數
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(482,59): warning C4305: '引數': 從 'double' 轉換為 'float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(431,9): warning C4101: 'alpha': 未參考的區域變數
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(433,7): warning C4101: 'ind': 未參考的區域變數
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(431,16): warning C4101: 'beta': 未參考的區域變數
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(431,22): warning C4101: 'gamma': 未參考的區域變數
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(503,33): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(504,34): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(506,34): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(507,35): warning C4244: '=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(518,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(519,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(520,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(521,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(522,24): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(527,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(528,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(529,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(530,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(531,24): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(536,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(537,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(538,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(539,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(540,24): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(545,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(546,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(547,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(548,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(549,24): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(564,32): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(566,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(567,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(568,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(569,38): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(570,36): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(571,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(576,32): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(577,37): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(578,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(579,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(580,38): warning C4244: '-=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(581,36): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\src\Scene\MainScene.cpp(582,37): warning C4244: '+=': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+  ControlWindow.cpp
+  main.cpp
+  正在產生程式碼...
   cg-gui.vcxproj -> C:\Users\terry\OneDrive - 國立臺灣科技大學\Desktop\台科大作業\電腦圖學\Project01\build\Debugx64\cg-gui.exe

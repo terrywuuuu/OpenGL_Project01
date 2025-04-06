@@ -401,60 +401,18 @@ namespace CG
 			}
 
 			int frame = static_cast<int>(_frame);
+			Walk(frame, dt);	// Do walk action
+		}
+		else if (action == Action::lay_face_down) {
+			_frame += dt;
 
-			switch (frame)
+			if (_frame > 7)
 			{
-			case 0:
-				// 左手臂抬起
-				alphas[Body::left_arm] = -45 * dt;
-				alphas[Body::left_hand] = -30 * dt;
-				// 右手臂抬起
-				alphas[Body::right_arm] = -45 * dt;
-				alphas[Body::right_hand] = -30 * dt;
-				// 腿部初始化
-				alphas[Body::left_leg] = 0;
-				alphas[Body::left_foot] = 0;
-				alphas[Body::right_leg] = 0;
-				alphas[Body::right_foot] = 0;
-				break;
-			case 1:
-			case 2:
-			case 3:
-				// 手臂揮動，腿部前進
-				alphas[Body::left_arm] -= 10 * dt;
-				alphas[Body::right_arm] += 10 * dt;
-				alphas[Body::left_leg] += 15 * dt;
-				alphas[Body::right_leg] -= 15 * dt;
-				position += 0.1 * dt;
-				break;
-			case 4:
-			case 5:
-			case 6:
-				alphas[Body::left_arm] += 10 * dt;
-				alphas[Body::right_arm] -= 10 * dt;
-				alphas[Body::left_leg] -= 15 * dt;
-				alphas[Body::right_leg] += 15 * dt;
-				position -= 0.1 * dt;
-				break;
-			case 7:
-			case 8:
-			case 9:
-				alphas[Body::left_arm] += 10 * dt;
-				alphas[Body::right_arm] -= 10 * dt;
-				alphas[Body::left_leg] -= 15 * dt;
-				alphas[Body::right_leg] += 15 * dt;
-				position += 0.1 * dt;
-				break;
-			case 10:
-			case 11:
-			case 12:
-				alphas[Body::left_arm] -= 10 * dt;
-				alphas[Body::right_arm] += 10 * dt;
-				alphas[Body::left_leg] += 15 * dt;
-				alphas[Body::right_leg] -= 15 * dt;
-				position -= 0.1 * dt;
-				break;
+				_frame = 0;
 			}
+
+			int frame = static_cast<int>(_frame);
+			PushUp(frame, dt);	// Do push-up action
 		}
 	}
 
@@ -499,7 +457,7 @@ namespace CG
 				alphas[Body::body] = -90;
 				break;
 			case Action::lay_face_down:
-				alphas[Body::body] = 90;
+				alphas[Body::body] = 65;
 				break;
 			}
 		}
@@ -535,5 +493,96 @@ namespace CG
 
 		Translation[Body::right_foot] = translate(-1.0, -7.0f, 0);
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
+	}
+
+	void MainScene::Walk(int frame, double dt) {
+		switch (frame)
+		{
+		case 0:
+			// 左手臂抬起
+			alphas[Body::left_arm] = -45 * dt;
+			alphas[Body::left_hand] = -30 * dt;
+			// 右手臂抬起
+			alphas[Body::right_arm] = -45 * dt;
+			alphas[Body::right_hand] = -30 * dt;
+			// 腿部初始化
+			alphas[Body::left_leg] = 0;
+			alphas[Body::left_foot] = 0;
+			alphas[Body::right_leg] = 0;
+			alphas[Body::right_foot] = 0;
+			break;
+		case 1:
+		case 2:
+		case 3:
+			// 手臂揮動，腿部前進
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			alphas[Body::left_leg] += 15 * dt;
+			alphas[Body::right_leg] -= 15 * dt;
+			position += 0.1 * dt;
+			break;
+		case 4:
+		case 5:
+		case 6:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::left_leg] -= 15 * dt;
+			alphas[Body::right_leg] += 15 * dt;
+			position -= 0.1 * dt;
+			break;
+		case 7:
+		case 8:
+		case 9:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::left_leg] -= 15 * dt;
+			alphas[Body::right_leg] += 15 * dt;
+			position += 0.1 * dt;
+			break;
+		case 10:
+		case 11:
+		case 12:
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			alphas[Body::left_leg] += 15 * dt;
+			alphas[Body::right_leg] -= 15 * dt;
+			position -= 0.1 * dt;
+			break;
+		}
+	}
+
+	void MainScene::PushUp(int frame, double dt) {
+		switch (frame) 
+		{
+		case 0:
+			// 初始化
+			alphas[Body::left_arm] = -65;
+			alphas[Body::right_arm] = -65;
+			break;
+		case 1:
+		case 2:
+		case 3:
+			// 身體向下
+			alphas[Body::body] += 9 * dt;
+			// 手臂擺動，腿部固定
+			alphas[Body::left_arm] += 16 * dt;
+			alphas[Body::right_arm] += 16 * dt;
+			betas[Body::left_hand] -= 25 * dt;
+			betas[Body::right_hand] += 25 * dt;
+			alphas[Body::left_leg] -= 5 * dt;
+			alphas[Body::right_leg] -= 5 * dt;
+			break;
+		case 4:
+		case 5:
+		case 6:
+			alphas[Body::body] -= 9 * dt;
+			alphas[Body::left_arm] -= 16 * dt;
+			alphas[Body::right_arm] -= 16 * dt;
+			betas[Body::left_hand] += 25 * dt;
+			betas[Body::right_hand] -= 25 * dt;
+			alphas[Body::left_leg] += 5 * dt;
+			alphas[Body::right_leg] += 5 * dt;
+			break;
+		}
 	}
 }
