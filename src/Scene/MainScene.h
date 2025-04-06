@@ -104,6 +104,13 @@ namespace CG
 		float gammas[PARTSNUM];
 		bool isActionChange;
 		
+		// Five Action
+		void Walk(int, double);
+		void PushUp(int, double);
+		void SitUp(int, double);
+		void HoPak(int, double);
+		void APT(int, double);
+
 
 		enum Body
 		{
