@@ -45,6 +45,7 @@ namespace CG
 
 		void SetMode(int mode);
 		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
+		void SetPosition(int axis, float position);
 
 	private:
 		auto LoadScene() -> bool;
@@ -73,7 +74,6 @@ namespace CG
 		int action = 0; // idle
 		GLenum mode = 0; // fill
 
-		float position = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
 		float eyedistance = 25.0;
@@ -102,6 +102,7 @@ namespace CG
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];
 		float gammas[PARTSNUM];
+		float position[3];
 		bool isActionChange;
 		
 		// Five Action
@@ -133,6 +134,12 @@ namespace CG
 			sit_up = 2,
 			push_up = 3
 		};
+
+		enum Axis {
+			x = 0,
+			y = 1,
+			z = 2
+		};;
 	};
 }
 

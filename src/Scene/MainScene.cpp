@@ -225,6 +225,11 @@ namespace CG
 		gammas[bodyPart] = gamma;
 	}
 
+	void MainScene::SetPosition(int axis, float position)
+	{
+		this->position[axis] = position;
+	}
+
 	auto MainScene::LoadScene() -> bool
 	{
 		glEnable(GL_DEPTH_TEST);
@@ -391,7 +396,7 @@ namespace CG
 				gammas[i] = 0.0f;
 			}
 			*/
-			position = 0;
+			position[0] = position[1] = position[2] = 0;
 		}
 		else if (action == Action::walk)
 		{
@@ -475,7 +480,7 @@ namespace CG
 			}
 		}
 		
-		Translation[Body::body] = translate(0, 2.9f + position, 0);
+		Translation[Body::body] = translate(position[Axis::x], 2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
 		Translation[Body::head] = translate(0, 5.5f, 0);
@@ -540,7 +545,7 @@ namespace CG
 			alphas[Body::right_arm] += 10 * dt;
 			alphas[Body::left_leg] += 15 * dt;
 			alphas[Body::right_leg] -= 15 * dt;
-			position += 0.1 * dt;
+			position[Axis::y] += 0.1 * dt;
 			break;
 		case 4:
 		case 5:
@@ -549,7 +554,7 @@ namespace CG
 			alphas[Body::right_arm] -= 10 * dt;
 			alphas[Body::left_leg] -= 15 * dt;
 			alphas[Body::right_leg] += 15 * dt;
-			position -= 0.1 * dt;
+			position[Axis::y] -= 0.1 * dt;
 			break;
 		case 7:
 		case 8:
@@ -558,7 +563,7 @@ namespace CG
 			alphas[Body::right_arm] -= 10 * dt;
 			alphas[Body::left_leg] -= 15 * dt;
 			alphas[Body::right_leg] += 15 * dt;
-			position += 0.1 * dt;
+			position[Axis::y] += 0.1 * dt;
 			break;
 		case 10:
 		case 11:
@@ -567,7 +572,7 @@ namespace CG
 			alphas[Body::right_arm] += 10 * dt;
 			alphas[Body::left_leg] += 15 * dt;
 			alphas[Body::right_leg] -= 15 * dt;
-			position -= 0.1 * dt;
+			position[Axis::y] -= 0.1 * dt;
 			break;
 		}
 	}
