@@ -35,7 +35,7 @@ namespace CG
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void Render();
+		void Render(float aspect);
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key, int action);
@@ -76,7 +76,7 @@ namespace CG
 		float position = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
-		float eyedistance = 20.0;
+		float eyedistance = 25.0;
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
@@ -129,9 +129,9 @@ namespace CG
 		enum Action
 		{
 			idle = 0,
-			walk,
-			lay_face_up,
-			lay_face_down
+			walk = 1,
+			sit_up = 2,
+			push_up = 3
 		};
 	};
 }

@@ -178,6 +178,13 @@ namespace CG
 		glfwGetFramebufferSize(mainWindow, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 
-		mainScene->Render();
+		// calc aspect 
+		float aspect = static_cast<float>(display_w) / static_cast<float>(display_h);
+		if (aspect <= std::numeric_limits<float>::epsilon()) {
+			aspect = 1.0f;
+		}
+
+		// call mainScene->Render and set aspect
+		mainScene->Render(aspect);
 	}
 }
