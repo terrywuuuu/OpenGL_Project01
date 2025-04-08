@@ -76,7 +76,7 @@ namespace CG
 		float position = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
-		float eyedistance = 20.0;
+		float eyedistance = 25.0;
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
