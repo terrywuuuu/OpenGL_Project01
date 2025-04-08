@@ -159,7 +159,8 @@ namespace CG
 	{
 		std::cout << "MainScene OnKeyboard: " << key << " " << action << std::endl;
 
-		if (action == GLFW_RELEASE)
+		// changed GLFW_RELEASE to GLFW_REPEAT for continuous key events when key is held down
+		if (action == GLFW_REPEAT)
 		{
 			switch (key)
 			{
