@@ -23,10 +23,21 @@ out vec2 UV;
 
 void main(void) 
 { 
-	mat4 MVP = Projection*View*Model;
-	mat4 MV = View*Model;
+	// 根據 gl_InstanceID 計算每個實例的平移
+    float offset = float(gl_InstanceID);
+    vec3 instancePosition = vec3(-60.0 + offset * 15.0, 0.0, 0.0);  // 每個實例的偏移
+
+    // 創建平移矩陣
+    mat4 translationMatrix = mat4(1.0);  // 單位矩陣，表示沒有縮放或旋轉
+    translationMatrix[3] = vec4(instancePosition, 1.0);  // 設定平移部分
+
+    // 將平移矩陣和原始模型矩陣相乘，得到最終的模型矩陣
+    mat4 newModel = translationMatrix * Model;  // 這樣保持了 Model 的部位相對位置不變
+
+	mat4 MVP = Projection*View*newModel;
+	mat4 MV = View * newModel;  
 	
-    // Get surface normal in eye coordinates
+	// Get surface normal in eye coordinates
 	mat3 normalMatrix = mat3(MV);//normal matrix is MV matrix's 3*3 excluding 'w' 
     vVaryingNormal = normalMatrix * vertexNormal;
 

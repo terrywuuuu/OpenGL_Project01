@@ -130,7 +130,12 @@ namespace CG
 				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
 				glUniform3fv(M_KsID, 1, &Ks[0]);
 				//          (primitive   , glVertexID base , vertex count    )
-				glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				if (instancedNum == 1) {
+					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				}
+				else {
+					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
+				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
 				vertexIDoffset += faces[i][j + 1] * 3;//glVertexID's base offset is face count*3
 			}//end for loop for draw one part of the robot	
@@ -414,6 +419,17 @@ namespace CG
 			int frame = static_cast<int>(_frame);
 			PushUp(frame, dt);	// Do push-up action
 		}
+		else if (action == Action::multiple) {
+			_frame += dt;
+
+			if (_frame > 8)
+			{
+				_frame = 7;
+			}
+
+			int frame = static_cast<int>(_frame);
+			Multiple(frame, dt);	// Do push-up action
+		}
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -451,6 +467,7 @@ namespace CG
 			switch (action) {
 			case Action::idle:
 			case Action::walk:
+			case Action::multiple:
 				alphas[Body::body] = 0;
 				break;
 			case Action::lay_face_up:
@@ -582,6 +599,46 @@ namespace CG
 			betas[Body::right_hand] -= 25 * dt;
 			alphas[Body::left_leg] += 5 * dt;
 			alphas[Body::right_leg] += 5 * dt;
+			break;
+		}
+	}
+
+	void MainScene::Multiple(int frame, double dt) {
+		switch (frame)
+		{
+		case 0:
+			// 手臂腿部固定
+			alphas[Body::left_arm] = 0;
+			alphas[Body::right_arm] = 0;
+			gammas[Body::left_hand] = 0;
+			gammas[Body::right_hand] = 0;
+			alphas[Body::left_hand] = 0;
+			alphas[Body::right_hand] = 0;
+			break;
+		case 1:
+		case 2:
+		case 3:
+			// 手臂擺動
+			alphas[Body::left_arm] -= 15 * dt;
+			alphas[Body::right_arm] -= 15 * dt;
+			break;
+		case 4:
+		case 5:
+		case 6:
+			gammas[Body::left_hand] -= 20 * dt;
+			gammas[Body::right_hand] += 20 * dt;
+			alphas[Body::left_hand] -= 10 * dt;
+			alphas[Body::right_hand] -= 10 * dt;
+			break;
+		case 7:
+			// 手臂腿部固定
+			alphas[Body::left_arm] = alphas[Body::left_arm];
+			alphas[Body::right_arm] = alphas[Body::right_arm];
+			gammas[Body::left_hand] = gammas[Body::left_hand];
+			gammas[Body::right_hand] = gammas[Body::right_hand];
+			alphas[Body::left_hand] = alphas[Body::left_hand];
+			alphas[Body::right_hand] = alphas[Body::right_hand];
+			instancedNum = 10;
 			break;
 		}
 	}

@@ -81,6 +81,7 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
+		int instancedNum = 1;  // 決定畫幾個機器人
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -104,13 +105,13 @@ namespace CG
 		float gammas[PARTSNUM];
 		bool isActionChange;
 		
-		// Five Action
+		// Six Action
 		void Walk(int, double);
 		void PushUp(int, double);
 		void SitUp(int, double);
 		void HoPak(int, double);
 		void APT(int, double);
-
+		void Multiple(int, double);
 
 		enum Body
 		{
@@ -131,7 +132,8 @@ namespace CG
 			idle = 0,
 			walk,
 			lay_face_up,
-			lay_face_down
+			lay_face_down,
+			multiple
 		};
 	};
 }
