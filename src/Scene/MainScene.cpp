@@ -57,7 +57,7 @@ namespace CG
 		UpdateModel();
 	}
 
-	void MainScene::Render()
+	void MainScene::Render(float aspect)
 	{
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -72,6 +72,7 @@ namespace CG
 			glm::vec3(0, 0, 0), // and looks at the origin
 			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
 		);
+		camera.SetAspect(aspect);
 
 		//update data to UBO for MVP
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
@@ -142,6 +143,16 @@ namespace CG
 	void MainScene::OnResize(int width, int height)
 	{
 		std::cout << "MainScene Resize: " << width << " " << height << std::endl;
+
+		// avoid divid 0
+		if (height == 0) height = 1;
+
+		// set new view port
+		glViewport(0, 0, width, height);
+
+		// calc aspect and update camera
+		float aspect = static_cast<float>(width) / static_cast<float>(height);
+		camera.SetAspect(aspect);
 	}
 
 	void MainScene::OnKeyboard(int key, int action)
@@ -250,7 +261,7 @@ namespace CG
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 
 		// Camera matrix
-		camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		LoadModel();
 

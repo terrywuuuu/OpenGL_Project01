@@ -35,7 +35,7 @@ namespace CG
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void Render();
+		void Render(float aspect);
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key, int action);
