@@ -129,9 +129,9 @@ namespace CG
 		enum Action
 		{
 			idle = 0,
-			walk,
-			lay_face_up,
-			lay_face_down
+			walk = 1,
+			sit_up = 2,
+			push_up = 3
 		};
 	};
 }
