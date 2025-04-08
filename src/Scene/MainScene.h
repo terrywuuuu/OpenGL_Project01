@@ -35,7 +35,7 @@ namespace CG
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void Render();
+		void Render(float aspect);
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key, int action);
@@ -45,6 +45,7 @@ namespace CG
 
 		void SetMode(int mode);
 		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
+		void SetPosition(int axis, float position);
 
 	private:
 		auto LoadScene() -> bool;
@@ -73,15 +74,14 @@ namespace CG
 		int action = 0; // idle
 		GLenum mode = 0; // fill
 
-		float position = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
-		float eyedistance = 20.0;
+		float eyedistance = 25.0;
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
-		int instancedNum = 1;  // ¨M©wµe´X­Ó¾÷¾¹¤H
+		int instancedNum = 1;  // ï¿½Mï¿½wï¿½eï¿½Xï¿½Ó¾ï¿½ï¿½ï¿½ï¿½H
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -103,6 +103,7 @@ namespace CG
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];
 		float gammas[PARTSNUM];
+		float position[3];
 		bool isActionChange;
 		
 		// Six Action
@@ -135,6 +136,12 @@ namespace CG
 			lay_face_down,
 			multiple
 		};
+
+		enum Axis {
+			x = 0,
+			y = 1,
+			z = 2
+		};;
 	};
 }
 

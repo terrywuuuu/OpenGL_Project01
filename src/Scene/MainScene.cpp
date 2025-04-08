@@ -57,7 +57,7 @@ namespace CG
 		UpdateModel();
 	}
 
-	void MainScene::Render()
+	void MainScene::Render(float aspect)
 	{
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -72,6 +72,7 @@ namespace CG
 			glm::vec3(0, 0, 0), // and looks at the origin
 			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
 		);
+		camera.SetAspect(aspect);
 
 		//update data to UBO for MVP
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
@@ -147,22 +148,33 @@ namespace CG
 	void MainScene::OnResize(int width, int height)
 	{
 		std::cout << "MainScene Resize: " << width << " " << height << std::endl;
+
+		// avoid divid 0
+		if (height == 0) height = 1;
+
+		// set new view port
+		glViewport(0, 0, width, height);
+
+		// calc aspect and update camera
+		float aspect = static_cast<float>(width) / static_cast<float>(height);
+		camera.SetAspect(aspect);
 	}
 
 	void MainScene::OnKeyboard(int key, int action)
 	{
 		std::cout << "MainScene OnKeyboard: " << key << " " << action << std::endl;
 
-		if (action == GLFW_RELEASE)
+		// changed GLFW_RELEASE to GLFW_REPEAT for continuous key events when key is held down
+		if (action == GLFW_REPEAT || action == GLFW_RELEASE)
 		{
 			switch (key)
 			{
-			case GLFW_KEY_1:
+			case GLFW_KEY_Q:
 				angle += 5;
 				if (angle >= 360) angle = 0;
 				printf("beta:%f\n", angle);
 				break;
-			case GLFW_KEY_2:
+			case GLFW_KEY_E:
 				angle -= 5;
 				if (angle <= 0) angle = 360;
 				printf("beta:%f\n", angle);
@@ -178,18 +190,6 @@ namespace CG
 				break;
 			case GLFW_KEY_D:
 				eyeAngley += 10;
-				break;
-			case GLFW_KEY_R:
-				alphas[1] -= 15;
-				if (alphas[1] == -360) alphas[1] = 0;
-				movey = 0;
-				movex = 0;
-				break;
-			case GLFW_KEY_T:
-				alphas[2] -= 15;
-				if (alphas[2] == -360) alphas[2] = 0;
-				movey = 0;
-				movex = 0;
 				break;
 			}
 		}
@@ -230,6 +230,11 @@ namespace CG
 		gammas[bodyPart] = gamma;
 	}
 
+	void MainScene::SetPosition(int axis, float position)
+	{
+		this->position[axis] = position;
+	}
+
 	auto MainScene::LoadScene() -> bool
 	{
 		glEnable(GL_DEPTH_TEST);
@@ -255,7 +260,7 @@ namespace CG
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 
 		// Camera matrix
-		camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		LoadModel();
 
@@ -388,13 +393,15 @@ namespace CG
 		if (action == Action::idle)
 		{
 			_frame = 0;
+			/*
 			for (int i = 0; i < PARTSNUM; i++)
 			{
 				alphas[i] = 0.0f;
 				betas[i] = 0.0f;
 				gammas[i] = 0.0f;
 			}
-			position = 0;
+			*/
+			position[0] = position[1] = position[2] = 0;
 		}
 		else if (action == Action::walk)
 		{
@@ -408,7 +415,18 @@ namespace CG
 			int frame = static_cast<int>(_frame);
 			Walk(frame, dt);	// Do walk action
 		}
-		else if (action == Action::lay_face_down) {
+		else if (action == Action::sit_up) {
+			_frame += dt;
+
+			if (_frame > 7)
+			{
+				_frame = 0;
+			}
+
+			int frame = static_cast<int>(_frame);
+			SitUp(frame, dt);	// Do push-up action
+		}
+		else if (action == Action::push_up) {
 			_frame += dt;
 
 			if (_frame > 7)
@@ -470,30 +488,38 @@ namespace CG
 			case Action::multiple:
 				alphas[Body::body] = 0;
 				break;
-			case Action::lay_face_up:
+			case Action::sit_up:
 				alphas[Body::body] = -90;
 				break;
-			case Action::lay_face_down:
+			case Action::push_up:
 				alphas[Body::body] = 65;
 				break;
 			}
 		}
 		
-		Translation[Body::body] = translate(0, 2.9f + position, 0);
+		Translation[Body::body] = translate(position[Axis::x], 2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
 		Translation[Body::head] = translate(0, 5.5f, 0);
 		Models[Body::head] = Models[Body::body] * Translation[Body::head] * bodyRotateMatrix(Body::head);
 
 		Translation[Body::left_arm] = translate(3.5f, 4.0f, -1.0f);
-		gammas[Body::left_arm] = -70;
+		// 其他動作硬綁在 -70了
+		if (action != Action::sit_up)
+		{
+			gammas[Body::left_arm] = -70;
+		}
 		Models[Body::left_arm] = Models[Body::body] * Translation[Body::left_arm] * bodyRotateMatrix(Body::left_arm);
 
 		Translation[Body::left_hand] = translate(4.8f, -0.8f, 0);
 		Models[Body::left_hand] = Models[Body::left_arm] * Translation[Body::left_hand] * bodyRotateMatrix(Body::left_hand);
 
 		Translation[Body::right_arm] = translate(-3.5f, 4.0f, -1.0f);
-		gammas[Body::right_arm] = 70;
+		// 其他動作硬綁在 70了
+		if (action != Action::sit_up) 
+		{
+			gammas[Body::right_arm] = 70;
+		}
 		Models[Body::right_arm] = Models[Body::body] * Translation[Body::right_arm] * bodyRotateMatrix(Body::right_arm);
 
 		Translation[Body::right_hand] = translate(-4.8, -0.8f, 0);
@@ -536,7 +562,7 @@ namespace CG
 			alphas[Body::right_arm] += 10 * dt;
 			alphas[Body::left_leg] += 15 * dt;
 			alphas[Body::right_leg] -= 15 * dt;
-			position += 0.1 * dt;
+			position[Axis::y] += 0.1 * dt;
 			break;
 		case 4:
 		case 5:
@@ -545,7 +571,7 @@ namespace CG
 			alphas[Body::right_arm] -= 10 * dt;
 			alphas[Body::left_leg] -= 15 * dt;
 			alphas[Body::right_leg] += 15 * dt;
-			position -= 0.1 * dt;
+			position[Axis::y] -= 0.1 * dt;
 			break;
 		case 7:
 		case 8:
@@ -554,7 +580,7 @@ namespace CG
 			alphas[Body::right_arm] -= 10 * dt;
 			alphas[Body::left_leg] -= 15 * dt;
 			alphas[Body::right_leg] += 15 * dt;
-			position += 0.1 * dt;
+			position[Axis::y] += 0.1 * dt;
 			break;
 		case 10:
 		case 11:
@@ -563,7 +589,53 @@ namespace CG
 			alphas[Body::right_arm] += 10 * dt;
 			alphas[Body::left_leg] += 15 * dt;
 			alphas[Body::right_leg] -= 15 * dt;
-			position -= 0.1 * dt;
+			position[Axis::y] -= 0.1 * dt;
+			break;
+		}
+	}
+
+	void MainScene::SitUp(int frame, double dt) {
+		// 動的幅度
+		double magnitude = 14;
+		switch (frame)
+		{
+		case 0:
+			// 初始化
+			// 左右手抱頭
+			alphas[Body::body] = -90;
+			alphas[Body::left_arm] = -160;
+			gammas[Body::left_arm] = -50;
+			betas[Body::left_hand] = -150;
+			gammas[Body::left_hand] = -30;
+
+			alphas[Body::right_arm] = -160;
+			gammas[Body::right_arm] = 50;
+			betas[Body::right_hand] = 150;
+			gammas[Body::right_hand] = 30;
+			//左右腿抬起來
+			alphas[Body::left_leg] = -76;
+			alphas[Body::left_foot] = 124;
+
+			alphas[Body::right_leg] = -76;
+			alphas[Body::right_foot] = 124;
+			break;
+		case 1:
+		case 2:
+		case 3:
+			// 身體往膝蓋移動
+			alphas[Body::body] += magnitude * dt;
+			// 左右腳往反方向移動
+			alphas[Body::right_leg] -= magnitude * dt;
+			alphas[Body::left_leg] -= magnitude * dt;
+			break;
+		case 4:
+		case 5:
+		case 6:
+			// 身體往地板移動
+			alphas[Body::body] -= magnitude * dt;
+			// 左右腳往反方向移動
+			alphas[Body::right_leg] += magnitude * dt;
+			alphas[Body::left_leg] += magnitude * dt;
 			break;
 		}
 	}
