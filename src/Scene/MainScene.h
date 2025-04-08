@@ -81,6 +81,7 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
+		int instancedNum = 1;  // �M�w�e�X�Ӿ����H
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -105,13 +106,13 @@ namespace CG
 		float position[3];
 		bool isActionChange;
 		
-		// Five Action
+		// Six Action
 		void Walk(int, double);
 		void PushUp(int, double);
 		void SitUp(int, double);
 		void HoPak(int, double);
 		void APT(int, double);
-
+		void Multiple(int, double);
 
 		enum Body
 		{
@@ -130,9 +131,10 @@ namespace CG
 		enum Action
 		{
 			idle = 0,
-			walk = 1,
-			sit_up = 2,
-			push_up = 3
+			walk,
+			lay_face_up,
+			lay_face_down,
+			multiple
 		};
 
 		enum Axis {
