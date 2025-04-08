@@ -180,6 +180,9 @@ namespace CG
 
 		// calc aspect 
 		float aspect = static_cast<float>(display_w) / static_cast<float>(display_h);
+		if (aspect <= std::numeric_limits<float>::epsilon()) {
+			aspect = 1.0f;
+		}
 
 		// call mainScene->Render and set aspect
 		mainScene->Render(aspect);
