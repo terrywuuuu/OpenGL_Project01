@@ -246,8 +246,8 @@ namespace CG
 		glBindVertexArray(VAO);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "res/shaders/DSPhong_Material.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "res/shaders/DSPhong_Material.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		program = LoadShaders(shaders); //讀取shader
 
@@ -424,7 +424,7 @@ namespace CG
 			}
 
 			int frame = static_cast<int>(_frame);
-			SitUp(frame, dt);	// Do push-up action
+			SitUp(frame, dt);	// Do Sit-up action
 		}
 		else if (action == Action::push_up) {
 			_frame += dt;
@@ -446,7 +446,7 @@ namespace CG
 			}
 
 			int frame = static_cast<int>(_frame);
-			Multiple(frame, dt);	// Do push-up action
+			Multiple(frame, dt);	// Do multiple action
 		}
 	}
 
@@ -497,13 +497,13 @@ namespace CG
 			}
 		}
 		
-		Translation[Body::body] = translate(position[Axis::x], 2.9f + position[Axis::y], position[Axis::z]);
+		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
-		Translation[Body::head] = translate(0, 5.5f, 0);
+		Translation[Body::head] = translate(0, 12.0f, 0);
 		Models[Body::head] = Models[Body::body] * Translation[Body::head] * bodyRotateMatrix(Body::head);
 
-		Translation[Body::left_arm] = translate(3.5f, 4.0f, -1.0f);
+		Translation[Body::left_arm] = translate(3.5f, 11.0f, -1.0f);
 		// 其他動作硬綁在 -70了
 		if (action != Action::sit_up)
 		{
@@ -514,7 +514,7 @@ namespace CG
 		Translation[Body::left_hand] = translate(4.8f, -0.8f, 0);
 		Models[Body::left_hand] = Models[Body::left_arm] * Translation[Body::left_hand] * bodyRotateMatrix(Body::left_hand);
 
-		Translation[Body::right_arm] = translate(-3.5f, 4.0f, -1.0f);
+		Translation[Body::right_arm] = translate(-3.5f,11.0f, -0.5f);
 		// 其他動作硬綁在 70了
 		if (action != Action::sit_up) 
 		{
@@ -525,13 +525,13 @@ namespace CG
 		Translation[Body::right_hand] = translate(-4.8, -0.8f, 0);
 		Models[Body::right_hand] = Models[Body::right_arm] * Translation[Body::right_hand] * bodyRotateMatrix(Body::right_hand);
 
-		Translation[Body::left_leg] = translate(1.5f, -4.5f, -1.0);
+		Translation[Body::left_leg] = translate(1.5f, 0.5f, -1.0);
 		Models[Body::left_leg] = Models[Body::body] * Translation[Body::left_leg] * bodyRotateMatrix(Body::left_leg);
 
 		Translation[Body::left_foot] = translate(1.0, -7.0f, 0);
 		Models[Body::left_foot] = Models[Body::left_leg] * Translation[Body::left_foot] * bodyRotateMatrix(Body::left_foot);
 
-		Translation[Body::right_leg] = translate(-1.0f, -4.5f, -1.0);
+		Translation[Body::right_leg] = translate(-1.0f, 0.5f, -1.0);
 		Models[Body::right_leg] = Models[Body::body] * Translation[Body::right_leg] * bodyRotateMatrix(Body::right_leg);
 
 		Translation[Body::right_foot] = translate(-1.0, -7.0f, 0);
