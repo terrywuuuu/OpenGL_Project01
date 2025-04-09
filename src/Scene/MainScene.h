@@ -81,7 +81,7 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
-		int instancedNum = 1;  // �M�w�e�X�Ӿ����H
+		int instancedNum = 1;  // How many robot
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -132,8 +132,8 @@ namespace CG
 		{
 			idle = 0,
 			walk,
-			lay_face_up,
-			lay_face_down,
+			sit_up,
+			push_up,
 			multiple
 		};
 
@@ -141,7 +141,7 @@ namespace CG
 			x = 0,
 			y = 1,
 			z = 2
-		};;
+		};
 	};
 }
 
