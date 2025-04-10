@@ -205,6 +205,13 @@ namespace CG
 	{
 		this->action = action;
 		isActionChange = true;
+		instancedNum = 1;
+		for (int i = 0; i < PARTSNUM; i++) //reset model pos
+		{
+			alphas[i] = 0.0f;
+			betas[i] = 0.0f;
+			gammas[i] = 0.0f;
+		}
 	}
 
 	void MainScene::SetMode(int mode)
@@ -389,6 +396,8 @@ namespace CG
 	void MainScene::UpdateAction(double dt)
 	{
 		static double _frame = 0;
+		if (isActionChange)
+			_frame = 0;
 
 		if (action == Action::idle)
 		{
@@ -481,6 +490,8 @@ namespace CG
 				betas[i] = 0.0f;
 				gammas[i] = 0.0f;
 			}
+			gammas[Body::left_arm] = -70;
+			gammas[Body::right_arm] = 70;
 
 			switch (action) {
 			case Action::idle:
@@ -496,7 +507,7 @@ namespace CG
 				break;
 			}
 		}
-		
+
 		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
@@ -504,22 +515,13 @@ namespace CG
 		Models[Body::head] = Models[Body::body] * Translation[Body::head] * bodyRotateMatrix(Body::head);
 
 		Translation[Body::left_arm] = translate(3.5f, 11.0f, -1.0f);
-		// 其他動作硬綁在 -70了
-		if (action != Action::sit_up)
-		{
-			gammas[Body::left_arm] = -70;
-		}
 		Models[Body::left_arm] = Models[Body::body] * Translation[Body::left_arm] * bodyRotateMatrix(Body::left_arm);
 
 		Translation[Body::left_hand] = translate(4.8f, -0.8f, 0);
 		Models[Body::left_hand] = Models[Body::left_arm] * Translation[Body::left_hand] * bodyRotateMatrix(Body::left_hand);
 
-		Translation[Body::right_arm] = translate(-3.5f,11.0f, -0.5f);
-		// 其他動作硬綁在 70了
-		if (action != Action::sit_up) 
-		{
-			gammas[Body::right_arm] = 70;
-		}
+		Translation[Body::right_arm] = translate(-3.5f, 11.0f, -0.5f);
+
 		Models[Body::right_arm] = Models[Body::body] * Translation[Body::right_arm] * bodyRotateMatrix(Body::right_arm);
 
 		Translation[Body::right_hand] = translate(-4.8, -0.8f, 0);
@@ -641,7 +643,7 @@ namespace CG
 	}
 
 	void MainScene::PushUp(int frame, double dt) {
-		switch (frame) 
+		switch (frame)
 		{
 		case 0:
 			// 初始化
@@ -660,6 +662,7 @@ namespace CG
 			betas[Body::right_hand] += 25 * dt;
 			alphas[Body::left_leg] -= 5 * dt;
 			alphas[Body::right_leg] -= 5 * dt;
+			position[Axis::y] -= 0.7 * dt;
 			break;
 		case 4:
 		case 5:
@@ -671,6 +674,7 @@ namespace CG
 			betas[Body::right_hand] -= 25 * dt;
 			alphas[Body::left_leg] += 5 * dt;
 			alphas[Body::right_leg] += 5 * dt;
+			position[Axis::y] += 0.7 * dt;
 			break;
 		}
 	}
