@@ -180,10 +180,10 @@ namespace CG
 				printf("beta:%f\n", angle);
 				break;
 			case GLFW_KEY_W:
-				eyedistance -= 0.2;
+				eyedistance -= 0.5;
 				break;
 			case GLFW_KEY_S:
-				eyedistance += 0.2;
+				eyedistance += 0.5;
 				break;
 			case GLFW_KEY_A:
 				eyeAngley -= 10;
@@ -416,7 +416,7 @@ namespace CG
 		{
 			_frame += dt;
 
-			if (_frame > 13)
+			if (_frame > 17)
 			{
 				_frame = 0;
 			}
@@ -438,7 +438,7 @@ namespace CG
 		else if (action == Action::push_up) {
 			_frame += dt;
 
-			if (_frame > 7)
+			if (_frame > 9)
 			{
 				_frame = 0;
 			}
@@ -503,7 +503,7 @@ namespace CG
 				alphas[Body::body] = -90;
 				break;
 			case Action::push_up:
-				alphas[Body::body] = 65;
+				alphas[Body::body] = 60;
 				break;
 			}
 		}
@@ -544,12 +544,10 @@ namespace CG
 		switch (frame)
 		{
 		case 0:
-			// 左手臂抬起
-			alphas[Body::left_arm] = -45 * dt;
-			alphas[Body::left_hand] = -30 * dt;
-			// 右手臂抬起
-			alphas[Body::right_arm] = -45 * dt;
-			alphas[Body::right_hand] = -30 * dt;
+			// 左手臂初始化
+			alphas[Body::left_arm] = 0;
+			// 右手臂初始化
+			alphas[Body::right_arm] = 0;
 			// 腿部初始化
 			alphas[Body::left_leg] = 0;
 			alphas[Body::left_foot] = 0;
@@ -562,35 +560,67 @@ namespace CG
 			// 手臂揮動，腿部前進
 			alphas[Body::left_arm] -= 10 * dt;
 			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::left_leg] += 15 * dt;
-			alphas[Body::right_leg] -= 15 * dt;
+			betas[Body::left_hand] -= 10 * dt;
+			alphas[Body::left_leg] += 10 * dt;
+			alphas[Body::right_leg] -= 14 * dt;
+			alphas[Body::right_foot] += 10 * dt;
 			position[Axis::y] += 0.1 * dt;
 			break;
 		case 4:
-		case 5:
-		case 6:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::left_leg] -= 15 * dt;
-			alphas[Body::right_leg] += 15 * dt;
-			position[Axis::y] -= 0.1 * dt;
-			break;
-		case 7:
-		case 8:
-		case 9:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::left_leg] -= 15 * dt;
-			alphas[Body::right_leg] += 15 * dt;
-			position[Axis::y] += 0.1 * dt;
-			break;
-		case 10:
-		case 11:
-		case 12:
 			alphas[Body::left_arm] -= 10 * dt;
 			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::left_leg] += 15 * dt;
-			alphas[Body::right_leg] -= 15 * dt;
+			alphas[Body::right_foot] -= 10 * dt;
+			alphas[Body::left_leg] += 10 * dt;
+			break;
+		case 5:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::right_foot] += 10 * dt;
+			alphas[Body::left_leg] -= 10 * dt;
+			break;
+		case 6:
+		case 7:
+		case 8:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			betas[Body::left_hand] += 10 * dt;
+			alphas[Body::left_leg] -= 10 * dt;
+			alphas[Body::right_leg] += 14 * dt;
+			alphas[Body::right_foot] -= 10 * dt;
+			position[Axis::y] -= 0.1 * dt;
+			break;
+		case 9:
+		case 10:
+		case 11:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			betas[Body::right_hand] += 10 * dt;
+			alphas[Body::left_leg] -= 14 * dt;
+			alphas[Body::right_leg] += 10 * dt;
+			alphas[Body::left_foot] += 10 * dt;
+			position[Axis::y] += 0.1 * dt;
+			break;
+		case 12:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::left_foot] -= 10 * dt;
+			alphas[Body::right_leg] += 10 * dt;
+			break;
+		case 13:
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			alphas[Body::left_foot] += 10 * dt;
+			alphas[Body::right_leg] -= 10 * dt;
+			break;
+		case 14:
+		case 15:
+		case 16:
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			betas[Body::right_hand] -= 10 * dt;
+			alphas[Body::left_leg] += 14 * dt;
+			alphas[Body::right_leg] -= 10 * dt;
+			alphas[Body::left_foot] -= 10 * dt;
 			position[Axis::y] -= 0.1 * dt;
 			break;
 		}
@@ -653,28 +683,30 @@ namespace CG
 		case 1:
 		case 2:
 		case 3:
+		case 4:
 			// 身體向下
-			alphas[Body::body] += 9 * dt;
+			alphas[Body::body] += 5 * dt;
 			// 手臂擺動，腿部固定
 			alphas[Body::left_arm] += 16 * dt;
 			alphas[Body::right_arm] += 16 * dt;
-			betas[Body::left_hand] -= 25 * dt;
-			betas[Body::right_hand] += 25 * dt;
-			alphas[Body::left_leg] -= 5 * dt;
-			alphas[Body::right_leg] -= 5 * dt;
-			position[Axis::y] -= 0.7 * dt;
+			betas[Body::left_hand] -= 20 * dt;
+			betas[Body::right_hand] += 20 * dt;
+			alphas[Body::left_leg] -= 3 * dt;
+			alphas[Body::right_leg] -= 3 * dt;
+			position[Axis::y] -= 0.5 * dt;
 			break;
-		case 4:
 		case 5:
 		case 6:
-			alphas[Body::body] -= 9 * dt;
+		case 7:
+		case 8:
+			alphas[Body::body] -= 5 * dt;
 			alphas[Body::left_arm] -= 16 * dt;
 			alphas[Body::right_arm] -= 16 * dt;
-			betas[Body::left_hand] += 25 * dt;
-			betas[Body::right_hand] -= 25 * dt;
-			alphas[Body::left_leg] += 5 * dt;
-			alphas[Body::right_leg] += 5 * dt;
-			position[Axis::y] += 0.7 * dt;
+			betas[Body::left_hand] += 20 * dt;
+			betas[Body::right_hand] -= 20 * dt;
+			alphas[Body::left_leg] += 3 * dt;
+			alphas[Body::right_leg] += 3 * dt;
+			position[Axis::y] += 0.5 * dt;
 			break;
 		}
 	}
@@ -714,7 +746,7 @@ namespace CG
 			gammas[Body::right_hand] = gammas[Body::right_hand];
 			alphas[Body::left_hand] = alphas[Body::left_hand];
 			alphas[Body::right_hand] = alphas[Body::right_hand];
-			instancedNum = 10;
+			instancedNum = 50;
 			break;
 		}
 	}
