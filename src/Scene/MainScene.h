@@ -74,6 +74,7 @@ namespace CG
 		int action = 0; // idle
 		GLenum mode = 0; // fill
 
+		float eyeX = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
 		float eyedistance = 25.0;
