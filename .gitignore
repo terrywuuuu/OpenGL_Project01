@@ -1,0 +1,13 @@
+bin/
+obj/
+
+# 忽略 Visual Studio 的設置檔案
+.vs/
+*.exe
+*.pdb
+
+# 忽略編譯生成的 Debug 目錄
+/cg-gui/x64/Debug
+build/Debugx64/cg-gui.exe
+build/Debugx64/cg-gui.pdb
+build/Debugx64/imgui.ini
