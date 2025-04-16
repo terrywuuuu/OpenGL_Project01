@@ -11,12 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Camera.h"
-
-<<<<<<< HEAD
 constexpr auto PARTSNUM = 11;
-=======
-constexpr auto PARTSNUM = 10;
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 //old
 // 0:body	1:ulefthand	2:dlefthand	3:lefthand
 // 4:lshouder	5:head	6:urighthand	7:drighthand
@@ -28,10 +23,7 @@ constexpr auto PARTSNUM = 10;
 // 0:body	1:ulefthand	2:dlefthand	3:head
 // 4:urighthand	5:drighthand	6:uleftleg	7:dleftleg
 // 8:urightleg	9:drightleg
-<<<<<<< HEAD
 // 10:background
-=======
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 
 namespace CG
 {
@@ -100,12 +92,8 @@ namespace CG
 		GLuint M_KaID;
 		GLuint M_KdID;
 		GLuint M_KsID;
-
-<<<<<<< HEAD
 		GLuint BackGround;
 
-=======
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count
 		std::map<std::string, glm::vec3> KDs;//mtl-name&Kd

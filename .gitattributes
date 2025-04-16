@@ -1,5 +1,2 @@
 *.ipch filter=lfs diff=lfs merge=lfs -text
-<<<<<<< HEAD
 res/Parts/Tree.obj filter=lfs diff=lfs merge=lfs -text
-=======
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
