@@ -14,11 +14,9 @@ uniform MatVP{
 	mat4 View;
 	mat4 Projection;
 };
+
 uniform mat4 Model;
-<<<<<<< HEAD
 uniform bool isInstanced;
-=======
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 
 // Color to fragment program
 out vec3 vVaryingNormal;
@@ -27,7 +25,6 @@ out vec2 UV;
 
 void main(void) 
 { 
-<<<<<<< HEAD
     mat4 newModel;
 
     if(isInstanced){
@@ -38,7 +35,7 @@ void main(void)
 
         if(mod(offset, 2.0) == 1.0){
             offsetx = offset * 10.0;
-     }
+        }
         else{
             offsetx = offset * -10.0;
         }
@@ -57,29 +54,6 @@ void main(void)
         // 不使用 instance 偏移
         newModel = Model;
     }
-=======
-    // 根據 gl_InstanceID 計算每個實例的平移
-    float offset = float(gl_InstanceID);
-    float offsetx;
-    float offsetz;
-
-    if(mod(offset, 2.0) == 1.0){
-        offsetx = offset * 10.0;
-    }
-    else{
-        offsetx = offset * -10.0;
-    }
-    offsetz = offset * -5.0;
-
-    vec3 instancePosition = vec3(offsetx, 0.0, offsetz);  // 每個實例的偏移
-
-    // 創建平移矩陣
-    mat4 translationMatrix = mat4(1.0);  // 單位矩陣，表示沒有縮放或旋轉
-    translationMatrix[3] = vec4(instancePosition, 1.0);  // 設定平移部分
-
-    // 將平移矩陣和原始模型矩陣相乘，得到最終的模型矩陣
-    mat4 newModel = translationMatrix * Model;  // 這樣保持了 Model 的部位相對位置不變
->>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 
 	mat4 MVP = Projection*View*newModel;
 	mat4 MV = View * newModel;  
