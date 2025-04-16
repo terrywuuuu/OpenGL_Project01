@@ -135,6 +135,16 @@ namespace CG
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
 				}
 				else {
+<<<<<<< HEAD
+					if (i == PARTSNUM - 1) {
+						glUniform1i(BackGround, 0);
+					}
+					else {
+						glUniform1i(BackGround, 1);
+					}
+
+=======
+>>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
 				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
@@ -265,6 +275,10 @@ namespace CG
 		M_KaID = glGetUniformLocation(program, "Material.Ka");
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
+<<<<<<< HEAD
+		BackGround = glGetUniformLocation(program, "isInstanced");
+=======
+>>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 
 		// Camera matrix
 		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
@@ -310,6 +324,10 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
+<<<<<<< HEAD
+		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+=======
+>>>>>>> be96dde54b5b29113d88a05076041d21dc0675e2
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
