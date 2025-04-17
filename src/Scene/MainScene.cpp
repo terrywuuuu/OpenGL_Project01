@@ -469,7 +469,7 @@ namespace CG
 		else if (action == Action::hopak_dance) {
 			_frame += dt;
 
-			if (_frame > 10)
+			if (_frame > 12)
 			{
 				_frame = 0;
 			}
@@ -796,21 +796,23 @@ namespace CG
 		//身體上下動
 		switch (frame % 2) {
 		case 0:
-			position[Axis::y] -= 0.5 * dt;
+			position[Axis::y] += 0.8 * dt;
 			break;
 		case 1:
-			position[Axis::y] += 0.5 * dt;
+			position[Axis::y] -= 0.8 * dt;
 			break;
 		}
 		//踢腿
-		double footdegree = 80;
-		switch (frame % 2) {
+		double footdegree = 40;
+		switch (frame % 4) {
 			case 0:
+			case 1:
 				// 左右腳往反方向移動
 				alphas[Body::right_foot] += footdegree * dt;
 				alphas[Body::left_foot] -= footdegree * dt;
 				break;
-			case 1:
+			case 2:
+			case 3:
 				// 左右腳往反方向移動
 				alphas[Body::right_foot] -= footdegree * dt;
 				alphas[Body::left_foot] += footdegree * dt;
@@ -827,7 +829,7 @@ namespace CG
 			gammas[Body::right_arm] -= 30 * dt;
 			betas[Body::right_hand] -= 90 * dt;
 			break;
-		case 7:
+		case 11:
 			betas[Body::left_arm] -= 70 * dt;
 			gammas[Body::left_arm] -= 30 * dt;
 			betas[Body::left_hand] -= 90 * dt;

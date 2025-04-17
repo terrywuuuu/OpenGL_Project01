@@ -99,16 +99,22 @@ namespace CG
 			}
 
 			for (int i = 0; i < 10; i++) if (ImGui::TreeNode(bodyParts[i])) {
-				const char* labels[3] = { "Alpha##", "Beta##", "Gamma##" };
-				float* values[3] = { &alphas[i], &betas[i], &gammas[i] };
 				bool changed = false;
 
-				for (int j = 0; j < 3; j++) {
-					if (ImGui::InputFloat((labels[j] + std::to_string(i)).c_str(), values[j], 1.0f, 10.0f, "%.1f",
-						ImGuiInputTextFlags_EnterReturnsTrue)) {
-						*values[i] = (*values[i] < -180.0f) ? -180.0f : (*values[i] > 180.0f) ? 180.0f : *values[i];
-						changed = true;
-					}
+				if (ImGui::InputFloat(("Alpha##" + std::to_string(i)).c_str(), &alphas[i], 1.0f, 10.0f, "%.1f",
+					ImGuiInputTextFlags_EnterReturnsTrue)) {
+					alphas[i] = (alphas[i] < -180.0f) ? -180.0f : (alphas[i] > 180.0f) ? 180.0f : alphas[i];
+					changed = true;
+				}
+				if (ImGui::InputFloat(("Beta##" + std::to_string(i)).c_str(), &betas[i], 1.0f, 10.0f, "%.1f",
+					ImGuiInputTextFlags_EnterReturnsTrue)) {
+					betas[i] = (betas[i] < -180.0f) ? -180.0f : (betas[i] > 180.0f) ? 180.0f : betas[i];
+					changed = true;
+				}
+				if (ImGui::InputFloat(("Gamma##" + std::to_string(i)).c_str(), &gammas[i], 1.0f, 10.0f, "%.1f",
+					ImGuiInputTextFlags_EnterReturnsTrue)) {
+					gammas[i] = (gammas[i] < -180.0f) ? -180.0f : (gammas[i] > 180.0f) ? 180.0f : gammas[i];
+					changed = true;
 				}
 
 				if (changed) {
