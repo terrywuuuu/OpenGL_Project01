@@ -136,7 +136,8 @@ namespace CG
 			walk,
 			sit_up,
 			push_up,
-			multiple
+			multiple,
+			hopak_dance,
 		};
 
 		enum Axis {

@@ -466,6 +466,17 @@ namespace CG
 			int frame = static_cast<int>(_frame);
 			Multiple(frame, dt);	// Do multiple action
 		}
+		else if (action == Action::hopak_dance) {
+			_frame += dt;
+
+			if (_frame > 10)
+			{
+				_frame = 0;
+			}
+
+			int frame = static_cast<int>(_frame);
+			HoPak(frame, dt);	// Do multiple action
+		}
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -514,6 +525,26 @@ namespace CG
 			case Action::push_up:
 				alphas[Body::body] = 60;
 				break;
+			case Action::hopak_dance:
+				alphas[Body::body] = 0;
+				// 初始化
+				// 左右手抱頭
+				betas[Body::left_arm] = -100;
+				gammas[Body::left_arm] = 0;
+
+				betas[Body::left_hand] = -80;
+
+				betas[Body::right_arm] = 100;
+				gammas[Body::right_arm] = 0;
+
+				betas[Body::right_hand] = 80;
+
+				//左右腿抬起來
+				alphas[Body::left_leg] = -130;
+				alphas[Body::left_foot] = 150;
+
+				alphas[Body::right_leg] = -130;
+				alphas[Body::right_foot] = 70;
 			}
 		}
 
@@ -756,6 +787,54 @@ namespace CG
 			alphas[Body::left_hand] = alphas[Body::left_hand];
 			alphas[Body::right_hand] = alphas[Body::right_hand];
 			instancedNum = 50;
+			break;
+		}
+	}
+
+
+	void MainScene::HoPak(int frame, double dt) {
+		//身體上下動
+		switch (frame % 2) {
+		case 0:
+			position[Axis::y] -= 0.5 * dt;
+			break;
+		case 1:
+			position[Axis::y] += 0.5 * dt;
+			break;
+		}
+		//踢腿
+		double footdegree = 80;
+		switch (frame % 2) {
+			case 0:
+				// 左右腳往反方向移動
+				alphas[Body::right_foot] += footdegree * dt;
+				alphas[Body::left_foot] -= footdegree * dt;
+				break;
+			case 1:
+				// 左右腳往反方向移動
+				alphas[Body::right_foot] -= footdegree * dt;
+				alphas[Body::left_foot] += footdegree * dt;
+				break;
+		}
+		//手打開
+		switch (frame) {
+		case 5:
+			betas[Body::left_arm] += 70 * dt;
+			gammas[Body::left_arm] += 30 * dt;
+			betas[Body::left_hand] += 90 * dt;
+
+			betas[Body::right_arm] -= 70 * dt;
+			gammas[Body::right_arm] -= 30 * dt;
+			betas[Body::right_hand] -= 90 * dt;
+			break;
+		case 7:
+			betas[Body::left_arm] -= 70 * dt;
+			gammas[Body::left_arm] -= 30 * dt;
+			betas[Body::left_hand] -= 90 * dt;
+
+			betas[Body::right_arm] += 70 * dt;
+			gammas[Body::right_arm] += 30 * dt;
+			betas[Body::right_hand] += 90 * dt;
 			break;
 		}
 	}

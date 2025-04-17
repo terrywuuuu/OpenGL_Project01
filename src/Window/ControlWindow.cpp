@@ -25,7 +25,7 @@ namespace CG
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 
             static int actionIndex = 0;
-            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple"};
+            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance"};
             ImGui::Text("Action: ");
             ImGui::SameLine(100);
             ImGui::SetNextItemWidth(150);
