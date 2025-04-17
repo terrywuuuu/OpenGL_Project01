@@ -11,8 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Camera.h"
-
-constexpr auto PARTSNUM = 10;
+constexpr auto PARTSNUM = 11;
 //old
 // 0:body	1:ulefthand	2:dlefthand	3:lefthand
 // 4:lshouder	5:head	6:urighthand	7:drighthand
@@ -24,6 +23,7 @@ constexpr auto PARTSNUM = 10;
 // 0:body	1:ulefthand	2:dlefthand	3:head
 // 4:urighthand	5:drighthand	6:uleftleg	7:dleftleg
 // 8:urightleg	9:drightleg
+// 10:background
 
 namespace CG
 {
@@ -74,6 +74,7 @@ namespace CG
 		int action = 0; // idle
 		GLenum mode = 0; // fill
 
+		float eyeX = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
 		float eyedistance = 25.0;
@@ -81,6 +82,7 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
+		int instancedNum = 1;  // How many robot
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -90,6 +92,7 @@ namespace CG
 		GLuint M_KaID;
 		GLuint M_KdID;
 		GLuint M_KsID;
+		GLuint BackGround;
 
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count
@@ -105,13 +108,13 @@ namespace CG
 		float position[3];
 		bool isActionChange;
 		
-		// Five Action
+		// Six Action
 		void Walk(int, double);
 		void PushUp(int, double);
 		void SitUp(int, double);
 		void HoPak(int, double);
 		void APT(int, double);
-
+		void Multiple(int, double);
 
 		enum Body
 		{
@@ -130,16 +133,18 @@ namespace CG
 		enum Action
 		{
 			idle = 0,
-			walk = 1,
-			sit_up = 2,
-			push_up = 3
+			walk,
+			sit_up,
+			push_up,
+			multiple,
+			hopak_dance,
 		};
 
 		enum Axis {
 			x = 0,
 			y = 1,
 			z = 2
-		};;
+		};
 	};
 }
 

@@ -131,7 +131,19 @@ namespace CG
 				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
 				glUniform3fv(M_KsID, 1, &Ks[0]);
 				//          (primitive   , glVertexID base , vertex count    )
-				glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				if (instancedNum == 1) {
+					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				}
+				else {
+					if (i == PARTSNUM - 1) {
+						glUniform1i(BackGround, 0);
+					}
+					else {
+						glUniform1i(BackGround, 1);
+					}
+
+					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
+				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
 				vertexIDoffset += faces[i][j + 1] * 3;//glVertexID's base offset is face count*3
 			}//end for loop for draw one part of the robot	
@@ -175,10 +187,10 @@ namespace CG
 				printf("beta:%f\n", angle);
 				break;
 			case GLFW_KEY_W:
-				eyedistance -= 0.2;
+				eyedistance -= 0.5;
 				break;
 			case GLFW_KEY_S:
-				eyedistance += 0.2;
+				eyedistance += 0.5;
 				break;
 			case GLFW_KEY_A:
 				eyeAngley -= 10;
@@ -200,6 +212,13 @@ namespace CG
 	{
 		this->action = action;
 		isActionChange = true;
+		instancedNum = 1;
+		for (int i = 0; i < PARTSNUM; i++) //reset model pos
+		{
+			alphas[i] = 0.0f;
+			betas[i] = 0.0f;
+			gammas[i] = 0.0f;
+		}
 	}
 
 	void MainScene::SetMode(int mode)
@@ -241,8 +260,8 @@ namespace CG
 		glBindVertexArray(VAO);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "res/shaders/DSPhong_Material.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "res/shaders/DSPhong_Material.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		program = LoadShaders(shaders); //讀取shader
 
@@ -253,6 +272,7 @@ namespace CG
 		M_KaID = glGetUniformLocation(program, "Material.Ka");
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
+		BackGround = glGetUniformLocation(program, "isInstanced");
 
 		// Camera matrix
 		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
@@ -298,6 +318,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
+		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -384,6 +405,8 @@ namespace CG
 	void MainScene::UpdateAction(double dt)
 	{
 		static double _frame = 0;
+		if (isActionChange)
+			_frame = 0;
 
 		if (action == Action::idle)
 		{
@@ -402,7 +425,7 @@ namespace CG
 		{
 			_frame += dt;
 
-			if (_frame > 13)
+			if (_frame > 17)
 			{
 				_frame = 0;
 			}
@@ -419,18 +442,40 @@ namespace CG
 			}
 
 			int frame = static_cast<int>(_frame);
-			SitUp(frame, dt);	// Do push-up action
+			SitUp(frame, dt);	// Do Sit-up action
 		}
 		else if (action == Action::push_up) {
 			_frame += dt;
 
-			if (_frame > 7)
+			if (_frame > 9)
 			{
 				_frame = 0;
 			}
 
 			int frame = static_cast<int>(_frame);
 			PushUp(frame, dt);	// Do push-up action
+		}
+		else if (action == Action::multiple) {
+			_frame += dt;
+
+			if (_frame > 8)
+			{
+				_frame = 7;
+			}
+
+			int frame = static_cast<int>(_frame);
+			Multiple(frame, dt);	// Do multiple action
+		}
+		else if (action == Action::hopak_dance) {
+			_frame += dt;
+
+			if (_frame > 10)
+			{
+				_frame = 0;
+			}
+
+			int frame = static_cast<int>(_frame);
+			HoPak(frame, dt);	// Do multiple action
 		}
 	}
 
@@ -465,56 +510,70 @@ namespace CG
 				betas[i] = 0.0f;
 				gammas[i] = 0.0f;
 			}
+			gammas[Body::left_arm] = -70;
+			gammas[Body::right_arm] = 70;
 
 			switch (action) {
 			case Action::idle:
 			case Action::walk:
+			case Action::multiple:
 				alphas[Body::body] = 0;
 				break;
 			case Action::sit_up:
 				alphas[Body::body] = -90;
 				break;
 			case Action::push_up:
-				alphas[Body::body] = 65;
+				alphas[Body::body] = 60;
 				break;
+			case Action::hopak_dance:
+				alphas[Body::body] = 0;
+				// 初始化
+				// 左右手抱頭
+				betas[Body::left_arm] = -100;
+				gammas[Body::left_arm] = 0;
+
+				betas[Body::left_hand] = -80;
+
+				betas[Body::right_arm] = 100;
+				gammas[Body::right_arm] = 0;
+
+				betas[Body::right_hand] = 80;
+
+				//左右腿抬起來
+				alphas[Body::left_leg] = -130;
+				alphas[Body::left_foot] = 150;
+
+				alphas[Body::right_leg] = -130;
+				alphas[Body::right_foot] = 70;
 			}
 		}
-		
-		Translation[Body::body] = translate(position[Axis::x], 2.9f + position[Axis::y], position[Axis::z]);
+
+		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
-		Translation[Body::head] = translate(0, 5.5f, 0);
+		Translation[Body::head] = translate(0, 12.0f, 0);
 		Models[Body::head] = Models[Body::body] * Translation[Body::head] * bodyRotateMatrix(Body::head);
 
-		Translation[Body::left_arm] = translate(3.5f, 4.0f, -1.0f);
-		// 其他動作硬綁在 -70了
-		if (action != Action::sit_up)
-		{
-			gammas[Body::left_arm] = -70;
-		}
+		Translation[Body::left_arm] = translate(3.5f, 11.0f, -1.0f);
 		Models[Body::left_arm] = Models[Body::body] * Translation[Body::left_arm] * bodyRotateMatrix(Body::left_arm);
 
 		Translation[Body::left_hand] = translate(4.8f, -0.8f, 0);
 		Models[Body::left_hand] = Models[Body::left_arm] * Translation[Body::left_hand] * bodyRotateMatrix(Body::left_hand);
 
-		Translation[Body::right_arm] = translate(-3.5f, 4.0f, -1.0f);
-		// 其他動作硬綁在 70了
-		if (action != Action::sit_up) 
-		{
-			gammas[Body::right_arm] = 70;
-		}
+		Translation[Body::right_arm] = translate(-3.5f, 11.0f, -0.5f);
+
 		Models[Body::right_arm] = Models[Body::body] * Translation[Body::right_arm] * bodyRotateMatrix(Body::right_arm);
 
 		Translation[Body::right_hand] = translate(-4.8, -0.8f, 0);
 		Models[Body::right_hand] = Models[Body::right_arm] * Translation[Body::right_hand] * bodyRotateMatrix(Body::right_hand);
 
-		Translation[Body::left_leg] = translate(1.5f, -4.5f, -1.0);
+		Translation[Body::left_leg] = translate(1.5f, 0.5f, -1.0);
 		Models[Body::left_leg] = Models[Body::body] * Translation[Body::left_leg] * bodyRotateMatrix(Body::left_leg);
 
 		Translation[Body::left_foot] = translate(1.0, -7.0f, 0);
 		Models[Body::left_foot] = Models[Body::left_leg] * Translation[Body::left_foot] * bodyRotateMatrix(Body::left_foot);
 
-		Translation[Body::right_leg] = translate(-1.0f, -4.5f, -1.0);
+		Translation[Body::right_leg] = translate(-1.0f, 0.5f, -1.0);
 		Models[Body::right_leg] = Models[Body::body] * Translation[Body::right_leg] * bodyRotateMatrix(Body::right_leg);
 
 		Translation[Body::right_foot] = translate(-1.0, -7.0f, 0);
@@ -525,12 +584,10 @@ namespace CG
 		switch (frame)
 		{
 		case 0:
-			// 左手臂抬起
-			alphas[Body::left_arm] = -45 * dt;
-			alphas[Body::left_hand] = -30 * dt;
-			// 右手臂抬起
-			alphas[Body::right_arm] = -45 * dt;
-			alphas[Body::right_hand] = -30 * dt;
+			// 左手臂初始化
+			alphas[Body::left_arm] = 0;
+			// 右手臂初始化
+			alphas[Body::right_arm] = 0;
 			// 腿部初始化
 			alphas[Body::left_leg] = 0;
 			alphas[Body::left_foot] = 0;
@@ -543,35 +600,67 @@ namespace CG
 			// 手臂揮動，腿部前進
 			alphas[Body::left_arm] -= 10 * dt;
 			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::left_leg] += 15 * dt;
-			alphas[Body::right_leg] -= 15 * dt;
+			betas[Body::left_hand] -= 10 * dt;
+			alphas[Body::left_leg] += 10 * dt;
+			alphas[Body::right_leg] -= 14 * dt;
+			alphas[Body::right_foot] += 10 * dt;
 			position[Axis::y] += 0.1 * dt;
 			break;
 		case 4:
-		case 5:
-		case 6:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::left_leg] -= 15 * dt;
-			alphas[Body::right_leg] += 15 * dt;
-			position[Axis::y] -= 0.1 * dt;
-			break;
-		case 7:
-		case 8:
-		case 9:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::left_leg] -= 15 * dt;
-			alphas[Body::right_leg] += 15 * dt;
-			position[Axis::y] += 0.1 * dt;
-			break;
-		case 10:
-		case 11:
-		case 12:
 			alphas[Body::left_arm] -= 10 * dt;
 			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::left_leg] += 15 * dt;
-			alphas[Body::right_leg] -= 15 * dt;
+			alphas[Body::right_foot] -= 10 * dt;
+			alphas[Body::left_leg] += 10 * dt;
+			break;
+		case 5:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::right_foot] += 10 * dt;
+			alphas[Body::left_leg] -= 10 * dt;
+			break;
+		case 6:
+		case 7:
+		case 8:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			betas[Body::left_hand] += 10 * dt;
+			alphas[Body::left_leg] -= 10 * dt;
+			alphas[Body::right_leg] += 14 * dt;
+			alphas[Body::right_foot] -= 10 * dt;
+			position[Axis::y] -= 0.1 * dt;
+			break;
+		case 9:
+		case 10:
+		case 11:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			betas[Body::right_hand] += 10 * dt;
+			alphas[Body::left_leg] -= 14 * dt;
+			alphas[Body::right_leg] += 10 * dt;
+			alphas[Body::left_foot] += 10 * dt;
+			position[Axis::y] += 0.1 * dt;
+			break;
+		case 12:
+			alphas[Body::left_arm] += 10 * dt;
+			alphas[Body::right_arm] -= 10 * dt;
+			alphas[Body::left_foot] -= 10 * dt;
+			alphas[Body::right_leg] += 10 * dt;
+			break;
+		case 13:
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			alphas[Body::left_foot] += 10 * dt;
+			alphas[Body::right_leg] -= 10 * dt;
+			break;
+		case 14:
+		case 15:
+		case 16:
+			alphas[Body::left_arm] -= 10 * dt;
+			alphas[Body::right_arm] += 10 * dt;
+			betas[Body::right_hand] -= 10 * dt;
+			alphas[Body::left_leg] += 14 * dt;
+			alphas[Body::right_leg] -= 10 * dt;
+			alphas[Body::left_foot] -= 10 * dt;
 			position[Axis::y] -= 0.1 * dt;
 			break;
 		}
@@ -624,7 +713,7 @@ namespace CG
 	}
 
 	void MainScene::PushUp(int frame, double dt) {
-		switch (frame) 
+		switch (frame)
 		{
 		case 0:
 			// 初始化
@@ -634,26 +723,118 @@ namespace CG
 		case 1:
 		case 2:
 		case 3:
+		case 4:
 			// 身體向下
-			alphas[Body::body] += 9 * dt;
+			alphas[Body::body] += 5 * dt;
 			// 手臂擺動，腿部固定
 			alphas[Body::left_arm] += 16 * dt;
 			alphas[Body::right_arm] += 16 * dt;
-			betas[Body::left_hand] -= 25 * dt;
-			betas[Body::right_hand] += 25 * dt;
-			alphas[Body::left_leg] -= 5 * dt;
-			alphas[Body::right_leg] -= 5 * dt;
+			betas[Body::left_hand] -= 20 * dt;
+			betas[Body::right_hand] += 20 * dt;
+			alphas[Body::left_leg] -= 3 * dt;
+			alphas[Body::right_leg] -= 3 * dt;
+			position[Axis::y] -= 0.5 * dt;
+			break;
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+			alphas[Body::body] -= 5 * dt;
+			alphas[Body::left_arm] -= 16 * dt;
+			alphas[Body::right_arm] -= 16 * dt;
+			betas[Body::left_hand] += 20 * dt;
+			betas[Body::right_hand] -= 20 * dt;
+			alphas[Body::left_leg] += 3 * dt;
+			alphas[Body::right_leg] += 3 * dt;
+			position[Axis::y] += 0.5 * dt;
+			break;
+		}
+	}
+
+	void MainScene::Multiple(int frame, double dt) {
+		switch (frame)
+		{
+		case 0:
+			// 手臂腿部固定
+			alphas[Body::left_arm] = 0;
+			alphas[Body::right_arm] = 0;
+			gammas[Body::left_hand] = 0;
+			gammas[Body::right_hand] = 0;
+			alphas[Body::left_hand] = 0;
+			alphas[Body::right_hand] = 0;
+			break;
+		case 1:
+		case 2:
+		case 3:
+			// 手臂擺動
+			alphas[Body::left_arm] -= 15 * dt;
+			alphas[Body::right_arm] -= 15 * dt;
 			break;
 		case 4:
 		case 5:
 		case 6:
-			alphas[Body::body] -= 9 * dt;
-			alphas[Body::left_arm] -= 16 * dt;
-			alphas[Body::right_arm] -= 16 * dt;
-			betas[Body::left_hand] += 25 * dt;
-			betas[Body::right_hand] -= 25 * dt;
-			alphas[Body::left_leg] += 5 * dt;
-			alphas[Body::right_leg] += 5 * dt;
+			gammas[Body::left_hand] -= 20 * dt;
+			gammas[Body::right_hand] += 20 * dt;
+			alphas[Body::left_hand] -= 10 * dt;
+			alphas[Body::right_hand] -= 10 * dt;
+			break;
+		case 7:
+			// 手臂腿部固定
+			alphas[Body::left_arm] = alphas[Body::left_arm];
+			alphas[Body::right_arm] = alphas[Body::right_arm];
+			gammas[Body::left_hand] = gammas[Body::left_hand];
+			gammas[Body::right_hand] = gammas[Body::right_hand];
+			alphas[Body::left_hand] = alphas[Body::left_hand];
+			alphas[Body::right_hand] = alphas[Body::right_hand];
+			instancedNum = 50;
+			break;
+		}
+	}
+
+
+	void MainScene::HoPak(int frame, double dt) {
+		//身體上下動
+		switch (frame % 2) {
+		case 0:
+			position[Axis::y] -= 0.5 * dt;
+			break;
+		case 1:
+			position[Axis::y] += 0.5 * dt;
+			break;
+		}
+		//踢腿
+		double footdegree = 80;
+		switch (frame % 2) {
+			case 0:
+				// 左右腳往反方向移動
+				alphas[Body::right_foot] += footdegree * dt;
+				alphas[Body::left_foot] -= footdegree * dt;
+				break;
+			case 1:
+				// 左右腳往反方向移動
+				alphas[Body::right_foot] -= footdegree * dt;
+				alphas[Body::left_foot] += footdegree * dt;
+				break;
+		}
+		//手打開
+		switch (frame) {
+		case 5:
+			betas[Body::left_arm] += 70 * dt;
+			gammas[Body::left_arm] += 30 * dt;
+			betas[Body::left_hand] += 90 * dt;
+
+			betas[Body::right_arm] -= 70 * dt;
+			gammas[Body::right_arm] -= 30 * dt;
+			betas[Body::right_hand] -= 90 * dt;
+			break;
+		case 7:
+			betas[Body::left_arm] -= 70 * dt;
+			gammas[Body::left_arm] -= 30 * dt;
+			betas[Body::left_hand] -= 90 * dt;
+
+			betas[Body::right_arm] += 70 * dt;
+			gammas[Body::right_arm] += 30 * dt;
+			betas[Body::right_hand] += 90 * dt;
 			break;
 		}
 	}

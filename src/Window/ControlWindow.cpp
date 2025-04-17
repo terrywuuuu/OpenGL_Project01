@@ -24,22 +24,22 @@ namespace CG
 		{
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 
-			static int actionIndex = 0;
-			std::vector<std::string> actions = { "Idle", "Walk", "Sit Up", "Push Up" };
-			ImGui::Text("Action: ");
-			ImGui::SameLine(100);
-			ImGui::SetNextItemWidth(150);
-			if (ImGui::BeginCombo("##Action", actions[actionIndex].c_str()))
-			{
-				for (int n = 0; n < actions.size(); n++)
-				{
-					const bool is_selected = (actionIndex == n);
-					if (ImGui::Selectable(actions[n].c_str(), is_selected))
-					{
-						actionIndex = n;
-						std::cout << "Set Action " << actionIndex << std::endl;
-						targetScene->SetAction(n);
-					}
+            static int actionIndex = 0;
+            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance"};
+            ImGui::Text("Action: ");
+            ImGui::SameLine(100);
+            ImGui::SetNextItemWidth(150);
+            if (ImGui::BeginCombo("##Action", actions[actionIndex].c_str()))
+            {
+                for (int n = 0; n < actions.size(); n++)
+                {
+                    const bool is_selected = (actionIndex == n);
+                    if (ImGui::Selectable(actions[n].c_str(), is_selected))
+                    {
+                        actionIndex = n;
+                        std::cout << "Set Action " << actionIndex << std::endl;
+                        targetScene->SetAction(n);
+                    }
 
 					if (is_selected)
 					{
@@ -74,8 +74,8 @@ namespace CG
 				ImGui::EndCombo();
 			}
 		}
-		ImVec2 controlPos = ImGui::GetWindowPos();      // Àò¨ú Control µ¡¤f¦ì¸m
-		ImVec2 controlSize = ImGui::GetWindowSize();    // Àò¨ú Control µ¡¤f¤j¤p
+		ImVec2 controlPos = ImGui::GetWindowPos();      // ï¿½ï¿½ï¿½ Control ï¿½ï¿½ï¿½fï¿½ï¿½m
+		ImVec2 controlSize = ImGui::GetWindowSize();    // ï¿½ï¿½ï¿½ Control ï¿½ï¿½ï¿½fï¿½jï¿½p
 		ImGui::End();
 
 
