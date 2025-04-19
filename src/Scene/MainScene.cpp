@@ -1,6 +1,6 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
-
+#include <Utilty/JsonIO.h>
 #include "MainScene.h"
 
 static glm::mat4 translate(float x, float y, float z)
@@ -308,17 +308,17 @@ namespace CG
 		}
 
 		// 加載各部件
-		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
-		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
-		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
-		Load2Buffer("../../res/Parts/head.obj", Body::head);           // head
-		Load2Buffer("../../res/Parts/right_arm.obj", Body::right_arm);      // upper right arm
-		Load2Buffer("../../res/Parts/right_hand.obj", Body::right_hand);      // down right arm
-		Load2Buffer("../../res/Parts/left_leg.obj", Body::left_leg);        // upperleftleg
-		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
-		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
-		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
+		//Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
+		//Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
+		//Load2Buffer("../../res/Parts/head.obj", Body::head);           // head
+		//Load2Buffer("../../res/Parts/right_arm.obj", Body::right_arm);      // upper right arm
+		//Load2Buffer("../../res/Parts/right_hand.obj", Body::right_hand);      // down right arm
+		//Load2Buffer("../../res/Parts/left_leg.obj", Body::left_leg);        // upperleftleg
+		//Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
+		//Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
+		//Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -411,27 +411,22 @@ namespace CG
 		if (action == Action::idle)
 		{
 			_frame = 0;
-			/*
-			for (int i = 0; i < PARTSNUM; i++)
-			{
-				alphas[i] = 0.0f;
-				betas[i] = 0.0f;
-				gammas[i] = 0.0f;
-			}
-			*/
 			position[0] = position[1] = position[2] = 0;
 		}
 		else if (action == Action::walk)
 		{
-			_frame += dt;
+			std::vector<JsonIO::FrameData> frames;
+			JsonIO::LoadFrames("../../res/actions/walk.json", frames);
+			//old
+			//_frame += dt;
 
-			if (_frame > 17)
-			{
-				_frame = 0;
-			}
+			//if (_frame > 17)
+			//{
+			//	_frame = 0;
+			//}
 
-			int frame = static_cast<int>(_frame);
-			Walk(frame, dt);	// Do walk action
+			//int frame = static_cast<int>(_frame);
+			//Walk(frame, dt);	// Do walk action
 		}
 		else if (action == Action::sit_up) {
 			_frame += dt;
@@ -805,18 +800,18 @@ namespace CG
 		//踢腿
 		double footdegree = 40;
 		switch (frame % 4) {
-			case 0:
-			case 1:
-				// 左右腳往反方向移動
-				alphas[Body::right_foot] += footdegree * dt;
-				alphas[Body::left_foot] -= footdegree * dt;
-				break;
-			case 2:
-			case 3:
-				// 左右腳往反方向移動
-				alphas[Body::right_foot] -= footdegree * dt;
-				alphas[Body::left_foot] += footdegree * dt;
-				break;
+		case 0:
+		case 1:
+			// 左右腳往反方向移動
+			alphas[Body::right_foot] += footdegree * dt;
+			alphas[Body::left_foot] -= footdegree * dt;
+			break;
+		case 2:
+		case 3:
+			// 左右腳往反方向移動
+			alphas[Body::right_foot] -= footdegree * dt;
+			alphas[Body::left_foot] += footdegree * dt;
+			break;
 		}
 		//手打開
 		switch (frame) {
