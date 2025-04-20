@@ -150,6 +150,7 @@
     <ClCompile Include="..\src\App\App.cpp" />
     <ClCompile Include="..\src\Scene\Camera.cpp" />
     <ClCompile Include="..\src\Scene\MainScene.cpp" />
+    <ClCompile Include="..\src\Utilty\JsonIO.cpp" />
     <ClCompile Include="..\src\Utilty\OBJLoader.cpp" />
     <ClCompile Include="..\src\Window\ControlWindow.cpp" />
     <ClCompile Include="main.cpp" />
@@ -172,6 +173,9 @@
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
