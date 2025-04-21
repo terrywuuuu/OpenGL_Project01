@@ -103,12 +103,6 @@ namespace CG
 		bool isActionChange;
 		
 		// Six Action
-		void Walk(int, double);
-		void PushUp(int, double);
-		void SitUp(int, double);
-		void HoPak(int, double);
-		void APT(int, double);
-		void Multiple(int, double);
 		void HandleAction(std::vector<JsonIO::FrameData>&,double, double);
 
 		enum Body

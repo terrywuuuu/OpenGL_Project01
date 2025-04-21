@@ -38,6 +38,9 @@
     <ClCompile Include="..\src\Scene\Camera.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Utilty\JsonIO.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -95,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Scene\Camera.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\JsonIO.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
