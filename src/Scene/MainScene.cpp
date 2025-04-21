@@ -1,5 +1,6 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
+#include <../src/Utilty/JsonIO.h>
 
 #include "MainScene.h"
 
@@ -202,12 +203,6 @@ namespace CG
 		}
 	}
 
-	//我不知道那裡用到這個 alpaca
-	//void MainScene::ResetAction()
-	//{
-	//	this->action = 0; // idle
-	//}
-
 	void MainScene::SetAction(int action)
 	{
 		this->action = action;
@@ -318,7 +313,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -404,79 +399,60 @@ namespace CG
 
 	void MainScene::UpdateAction(double dt)
 	{
-		static double _frame = 0;
-		if (isActionChange)
+		static double _frame = 0.0;
+		static short isMultiple = 0;
+		std::vector<JsonIO::FrameData> frameData;
+		int end = 0;
+		if (isActionChange) {
+			isActionChange = false;
 			_frame = 0;
+		}
 
 		if (action == Action::idle)
 		{
-			_frame = 0;
-			/*
-			for (int i = 0; i < PARTSNUM; i++)
-			{
-				alphas[i] = 0.0f;
-				betas[i] = 0.0f;
-				gammas[i] = 0.0f;
+			if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-			*/
-			position[0] = position[1] = position[2] = 0;
 		}
 		else if (action == Action::walk)
 		{
-			_frame += dt;
-
-			if (_frame > 17)
+			if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData))
 			{
-				_frame = 0;
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-
-			int frame = static_cast<int>(_frame);
-			Walk(frame, dt);	// Do walk action
 		}
 		else if (action == Action::sit_up) {
-			_frame += dt;
-
-			if (_frame > 7)
-			{
-				_frame = 0;
+			if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-
-			int frame = static_cast<int>(_frame);
-			SitUp(frame, dt);	// Do Sit-up action
 		}
 		else if (action == Action::push_up) {
-			_frame += dt;
-
-			if (_frame > 9)
-			{
-				_frame = 0;
+			if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-
-			int frame = static_cast<int>(_frame);
-			PushUp(frame, dt);	// Do push-up action
 		}
 		else if (action == Action::multiple) {
-			_frame += dt;
-
-			if (_frame > 8)
-			{
-				_frame = 7;
+			if (instancedNum == 1 && JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-
-			int frame = static_cast<int>(_frame);
-			Multiple(frame, dt);	// Do multiple action
+			if (_frame >= end-1) {
+				instancedNum = 50;
+			}
 		}
 		else if (action == Action::hopak_dance) {
-			_frame += dt;
-
-			if (_frame > 12)
-			{
-				_frame = 0;
+			if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
 			}
-
-			int frame = static_cast<int>(_frame);
-			HoPak(frame, dt);	// Do multiple action
 		}
+		_frame += dt;
+		if (_frame > end)
+			_frame = 0;
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -488,65 +464,7 @@ namespace CG
 
 	void MainScene::UpdateModel()
 	{
-		glm::mat4 Rotation[PARTSNUM];
 		glm::mat4 Translation[PARTSNUM];
-
-		float alpha, beta, gamma;// x, y, z
-		static float dir = 0.0;
-		int ind;
-
-		for (int i = 0; i < PARTSNUM; i++)
-		{
-			Models[i] = glm::mat4(1.0f);
-			Rotation[i] = glm::mat4(1.0f);
-			Translation[i] = glm::mat4(1.0f);
-		}
-
-		if (isActionChange) {// stand, lay faec up, lay face down
-			isActionChange = false;
-			for (int i = 0; i < PARTSNUM; i++) //reset model pos
-			{
-				alphas[i] = 0.0f;
-				betas[i] = 0.0f;
-				gammas[i] = 0.0f;
-			}
-			gammas[Body::left_arm] = -70;
-			gammas[Body::right_arm] = 70;
-
-			switch (action) {
-			case Action::idle:
-			case Action::walk:
-			case Action::multiple:
-				alphas[Body::body] = 0;
-				break;
-			case Action::sit_up:
-				alphas[Body::body] = -90;
-				break;
-			case Action::push_up:
-				alphas[Body::body] = 60;
-				break;
-			case Action::hopak_dance:
-				alphas[Body::body] = 0;
-				// 初始化
-				// 左右手抱頭
-				betas[Body::left_arm] = -100;
-				gammas[Body::left_arm] = 0;
-
-				betas[Body::left_hand] = -80;
-
-				betas[Body::right_arm] = 100;
-				gammas[Body::right_arm] = 0;
-
-				betas[Body::right_hand] = 80;
-
-				//左右腿抬起來
-				alphas[Body::left_leg] = -130;
-				alphas[Body::left_foot] = 150;
-
-				alphas[Body::right_leg] = -130;
-				alphas[Body::right_foot] = 70;
-			}
-		}
 
 		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
@@ -580,264 +498,28 @@ namespace CG
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
 	}
 
-	void MainScene::Walk(int frame, double dt) {
-		switch (frame)
-		{
-		case 0:
-			// 左手臂初始化
-			alphas[Body::left_arm] = 0;
-			// 右手臂初始化
-			alphas[Body::right_arm] = 0;
-			// 腿部初始化
-			alphas[Body::left_leg] = 0;
-			alphas[Body::left_foot] = 0;
-			alphas[Body::right_leg] = 0;
-			alphas[Body::right_foot] = 0;
-			break;
-		case 1:
-		case 2:
-		case 3:
-			// 手臂揮動，腿部前進
-			alphas[Body::left_arm] -= 10 * dt;
-			alphas[Body::right_arm] += 10 * dt;
-			betas[Body::left_hand] -= 10 * dt;
-			alphas[Body::left_leg] += 10 * dt;
-			alphas[Body::right_leg] -= 14 * dt;
-			alphas[Body::right_foot] += 10 * dt;
-			position[Axis::y] += 0.1 * dt;
-			break;
-		case 4:
-			alphas[Body::left_arm] -= 10 * dt;
-			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::right_foot] -= 10 * dt;
-			alphas[Body::left_leg] += 10 * dt;
-			break;
-		case 5:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::right_foot] += 10 * dt;
-			alphas[Body::left_leg] -= 10 * dt;
-			break;
-		case 6:
-		case 7:
-		case 8:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			betas[Body::left_hand] += 10 * dt;
-			alphas[Body::left_leg] -= 10 * dt;
-			alphas[Body::right_leg] += 14 * dt;
-			alphas[Body::right_foot] -= 10 * dt;
-			position[Axis::y] -= 0.1 * dt;
-			break;
-		case 9:
-		case 10:
-		case 11:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			betas[Body::right_hand] += 10 * dt;
-			alphas[Body::left_leg] -= 14 * dt;
-			alphas[Body::right_leg] += 10 * dt;
-			alphas[Body::left_foot] += 10 * dt;
-			position[Axis::y] += 0.1 * dt;
-			break;
-		case 12:
-			alphas[Body::left_arm] += 10 * dt;
-			alphas[Body::right_arm] -= 10 * dt;
-			alphas[Body::left_foot] -= 10 * dt;
-			alphas[Body::right_leg] += 10 * dt;
-			break;
-		case 13:
-			alphas[Body::left_arm] -= 10 * dt;
-			alphas[Body::right_arm] += 10 * dt;
-			alphas[Body::left_foot] += 10 * dt;
-			alphas[Body::right_leg] -= 10 * dt;
-			break;
-		case 14:
-		case 15:
-		case 16:
-			alphas[Body::left_arm] -= 10 * dt;
-			alphas[Body::right_arm] += 10 * dt;
-			betas[Body::right_hand] -= 10 * dt;
-			alphas[Body::left_leg] += 14 * dt;
-			alphas[Body::right_leg] -= 10 * dt;
-			alphas[Body::left_foot] -= 10 * dt;
-			position[Axis::y] -= 0.1 * dt;
-			break;
+	void MainScene::HandleAction(std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
+		JsonIO::FrameData curFD = frameDatas[frame], perFD;
+		if (frame == 0) {
+			for (int i = 0; i < 3; ++i) {
+				position[i] = curFD.position[i];
+			}
+			for (int i = 0; i < PARTSNUM; i++) {
+				alphas[i] = curFD.partRotations[i].alpha;
+				betas[i] = curFD.partRotations[i].beta;
+				gammas[i] = curFD.partRotations[i].gamma;
+			}
 		}
-	}
-
-	void MainScene::SitUp(int frame, double dt) {
-		// 動的幅度
-		double magnitude = 14;
-		switch (frame)
-		{
-		case 0:
-			// 初始化
-			// 左右手抱頭
-			alphas[Body::body] = -90;
-			alphas[Body::left_arm] = -160;
-			gammas[Body::left_arm] = -50;
-			betas[Body::left_hand] = -150;
-			gammas[Body::left_hand] = -30;
-
-			alphas[Body::right_arm] = -160;
-			gammas[Body::right_arm] = 50;
-			betas[Body::right_hand] = 150;
-			gammas[Body::right_hand] = 30;
-			//左右腿抬起來
-			alphas[Body::left_leg] = -76;
-			alphas[Body::left_foot] = 124;
-
-			alphas[Body::right_leg] = -76;
-			alphas[Body::right_foot] = 124;
-			break;
-		case 1:
-		case 2:
-		case 3:
-			// 身體往膝蓋移動
-			alphas[Body::body] += magnitude * dt;
-			// 左右腳往反方向移動
-			alphas[Body::right_leg] -= magnitude * dt;
-			alphas[Body::left_leg] -= magnitude * dt;
-			break;
-		case 4:
-		case 5:
-		case 6:
-			// 身體往地板移動
-			alphas[Body::body] -= magnitude * dt;
-			// 左右腳往反方向移動
-			alphas[Body::right_leg] += magnitude * dt;
-			alphas[Body::left_leg] += magnitude * dt;
-			break;
-		}
-	}
-
-	void MainScene::PushUp(int frame, double dt) {
-		switch (frame)
-		{
-		case 0:
-			// 初始化
-			alphas[Body::left_arm] = -65;
-			alphas[Body::right_arm] = -65;
-			break;
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			// 身體向下
-			alphas[Body::body] += 5 * dt;
-			// 手臂擺動，腿部固定
-			alphas[Body::left_arm] += 16 * dt;
-			alphas[Body::right_arm] += 16 * dt;
-			betas[Body::left_hand] -= 20 * dt;
-			betas[Body::right_hand] += 20 * dt;
-			alphas[Body::left_leg] -= 3 * dt;
-			alphas[Body::right_leg] -= 3 * dt;
-			position[Axis::y] -= 0.5 * dt;
-			break;
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-			alphas[Body::body] -= 5 * dt;
-			alphas[Body::left_arm] -= 16 * dt;
-			alphas[Body::right_arm] -= 16 * dt;
-			betas[Body::left_hand] += 20 * dt;
-			betas[Body::right_hand] -= 20 * dt;
-			alphas[Body::left_leg] += 3 * dt;
-			alphas[Body::right_leg] += 3 * dt;
-			position[Axis::y] += 0.5 * dt;
-			break;
-		}
-	}
-
-	void MainScene::Multiple(int frame, double dt) {
-		switch (frame)
-		{
-		case 0:
-			// 手臂腿部固定
-			alphas[Body::left_arm] = 0;
-			alphas[Body::right_arm] = 0;
-			gammas[Body::left_hand] = 0;
-			gammas[Body::right_hand] = 0;
-			alphas[Body::left_hand] = 0;
-			alphas[Body::right_hand] = 0;
-			break;
-		case 1:
-		case 2:
-		case 3:
-			// 手臂擺動
-			alphas[Body::left_arm] -= 15 * dt;
-			alphas[Body::right_arm] -= 15 * dt;
-			break;
-		case 4:
-		case 5:
-		case 6:
-			gammas[Body::left_hand] -= 20 * dt;
-			gammas[Body::right_hand] += 20 * dt;
-			alphas[Body::left_hand] -= 10 * dt;
-			alphas[Body::right_hand] -= 10 * dt;
-			break;
-		case 7:
-			// 手臂腿部固定
-			alphas[Body::left_arm] = alphas[Body::left_arm];
-			alphas[Body::right_arm] = alphas[Body::right_arm];
-			gammas[Body::left_hand] = gammas[Body::left_hand];
-			gammas[Body::right_hand] = gammas[Body::right_hand];
-			alphas[Body::left_hand] = alphas[Body::left_hand];
-			alphas[Body::right_hand] = alphas[Body::right_hand];
-			instancedNum = 50;
-			break;
-		}
-	}
-
-
-	void MainScene::HoPak(int frame, double dt) {
-		//身體上下動
-		switch (frame % 2) {
-		case 0:
-			position[Axis::y] += 0.8 * dt;
-			break;
-		case 1:
-			position[Axis::y] -= 0.8 * dt;
-			break;
-		}
-		//踢腿
-		double footdegree = 40;
-		switch (frame % 4) {
-			case 0:
-			case 1:
-				// 左右腳往反方向移動
-				alphas[Body::right_foot] += footdegree * dt;
-				alphas[Body::left_foot] -= footdegree * dt;
-				break;
-			case 2:
-			case 3:
-				// 左右腳往反方向移動
-				alphas[Body::right_foot] -= footdegree * dt;
-				alphas[Body::left_foot] += footdegree * dt;
-				break;
-		}
-		//手打開
-		switch (frame) {
-		case 5:
-			betas[Body::left_arm] += 70 * dt;
-			gammas[Body::left_arm] += 30 * dt;
-			betas[Body::left_hand] += 90 * dt;
-
-			betas[Body::right_arm] -= 70 * dt;
-			gammas[Body::right_arm] -= 30 * dt;
-			betas[Body::right_hand] -= 90 * dt;
-			break;
-		case 11:
-			betas[Body::left_arm] -= 70 * dt;
-			gammas[Body::left_arm] -= 30 * dt;
-			betas[Body::left_hand] -= 90 * dt;
-
-			betas[Body::right_arm] += 70 * dt;
-			gammas[Body::right_arm] += 30 * dt;
-			betas[Body::right_hand] += 90 * dt;
-			break;
+		else {
+			perFD = frame >= frameDatas.size() - 1 ? frameDatas[0] : frameDatas[frame + 1];
+			for (int i = 0; i < 3; ++i) {
+				position[i] += (perFD.position[i] - curFD.position[i]) * dt;
+			}
+			for (int i = 0; i < PARTSNUM; i++) {
+				alphas[i] += (perFD.partRotations[i].alpha - curFD.partRotations[i].alpha) * dt;
+				betas[i] += (perFD.partRotations[i].beta - curFD.partRotations[i].beta) * dt;
+				gammas[i] += (perFD.partRotations[i].gamma - curFD.partRotations[i].gamma) * dt;
+			}
 		}
 	}
 }
