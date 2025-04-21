@@ -10,15 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "../Utilty/JsonIO.h"
 #include "Camera.h"
 constexpr auto PARTSNUM = 11;
-//old
-// 0:body	1:ulefthand	2:dlefthand	3:lefthand
-// 4:lshouder	5:head	6:urighthand	7:drighthand
-// 8:righthand	9:rshouder	10:back2	11:dbody
-// 12:uleftleg	13:dleftleg	14:leftfoot	15:urightleg
-// 16:drightleg	17:rightfoot
-
 //new
 // 0:body	1:ulefthand	2:dlefthand	3:head
 // 4:urighthand	5:drighthand	6:uleftleg	7:dleftleg
@@ -71,7 +65,7 @@ namespace CG
 		std::array<GLuint, PARTSNUM> nVBOs;
 		GLuint program;
 
-		int action = 0; // idle
+		int action = -1; // idle
 		GLenum mode = 0; // fill
 
 		float eyeX = 0.0;
@@ -115,6 +109,7 @@ namespace CG
 		void HoPak(int, double);
 		void APT(int, double);
 		void Multiple(int, double);
+		void HandleAction(std::vector<JsonIO::FrameData>&,double, double);
 
 		enum Body
 		{
