@@ -23,6 +23,7 @@ namespace CG
 		ImGui::Begin("Control");
 		{
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
+			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
 
             static int actionIndex = 0;
             std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance","T-pose"};
@@ -131,5 +132,50 @@ namespace CG
 		// Show the big demo window or not
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
+
+		if (showMtlWindow)
+			DisplayMtl();
+	}
+
+	void ControlWindow::DisplayMtl() {
+		ImGui::SetNextWindowPos(ImVec2(1000, 100));              // 設定位置 (x=1000, y=100)
+		ImGui::SetNextWindowSize(ImVec2(300, 200));             // 設定寬度 300、高度 200
+		ImGui::Begin("My Custom Window");
+		{
+			static std::vector<int> partsIndex;
+			partsIndex.resize(10, 0);
+			std::vector<std::string> Parts = { "body", "left_arm", "left_hand", "head","right_arm", "right_hand", "left_leg", "left_foot", "right_leg", "right_foot"};
+			std::vector<std::string> material = { "Matte", "Metal", "Dark" };
+
+			for (int i = 0; i < Parts.size(); ++i)
+			{
+				ImGui::Text("%s", Parts[i].c_str());
+				ImGui::SameLine(100);
+				ImGui::SetNextItemWidth(150);
+				std::string comboID = "##Material_" + Parts[i];
+
+				if (ImGui::BeginCombo(comboID.c_str(), material[partsIndex[i]].c_str()))
+				{
+					for (int n = 0; n < material.size(); n++)
+					{
+						const bool is_selected = (partsIndex[i] == n);
+						if (ImGui::Selectable(material[n].c_str(), is_selected))
+						{
+							partsIndex[i] = n;
+							std::cout << "Set Mtl " << partsIndex[i] << std::endl;
+							targetScene->SetMtl(i, material[n]);
+						}
+
+						if (is_selected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::End();
+		}
 	}
 }

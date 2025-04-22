@@ -11,9 +11,11 @@ namespace CG
 
 		auto Initialize() -> bool;
 		void Display();
+		void DisplayMtl();
 
 	private:
 		bool showDemoWindow;
+		bool showMtlWindow;
 
 	private:
 		MainScene* targetScene;
