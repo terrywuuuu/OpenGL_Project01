@@ -124,13 +124,13 @@ namespace CG
 
 			int vertexIDoffset = 0;//glVertexID's offset 
 			std::string mtlname;//material name
-			glm::vec3 Ks = glm::vec3(1, 1, 1);//because .mtl excluding specular , so give it here.
+			
 			for (int j = 0; j < mtls[i].size(); j++)
 			{
 				mtlname = mtls[i][j];
 				//find the material diffuse color in map:KDs by material name.
 				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
-				glUniform3fv(M_KsID, 1, &Ks[0]);
+				glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
 				//          (primitive   , glVertexID base , vertex count    )
 				if (instancedNum == 1) {
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
@@ -244,6 +244,39 @@ namespace CG
 		this->position[axis] = position;
 	}
 
+	void MainScene::SetMtl(int partsNum, std::string material)
+	{
+		std::string mtlname;//material name
+
+		if (material == "Matte") {
+			for (int i = 0; i < mtls[partsNum].size(); i++) {
+				mtlname = mtls[partsNum][i];
+				glm::vec3 ks = glm::vec3(0.1, 0.1, 0.1);
+				KSs[mtlname] = ks;
+				glm::vec3 kd = glm::vec3(0.8, 0.8, 0.8);
+				KDs[mtlname] = kd;
+			}
+		}
+		else if (material == "Metal") {
+			for (int i = 0; i < mtls[partsNum].size(); i++) {
+				mtlname = mtls[partsNum][i];
+				glm::vec3 ks = glm::vec3(2.0, 2.0, 2.0);
+				KSs[mtlname] = ks;
+				glm::vec3 kd = glm::vec3(0.8, 0.8, 0.8);
+				KDs[mtlname] = kd;
+			}
+		}
+		else if (material == "Dark") {
+			for (int i = 0; i < mtls[partsNum].size(); i++) {
+				mtlname = mtls[partsNum][i];
+				glm::vec3 ks = glm::vec3(0.1, 0.1, 0.1);
+				KSs[mtlname] = ks;
+				glm::vec3 kd = glm::vec3(0.6, 0.6, 0.6);
+				KDs[mtlname] = kd;
+			}
+		}
+	}
+
 	auto MainScene::LoadScene() -> bool
 	{
 		glEnable(GL_DEPTH_TEST);
@@ -313,7 +346,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };

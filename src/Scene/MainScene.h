@@ -40,6 +40,7 @@ namespace CG
 		void SetMode(int mode);
 		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
 		void SetPosition(int axis, float position);
+		void SetMtl(int partsNum, std::string material);
 
 	private:
 		auto LoadScene() -> bool;
