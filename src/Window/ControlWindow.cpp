@@ -27,7 +27,7 @@ namespace CG
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
 
             static int actionIndex = 0;
-            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance","T-pose"};
+            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT", "T-pose"};
             ImGui::Text("Action: ");
             ImGui::SameLine(100);
             ImGui::SetNextItemWidth(150);

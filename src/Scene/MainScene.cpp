@@ -483,6 +483,12 @@ namespace CG
 				HandleAction(frameData, _frame, dt);
 			}
 		}
+		else if (action == Action::apt) {
+			if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
+				end = frameData.size();
+				HandleAction(frameData, _frame, dt);
+			}
+		}
 		_frame += dt;
 		if (_frame > end)
 			_frame = 0;
