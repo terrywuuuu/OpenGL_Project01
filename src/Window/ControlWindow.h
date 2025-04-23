@@ -16,6 +16,7 @@ namespace CG
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
+		float speed = 1;
 
 	private:
 		MainScene* targetScene;

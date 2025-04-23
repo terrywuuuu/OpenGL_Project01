@@ -232,6 +232,11 @@ namespace CG
 		}
 	}
 
+	void MainScene::SetSpeed(float speed)
+	{
+		this->speed = speed;
+	}
+
 	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
 	{
 		alphas[bodyPart] = alpha;
@@ -440,6 +445,8 @@ namespace CG
 			isActionChange = false;
 			_frame = 0;
 		}
+
+		dt *= speed;
 
 		if (action == Action::idle)
 		{
