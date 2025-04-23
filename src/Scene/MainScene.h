@@ -32,7 +32,7 @@ namespace CG
 		void Render(float aspect);
 
 		void OnResize(int width, int height);
-		void OnKeyboard(int key, int action);
+		void OnKeyboard(int key);
 
 		void ResetAction();
 		void SetAction(int action);

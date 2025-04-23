@@ -67,12 +67,29 @@ namespace CG
 		glBindVertexArray(VAO);
 		glUseProgram(program);//uniform參數數值前必須先use shader
 
+
+		/*
 		float eyey = glm::radians(eyeAngley);
 		camera.LookAt(
 			glm::vec3(eyedistance * sin(eyey), 2, eyedistance * cos(eyey)), // Camera is at (0,0,20), in World Space
 			glm::vec3(0, 0, 0), // and looks at the origin
 			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
 		);
+		*/
+
+		float theta = glm::radians(eyeAngley); // 左右
+		float phi = glm::radians(angle);   // 上下
+
+		float camX = eyedistance * cos(phi) * sin(theta);
+		float camY = eyedistance * sin(phi);
+		float camZ = eyedistance * cos(phi) * cos(theta);
+
+		camera.LookAt(
+			glm::vec3(camX, camY, camZ),
+			glm::vec3(0, 0, 0),
+			glm::vec3(0, 1, 0)
+		);
+
 		camera.SetAspect(aspect);
 
 		//update data to UBO for MVP
@@ -168,39 +185,43 @@ namespace CG
 		camera.SetAspect(aspect);
 	}
 
-	void MainScene::OnKeyboard(int key, int action)
+	void MainScene::OnKeyboard(int key)
 	{
-		std::cout << "MainScene OnKeyboard: " << key << " " << action << std::endl;
-
-		// changed GLFW_RELEASE to GLFW_REPEAT for continuous key events when key is held down
-		if (action == GLFW_REPEAT || action == GLFW_RELEASE)
+		//0: key "a" press
+		//1: key "d" press
+		//2: key "w" press
+		//3: key "s" press
+		//4: Mouse wheel up
+		//5: Mouse wheel down
+		switch (key)
 		{
-			switch (key)
-			{
-			case GLFW_KEY_Q:
-				angle += 5;
-				if (angle >= 360) angle = 0;
-				printf("beta:%f\n", angle);
-				break;
-			case GLFW_KEY_E:
-				angle -= 5;
-				if (angle <= 0) angle = 360;
-				printf("beta:%f\n", angle);
-				break;
-			case GLFW_KEY_W:
-				eyedistance -= 0.5;
-				break;
-			case GLFW_KEY_S:
-				eyedistance += 0.5;
-				break;
-			case GLFW_KEY_A:
+			case 0:
 				eyeAngley -= 10;
 				break;
-			case GLFW_KEY_D:
+			case 1:
 				eyeAngley += 10;
 				break;
-			}
+			case 2:
+				angle += 3;
+				if (angle >= 90) angle = 89;
+				printf("beta:%f\n", angle);
+				break;
+			case 3:
+				angle -= 3;
+				if (angle <= -90) angle = -89;
+				printf("beta:%f\n", angle);
+				break;
+			case 4:
+				eyedistance -= 2.0;
+				break;
+
+			case 5:
+				eyedistance += 2.0;
+				break;
 		}
+		/*
+			
+		*/
 	}
 
 	void MainScene::SetAction(int action)

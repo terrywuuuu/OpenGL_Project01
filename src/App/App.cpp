@@ -83,6 +83,7 @@ namespace CG
 			}
 		);
 
+		/*
 		glfwSetKeyCallback(
 			mainWindow,
 			[](GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -92,6 +93,7 @@ namespace CG
 				mainScene->OnKeyboard(key, action);
 			}
 		);
+		*/
 
 		controlWindow = new ControlWindow();
 		controlWindow->Initialize();

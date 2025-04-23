@@ -20,6 +20,66 @@ namespace CG
 
 	void ControlWindow::Display()
 	{
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		static float lastPressTime = 0.0f;  // last keydown time
+		float triggerInterval = 0.05f;
+
+		//Key event A, D control eyes Angley
+		if (ImGui::IsKeyDown(ImGuiKey_A)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(0);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_D)) {
+
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(1);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		//Key event W, S control angle
+		if (ImGui::IsKeyDown(ImGuiKey_W)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(2);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_S)){
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(3);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		//Mouse wheel control eyes distance
+		if (io.MouseWheel != 0.0f)
+		{
+			if (io.MouseWheel > 0)
+				//Mouse wheel up
+				targetScene->OnKeyboard(4);
+			else
+				//Mouse wheel down
+				targetScene->OnKeyboard(5);
+		}
+
 		ImGui::Begin("Control");
 		{
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
