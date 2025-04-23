@@ -11,6 +11,7 @@ namespace CG
 	ControlWindow::ControlWindow()
 	{
 		showDemoWindow = false;
+		showMtlWindow = false;
 	}
 
 	auto ControlWindow::Initialize() -> bool
@@ -203,8 +204,6 @@ namespace CG
 	}
 
 	void ControlWindow::DisplayMtl() {
-		ImGui::SetNextWindowPos(ImVec2(1000, 100));              // 設定位置 (x=1000, y=100)
-		ImGui::SetNextWindowSize(ImVec2(300, 200));             // 設定寬度 300、高度 200
 		ImGui::Begin("My Custom Window");
 		{
 			static std::vector<int> partsIndex;
