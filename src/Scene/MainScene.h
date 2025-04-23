@@ -41,6 +41,7 @@ namespace CG
 		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
 		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
+		void SetSpeed(float speed);
 
 	private:
 		auto LoadScene() -> bool;
@@ -103,6 +104,9 @@ namespace CG
 		float position[3];
 		bool isActionChange;
 		
+		//control speed
+		float speed = 1;
+
 		// Six Action
 		void HandleAction(std::vector<JsonIO::FrameData>&,double, double);
 

@@ -50,6 +50,11 @@ namespace CG
 				ImGui::EndCombo();
 			}
 
+			if (ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.3f"))
+			{
+				targetScene->SetSpeed(speed);
+			}
+
 			static int modeIndex = 0;
 			std::vector<std::string> modes = { "Fill", "Line" };
 			ImGui::Text("Mode: ");
