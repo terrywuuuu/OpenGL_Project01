@@ -128,6 +128,7 @@ namespace CG
 			push_up,
 			multiple,
 			hopak_dance,
+			apt
 		};
 
 		enum Axis {
