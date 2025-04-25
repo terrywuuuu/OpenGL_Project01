@@ -141,7 +141,7 @@ namespace CG
 
 			int vertexIDoffset = 0;//glVertexID's offset 
 			std::string mtlname;//material name
-			
+
 			for (int j = 0; j < mtls[i].size(); j++)
 			{
 				mtlname = mtls[i][j];
@@ -195,33 +195,29 @@ namespace CG
 		//5: Mouse wheel down
 		switch (key)
 		{
-			case 0:
-				eyeAngley -= 10;
-				break;
-			case 1:
-				eyeAngley += 10;
-				break;
-			case 2:
-				angle += 3;
-				if (angle >= 90) angle = 89;
-				printf("beta:%f\n", angle);
-				break;
-			case 3:
-				angle -= 3;
-				if (angle <= -90) angle = -89;
-				printf("beta:%f\n", angle);
-				break;
-			case 4:
-				eyedistance -= 2.0;
-				break;
-
-			case 5:
-				eyedistance += 2.0;
-				break;
+		case 0:
+			eyeAngley -= 10;
+			break;
+		case 1:
+			eyeAngley += 10;
+			break;
+		case 2:
+			angle += 3;
+			if (angle >= 90) angle = 89;
+			printf("beta:%f\n", angle);
+			break;
+		case 3:
+			angle -= 3;
+			if (angle <= -90) angle = -89;
+			printf("beta:%f\n", angle);
+			break;
+		case 4:
+			eyedistance -= 2.0;
+			break;
+		case 5:
+			eyedistance += 2.0;
+			break;
 		}
-		/*
-			
-		*/
 	}
 
 	void MainScene::SetAction(int action)
@@ -344,6 +340,8 @@ namespace CG
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
 
+		LoadAction();
+
 		return true;
 	}
 
@@ -372,7 +370,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -456,70 +454,64 @@ namespace CG
 		normals_size[i] = normals.size();
 	}
 
+	void MainScene::LoadAction()
+	{
+		std::vector<JsonIO::FrameData> frameData;
+		if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
+			actionData.push_back(JsonIO::Action(frameData));
+		}
+	}
+
 	void MainScene::UpdateAction(double dt)
 	{
 		static double _frame = 0.0;
-		static short isMultiple = 0;
-		std::vector<JsonIO::FrameData> frameData;
-		int end = 0;
-		if (isActionChange) {
-			isActionChange = false;
-			_frame = 0;
-		}
+		const JsonIO::Action& act = actionData[action];
+		const size_t end = act.fd.size();
 
 		dt *= speed;
 
-		if (action == Action::idle)
+		if (isActionChange) {
+			isActionChange = false;
+			_frame = 0.0;
+		}
+		if (action == Action::multiple)
 		{
-			if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
+			if (_frame >= end - 1)
+				instancedNum = 100;
 		}
-		else if (action == Action::walk)
-		{
-			if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData))
-			{
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
+		else
+			instancedNum = 1;
+		if (instancedNum == 1) {
+			HandleAction(act.fd, _frame, dt);
 		}
-		else if (action == Action::sit_up) {
-			if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::push_up) {
-			if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::multiple) {
-			if (instancedNum == 1 && JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-			if (_frame >= end-1) {
-				instancedNum = 50;
-			}
-		}
-		else if (action == Action::hopak_dance) {
-			if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::apt) {
-			if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
+
 		_frame += dt;
-		if (_frame > end)
-			_frame = 0;
+		if (_frame > end) {
+			_frame = 0.0;
+		}
+	}
+
+	JsonIO::Action MainScene::GetActions(int action)
+	{
+		return actionData[action];
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -570,7 +562,7 @@ namespace CG
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
 	}
 
-	void MainScene::HandleAction(std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
+	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
 		JsonIO::FrameData curFD = frameDatas[frame], perFD;
 		if (frame == 0) {
 			for (int i = 0; i < 3; ++i) {
@@ -594,4 +586,6 @@ namespace CG
 			}
 		}
 	}
+
+
 }

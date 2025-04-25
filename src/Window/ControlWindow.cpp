@@ -1,7 +1,5 @@
 #include "ControlWindow.h"
 
-#include <imgui.h>
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -21,7 +19,6 @@ namespace CG
 
 	void ControlWindow::Display()
 	{
-
 		ImGuiIO& io = ImGui::GetIO();
 
 		static float lastPressTime = 0.0f;  // last keydown time
@@ -83,11 +80,14 @@ namespace CG
 
 		ImGui::Begin("Control");
 		{
+			//set control window size
+			ImGui::SetNextWindowSize(ImVec2(400, 600.0f));
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
+			ImGui::Checkbox("Edit Action", &showEditor);
 
             static int actionIndex = 0;
-            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT", "T-pose"};
+            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT"};
             ImGui::Text("Action: ");
             ImGui::SameLine(100);
             ImGui::SetNextItemWidth(150);
@@ -110,7 +110,7 @@ namespace CG
 				}
 				ImGui::EndCombo();
 			}
-
+			ImGui::SetNextItemWidth(150);
 			if (ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.3f"))
 			{
 				targetScene->SetSpeed(speed);
@@ -141,13 +141,62 @@ namespace CG
 				ImGui::EndCombo();
 			}
 		}
-		ImVec2 controlPos = ImGui::GetWindowPos();      // ��� Control ���f��m
-		ImVec2 controlSize = ImGui::GetWindowSize();    // ��� Control ���f�j�p
+		ImVec2 controlPos = ImGui::GetWindowPos();
+		ImVec2 controlSize = ImGui::GetWindowSize();
 		ImGui::End();
 
+		// Show the big demo window or not
+		if (showDemoWindow)
+			ImGui::ShowDemoWindow(&showDemoWindow);
+		if (showMtlWindow)
+			DisplayMtl();
+		if (showEditor)
+			DisplayEditor(controlPos,controlSize);
+	}
 
-		ImGui::SetNextWindowPos(ImVec2(controlPos.x, controlPos.y + controlSize.y + 10));
-		ImGui::SetNextWindowSize(ImVec2(controlSize.x, 600.0f), ImGuiCond_FirstUseEver);
+	void ControlWindow::DisplayMtl() {
+		ImGui::Begin("My Custom Window");
+		{
+			static std::vector<int> partsIndex;
+			partsIndex.resize(10, 0);
+			std::vector<std::string> Parts = { "body", "left_arm", "left_hand", "head","right_arm", "right_hand", "left_leg", "left_foot", "right_leg", "right_foot"};
+			std::vector<std::string> material = { "Matte", "Metal", "Dark" };
+
+			for (int i = 0; i < Parts.size(); ++i)
+			{
+				ImGui::Text("%s", Parts[i].c_str());
+				ImGui::SameLine(100);
+				ImGui::SetNextItemWidth(150);
+				std::string comboID = "##Material_" + Parts[i];
+
+				if (ImGui::BeginCombo(comboID.c_str(), material[partsIndex[i]].c_str()))
+				{
+					for (int n = 0; n < material.size(); n++)
+					{
+						const bool is_selected = (partsIndex[i] == n);
+						if (ImGui::Selectable(material[n].c_str(), is_selected))
+						{
+							partsIndex[i] = n;
+							std::cout << "Set Mtl " << partsIndex[i] << std::endl;
+							targetScene->SetMtl(i, material[n]);
+						}
+
+						if (is_selected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::End();
+		}
+	}
+
+	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize) {
+		ImGui::SetNextWindowPos(ImVec2(postPos.x, postPos.y + postSize.y + 10));
+		ImGui::SetNextWindowSize(ImVec2(postSize.x, 600.0f), ImGuiCond_FirstUseEver);
 		ImGui::Begin("Editor");
 		{
 			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
@@ -194,52 +243,5 @@ namespace CG
 			ImGui::EndChild();
 		}
 		ImGui::End();
-
-		// Show the big demo window or not
-		if (showDemoWindow)
-			ImGui::ShowDemoWindow(&showDemoWindow);
-
-		if (showMtlWindow)
-			DisplayMtl();
-	}
-
-	void ControlWindow::DisplayMtl() {
-		ImGui::Begin("My Custom Window");
-		{
-			static std::vector<int> partsIndex;
-			partsIndex.resize(10, 0);
-			std::vector<std::string> Parts = { "body", "left_arm", "left_hand", "head","right_arm", "right_hand", "left_leg", "left_foot", "right_leg", "right_foot"};
-			std::vector<std::string> material = { "Matte", "Metal", "Dark" };
-
-			for (int i = 0; i < Parts.size(); ++i)
-			{
-				ImGui::Text("%s", Parts[i].c_str());
-				ImGui::SameLine(100);
-				ImGui::SetNextItemWidth(150);
-				std::string comboID = "##Material_" + Parts[i];
-
-				if (ImGui::BeginCombo(comboID.c_str(), material[partsIndex[i]].c_str()))
-				{
-					for (int n = 0; n < material.size(); n++)
-					{
-						const bool is_selected = (partsIndex[i] == n);
-						if (ImGui::Selectable(material[n].c_str(), is_selected))
-						{
-							partsIndex[i] = n;
-							std::cout << "Set Mtl " << partsIndex[i] << std::endl;
-							targetScene->SetMtl(i, material[n]);
-						}
-
-						if (is_selected)
-						{
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-					ImGui::EndCombo();
-				}
-			}
-
-			ImGui::End();
-		}
 	}
 }

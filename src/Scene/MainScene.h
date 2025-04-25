@@ -34,7 +34,6 @@ namespace CG
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
 
-		void ResetAction();
 		void SetAction(int action);
 
 		void SetMode(int mode);
@@ -43,16 +42,21 @@ namespace CG
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
 
+		JsonIO::Action GetActions(int action);
+
 	private:
 		auto LoadScene() -> bool;
 
 		void LoadModel();
 		void Load2Buffer(const char* obj, int i);
+		void LoadAction();
 
 		void UpdateAction(double dt);
 		void UpdateModel();
 		glm::mat4 bodyRotateMatrix(int body);
-		
+
+
+		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
 	private:
 		Camera camera;
 
@@ -67,7 +71,7 @@ namespace CG
 		std::array<GLuint, PARTSNUM> nVBOs;
 		GLuint program;
 
-		int action = -1; // idle
+		int action = 0; // idle
 		GLenum mode = 0; // fill
 
 		float eyeX = 0.0;
@@ -103,12 +107,10 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isActionChange;
+		std::vector<JsonIO::Action> actionData;
 		
 		//control speed
 		float speed = 1;
-
-		// Six Action
-		void HandleAction(std::vector<JsonIO::FrameData>&,double, double);
 
 		enum Body
 		{
