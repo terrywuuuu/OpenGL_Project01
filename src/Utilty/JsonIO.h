@@ -6,8 +6,7 @@ class JsonIO {
 public:
 	struct partRotation { float alpha, beta, gamma; };
 	struct FrameData {
-		int frame;
-		double speed;
+		float frame;
 		bool isKeyFrame;
 		float position[3];            // x, y, z
 		partRotation partRotations[10];
@@ -20,8 +19,10 @@ public:
 	};
 	struct Action
 	{
-		std::vector<FrameData> fd;
-		Action(std::vector<FrameData> fd) : fd(fd) {}
+		float speed;
+		std::vector<FrameData> FDs;
+		Action():FDs(),speed(){}
+		Action(std::vector<FrameData> fd) : FDs(fd) {}
 	};
 
 	// Load frames from JSON file

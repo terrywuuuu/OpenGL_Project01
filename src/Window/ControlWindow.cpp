@@ -19,89 +19,30 @@ namespace CG
 
 	void ControlWindow::Display()
 	{
-		ImGuiIO& io = ImGui::GetIO();
-
-		static float lastPressTime = 0.0f;  // last keydown time
-		float triggerInterval = 0.05f;
-
-		//Key event A, D control eyes Angley
-		if (ImGui::IsKeyDown(ImGuiKey_A)) {
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(0);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		if (ImGui::IsKeyDown(ImGuiKey_D)) {
-
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(1);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		//Key event W, S control angle
-		if (ImGui::IsKeyDown(ImGuiKey_W)) {
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(2);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		if (ImGui::IsKeyDown(ImGuiKey_S)){
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(3);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		//Mouse wheel control eyes distance
-		if (io.MouseWheel != 0.0f)
-		{
-			if (io.MouseWheel > 0)
-				//Mouse wheel up
-				targetScene->OnKeyboard(4);
-			else
-				//Mouse wheel down
-				targetScene->OnKeyboard(5);
-		}
-
+		static int _actionIndex = 0;
 		ImGui::Begin("Control");
 		{
-			//set control window size
-			ImGui::SetNextWindowSize(ImVec2(400, 600.0f));
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
-			ImGui::Checkbox("Edit Action", &showEditor);
+			ImGui::Checkbox("Edit Action", &isEdit);
 
-            static int actionIndex = 0;
-            std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT"};
-            ImGui::Text("Action: ");
-            ImGui::SameLine(100);
-            ImGui::SetNextItemWidth(150);
-            if (ImGui::BeginCombo("##Action", actions[actionIndex].c_str()))
-            {
-                for (int n = 0; n < actions.size(); n++)
-                {
-                    const bool is_selected = (actionIndex == n);
-                    if (ImGui::Selectable(actions[n].c_str(), is_selected))
-                    {
-                        actionIndex = n;
-                        std::cout << "Set Action " << actionIndex << std::endl;
-                        targetScene->SetAction(n);
-                    }
+			//todo get action data from MainScene
+			std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT" };
+			ImGui::Text("Action: ");
+			ImGui::SameLine(100);
+			ImGui::SameLine(100);
+			ImGui::SetNextItemWidth(150);
+			if (ImGui::BeginCombo("##Action", actions[_actionIndex].c_str()))
+			{
+				for (int n = 0; n < actions.size(); n++)
+				{
+					const bool is_selected = (_actionIndex == n);
+					if (ImGui::Selectable(actions[n].c_str(), is_selected))
+					{
+						_actionIndex = n;
+						std::cout << "Set Action " << _actionIndex << std::endl;
+						targetScene->SetAction(n);
+					}
 
 					if (is_selected)
 					{
@@ -150,8 +91,71 @@ namespace CG
 			ImGui::ShowDemoWindow(&showDemoWindow);
 		if (showMtlWindow)
 			DisplayMtl();
-		if (showEditor)
-			DisplayEditor(controlPos,controlSize);
+		//if (isEdit)
+		DisplayEditor(controlPos, controlSize, _actionIndex, isEdit);
+		targetScene->SetEdit(isEdit, 0);
+
+		targetScene->SetEdit(isEdit, 0);
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		static float lastPressTime = 0.0f;  // last keydown time
+		float triggerInterval = 0.05f;
+
+		//run other window first to avoid input conflict
+		//Key event A, D control eyes Angley
+		if (ImGui::IsKeyDown(ImGuiKey_A)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(0);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_D)) {
+
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(1);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		//Key event W, S control angle
+		if (ImGui::IsKeyDown(ImGuiKey_W)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(2);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_S)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(3);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		//Mouse wheel control eyes distance
+		if (io.MouseWheel != 0.0f)
+		{
+			if (io.MouseWheel > 0)
+				//Mouse wheel up
+				targetScene->OnKeyboard(4);
+			else
+				//Mouse wheel down
+				targetScene->OnKeyboard(5);
+		}
 	}
 
 	void ControlWindow::DisplayMtl() {
@@ -159,7 +163,7 @@ namespace CG
 		{
 			static std::vector<int> partsIndex;
 			partsIndex.resize(10, 0);
-			std::vector<std::string> Parts = { "body", "left_arm", "left_hand", "head","right_arm", "right_hand", "left_leg", "left_foot", "right_leg", "right_foot"};
+			std::vector<std::string> Parts = { "body", "left_arm", "left_hand", "head","right_arm", "right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
 			std::vector<std::string> material = { "Matte", "Metal", "Dark" };
 
 			for (int i = 0; i < Parts.size(); ++i)
@@ -194,26 +198,70 @@ namespace CG
 		}
 	}
 
-	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize) {
+	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, bool isEdit) {
 		ImGui::SetNextWindowPos(ImVec2(postPos.x, postPos.y + postSize.y + 10));
-		ImGui::SetNextWindowSize(ImVec2(postSize.x, 600.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(postSize.x, 400));
 		ImGui::Begin("Editor");
 		{
-			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+			//handle mouse wheel event
+			ImGuiIO& io = ImGui::GetIO();
+			// is mouse hover over editor window
+			bool editorHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+			if (editorHovered && io.MouseWheel != 0.0f) {
+				// remove this mouse wheel event to prevent the main window receive it
+				io.MouseWheel = 0.0f;
+			}
 
+			static float curFrame = 0.0f;
+			static bool isChangeFD = false;
+			static bool isSave = false;
 			static float alphas[10] = { 0 }, betas[10] = { 0 }, gammas[10] = { 0 }, position[3] = { 0 };
 			const char* bodyParts[10] = { "body", "left_arm", "left_hand", "head", "right_arm",
 									   "right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
 			const char* axes[3] = { "X", "Y", "Z" };
+			JsonIO::FrameData curFD = targetScene->GetFrameData(), nextFD = curFD;
 
+			//get model position and rotation
 			for (int i = 0; i < 3; i++) {
-				if (ImGui::InputFloat(axes[i], &position[i], 0.1f, 2.0f, "%.1f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+				position[i] = curFD.position[i];
+			}
+			for (int i = 0; i < PARTSNUM; i++)
+			{
+				alphas[i] = curFD.partRotations[i].alpha;
+				betas[i] = curFD.partRotations[i].beta;
+				gammas[i] = curFD.partRotations[i].gamma;
+			}
+
+			ImGuiInputTextFlags flag = ImGuiInputTextFlags_EnterReturnsTrue
+				| (isEdit ? 0 : ImGuiInputTextFlags_ReadOnly);
+
+			//draw editor window
+			//total frames todo add a button to add keyframe
+			ImGui::Checkbox("Save Current Frame", &isSave);
+			if (ImGui::InputFloat("frames", &curFrame, 1.0f, 1.0f, "%.01f", flag)) {
+				if (curFrame >= actionData.FDs.size())
+					curFrame = actionData.FDs.size() - 1;
+				if (curFrame < 0.0f)
+					curFrame = 0.0f;
+				targetScene->SetFrame((int)curFrame);
+			}
+
+			//set action data after change curFrame
+			actionData = targetScene->GetAction();
+			curFD = targetScene->GetFrameData();
+			curFrame = curFD.frame;
+
+			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+			//set modle position
+			for (int i = 0; i < 3; i++) {
+				if (ImGui::InputFloat(axes[i], &position[i], 0.1f, 2.0f, "%.1f", flag)) {
 					position[i] = (position[i] < -180.0f) ? -180.0f : (position[i] > 180.0f) ? 180.0f : position[i];
 					targetScene->SetPosition(i, position[i]);
+					curFD.position[i] = position[i];
 					std::cout << "Set position " << axes[i] << ": " << position[i] << "\n";
 				}
 			}
-
+			//set modle parts rotation
 			for (int i = 0; i < 10; i++) if (ImGui::TreeNode(bodyParts[i])) {
 				bool changed = false;
 
@@ -235,10 +283,16 @@ namespace CG
 
 				if (changed) {
 					targetScene->SetRotate(i, alphas[i], betas[i], gammas[i]);
+					curFD.partRotations[i].alpha = alphas[i];
 					std::cout << "Set rotation " << bodyParts[i] << ": Alpha=" << alphas[i]
 						<< ", Beta=" << betas[i] << ", Gamma=" << gammas[i] << "\n";
 				}
 				ImGui::TreePop();
+			}
+			if(isEdit)
+				targetScene->SetFrameData(curFD, (int)curFrame);
+			if (isSave) {
+
 			}
 			ImGui::EndChild();
 		}

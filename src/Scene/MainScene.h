@@ -41,8 +41,15 @@ namespace CG
 		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
+		void SetEdit(bool isEdit,int mode);
+		void SetFrame(int frame);
+		
+		void SetActionData(JsonIO::Action actionData, int actionIndex);
+		void SetFrameData(JsonIO::FrameData frameData, int frame);
 
-		JsonIO::Action GetActions(int action);
+		JsonIO::FrameData GetFrameData();
+		JsonIO::Action GetAction();
+		double GetFrame() { return frame; }
 
 	private:
 		auto LoadScene() -> bool;
@@ -107,10 +114,12 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isActionChange;
-		std::vector<JsonIO::Action> actionData;
+		bool isEdit = false;
+		std::vector<JsonIO::Action> actionDatas;
 		
 		//control speed
 		float speed = 1;
+		double frame;
 
 		enum Body
 		{
