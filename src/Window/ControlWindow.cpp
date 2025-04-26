@@ -89,7 +89,6 @@ namespace CG
 		{
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
-			ImGui::Checkbox("Edit Action", &isEdit);
 
 			//todo get action data from MainScene
 			std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT" };
@@ -107,7 +106,6 @@ namespace CG
 						_actionIndex = n;
 						std::cout << "Set Action " << _actionIndex << std::endl;
 						targetScene->SetAction(n);
-						actionData = targetScene->GetAction();
 					}
 
 					if (is_selected)
@@ -152,14 +150,13 @@ namespace CG
 		ImVec2 controlSize = ImGui::GetWindowSize();
 		ImGui::End();
 
+		actionData = targetScene->GetAction();
 		// Show the big demo window or not
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
 		if (showMtlWindow)
 			DisplayMtl();
-		//if (isEdit)
-		DisplayEditor(controlPos, controlSize, _actionIndex, isEdit, actionData);
-		targetScene->SetEdit(isEdit, 0);
+		DisplayEditor(controlPos, controlSize, _actionIndex, actionData);
 		HandleInput();
 	}
 
@@ -203,7 +200,7 @@ namespace CG
 		}
 	}
 
-	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, bool isEdit,JsonIO::Action actionData) {
+	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, JsonIO::Action actionData) {
 		ImGui::SetNextWindowPos(ImVec2(postPos.x, postPos.y + postSize.y + 10));
 		ImGui::SetNextWindowSize(ImVec2(postSize.x, 400));
 		ImGui::Begin("Editor");
@@ -216,8 +213,8 @@ namespace CG
 			}
 
 			static float curFrame = 0.0f;
-			static bool isChangeFD = false;
 			static bool isSave = false;
+			static bool isEdit = false;
 			static float alphas[10] = { 0 }, betas[10] = { 0 }, gammas[10] = { 0 }, position[3] = { 0 };
 			const char* bodyParts[10] = { "body", "left_arm", "left_hand", "head", "right_arm",
 									   "right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
@@ -231,29 +228,29 @@ namespace CG
 			for (int i = 0; i < 3; i++) {
 				position[i] = curFD.position[i];
 			}
-			for (int i = 0; i < PARTSNUM-1; i++)
+			for (int i = 0; i < PARTSNUM - 1; i++)
 			{
 				alphas[i] = curFD.partRotations[i].alpha;
 				betas[i] = curFD.partRotations[i].beta;
 				gammas[i] = curFD.partRotations[i].gamma;
 			}
 
-			ImGuiInputTextFlags flag = ImGuiInputTextFlags_EnterReturnsTrue
-				| (isEdit ? 0 : ImGuiInputTextFlags_ReadOnly);
+			ImGuiInputTextFlags flag = (isEdit ? 0 : ImGuiInputTextFlags_ReadOnly);
 
 			//draw editor window
-			//total frames todo add a button to add keyframe
-			ImGui::SliderFloat("Timeline", &curFrame, 0.0f, actionData.FDs.size() - 1, "Frame: %.1f");
-			if (ImGui::Button("Add Keyframe")) {
-				// copy current frame data to a new frame
-				actionData.FDs.push_back(curFD);
-				actionData.FDs.back().frame = actionData.FDs.size() - 1;
+			if (ImGui::Checkbox("Edit Action", &isEdit)) {// when state change
+				targetScene->SetEdit(isEdit, 0);
 			}
-			ImGui::Checkbox("Save Current Frame", &isSave);
-
-			//set action data after change curFrame
-			actionData = targetScene->GetAction();
-			
+			float maxFrame = (actionData.FDs.empty()) ? 0.0f : (actionData.FDs.size() - 1.0f);
+			ImGui::SliderFloat("Timeline", &curFrame, 0.0f, maxFrame, "Frame: %.1f", flag);
+			if (isEdit)
+				targetScene->SetFrame((int)curFrame);
+			if (isEdit && ImGui::Button("Add Keyframe")) {
+				targetScene->SetFrameData(curFD, curFrame, 1);
+			}
+			if (isEdit && ImGui::Button("Save")) {
+				targetScene->SetFrameData(curFD, (int)curFrame, 0);
+			}
 
 			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 			//set modle position
@@ -292,12 +289,7 @@ namespace CG
 				}
 				ImGui::TreePop();
 			}
-			if(isEdit)
-				//targetScene->SetFrameData(curFD, (int)curFrame);
-			if (isSave) {
-				isSave = false;
-				targetScene->SetFrameData(curFD, (int)curFrame);
-			}
+
 			ImGui::EndChild();
 		}
 		ImGui::End();

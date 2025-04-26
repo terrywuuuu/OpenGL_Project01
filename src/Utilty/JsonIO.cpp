@@ -13,7 +13,7 @@ static const char* bodyNames[10] = {
             "right_leg","right_foot"
 };
 
-bool JsonIO::LoadFrames(const std::string& filename, std::vector<FrameData>& out) {
+bool JsonIO::LoadFrames(const std::string& filename, Action& out) {
     std::ifstream ifs(filename);
     json j;
     if (!ifs.is_open()) {
@@ -29,28 +29,34 @@ bool JsonIO::LoadFrames(const std::string& filename, std::vector<FrameData>& out
         std::cerr << "JsonIO::LoadFrames: JSON parse error\n";
         return false;
     }
-    out.clear();
+
+    // Clear the existing action data
+    out.FDs.clear();
+
     for (auto& frameJson : j) {
         FrameData ofd;
         ofd.frame = frameJson.at("frame").get<int>();
-		ofd.position[0] = frameJson["position"].at("x").get<float>();
-		ofd.position[1] = frameJson["position"].at("y").get<float>();
-		ofd.position[2] = frameJson["position"].at("z").get<float>();
+        ofd.position[0] = frameJson["position"].at("x").get<float>();
+        ofd.position[1] = frameJson["position"].at("y").get<float>();
+        ofd.position[2] = frameJson["position"].at("z").get<float>();
 
-		for (int i = 0; i < 10; ++i) {
-			auto& jn = frameJson[bodyNames[i]];
-			ofd.partRotations[i].alpha = jn.at("alpha").get<float>();
-			ofd.partRotations[i].beta = jn.at("beta").get<float>();
-			ofd.partRotations[i].gamma = jn.at("gamma").get<float>();
-		}
-        out.push_back(ofd);
+        for (int i = 0; i < 10; ++i) {
+            auto& jn = frameJson[bodyNames[i]];
+            ofd.partRotations[i].alpha = jn.at("alpha").get<float>();
+            ofd.partRotations[i].beta = jn.at("beta").get<float>();
+            ofd.partRotations[i].gamma = jn.at("gamma").get<float>();
+        }
+
+        out.FDs.push_back(ofd);  // Push the FrameData to Action's FDs
     }
+
     return true;
 }
 
-bool JsonIO::SaveFrames(const std::string& filename, const std::vector<FrameData>& fd) {
+bool JsonIO::SaveFrames(const std::string& filename, const Action& action) {
     json j = json::array();
-    for (auto& f : fd) {
+
+    for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;
         frameJson["frame"] = f.frame;
         frameJson["position"] = {
@@ -67,6 +73,12 @@ bool JsonIO::SaveFrames(const std::string& filename, const std::vector<FrameData
                 {"gamma", pr.gamma}
             };
         }
+
+		std::cout << "frame: " << f.frame << "\n";
+		std::cout << "position: " << f.position[0] << "," << f.position[1] << "," << f.position[2] << "\n";
+		for (int i = 0; i < 10; ++i) {
+			std::cout << bodyNames[i] << ": " << f.partRotations[i].alpha << "," << f.partRotations[i].beta << "," << f.partRotations[i].gamma << "\n";
+		}
 
         j.push_back(frameJson);
     }

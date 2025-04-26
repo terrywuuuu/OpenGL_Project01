@@ -41,11 +41,12 @@ namespace CG
 		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
+
 		void SetEdit(bool isEdit,int mode);
-		//void SetFrame(int frame);
+		void SetFrame(int frame);
 		
 		//void SaveAction();
-		void SetFrameData(JsonIO::FrameData frameData, int frame);
+		void SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD);
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
@@ -77,7 +78,7 @@ namespace CG
 		std::array<GLuint, PARTSNUM> nVBOs;
 		GLuint program;
 
-		int action = 0; // idle
+		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
 
 		float eyeX = 0.0;

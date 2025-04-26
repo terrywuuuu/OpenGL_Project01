@@ -222,7 +222,7 @@ namespace CG
 	void MainScene::SetAction(int action)
 	{
 		curAction = actionDatas[action];
-		this->action = action;
+		this->actionIndex = action;
 		instancedNum = 1;
 		frame = 0;
 	}
@@ -300,16 +300,23 @@ namespace CG
 
 		}
 		else {// new action
-			actionDatas.push_back(JsonIO::Action());
+
 		}
 	}
 
-	//void MainScene::SetFrame(int frame) {
-	//	this->frame = frame;
-	//}
+	void MainScene::SetFrame(int frame) {
+		this->frame = frame;
+	}
 
-	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame)
+	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD=0)
 	{
+		if (isNewFD) {
+			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
+		}
+		else {
+			actionDatas[actionIndex] = curAction;
+			JsonIO::SaveFrames("../../res/actions/action.json", actionDatas[actionIndex]);
+		}
 		this->frame = frame;
 		curAction.FDs[frame] = frameData;
 	}
@@ -318,11 +325,6 @@ namespace CG
 	{
 		return curAction;
 	}
-
-	//void MainScene::SaveAction()
-	//{
-	//	actionDatas[action] = curAction;
-	//}
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
@@ -496,27 +498,27 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		std::vector<JsonIO::FrameData> frameData;
-		if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		JsonIO::Action actionData;
+		if (JsonIO::LoadFrames("../../res/actions/idle.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/walk.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/push_up.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/multiple.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
-		if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
-			actionDatas.push_back(JsonIO::Action(frameData));
+		if (JsonIO::LoadFrames("../../res/actions/apt.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
 		}
 		SetAction(Action::idle);
 	}
@@ -531,7 +533,7 @@ namespace CG
 		if (isActionChange) {
 			isActionChange = false;
 		}
-		if (action == Action::multiple)
+		if (actionIndex == Action::multiple)
 		{
 			if (frame >= end - 1)
 				instancedNum = 100;

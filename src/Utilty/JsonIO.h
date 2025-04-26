@@ -29,8 +29,8 @@ public:
 	};
 
 	// Load frames from JSON file
-	static bool LoadFrames(const std::string& filename, std::vector<FrameData>& out);
+	static bool LoadFrames(const std::string& filename, Action& out);
 
 	// Save frames to JSON file
-	static bool SaveFrames(const std::string& filename, const std::vector<FrameData>& frames);
+	static bool SaveFrames(const std::string& filename, const Action& ad);
 };

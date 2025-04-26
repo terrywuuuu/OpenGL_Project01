@@ -13,7 +13,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Display();
 		void DisplayMtl();
-		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, bool isEdit, JsonIO::Action actionData);
+		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, JsonIO::Action actionData);
 		void SetActionData();
 		void HandleInput();
 
