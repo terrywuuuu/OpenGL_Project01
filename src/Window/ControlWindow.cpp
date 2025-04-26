@@ -210,11 +210,11 @@ namespace CG
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			bool editorHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
-
 			// Disable the mouse wheel input when the editor is hovered
 			if (editorHovered) {
 				io.MouseWheel = 0.0f;
 			}
+
 			static float curFrame = 0.0f;
 			static bool isChangeFD = false;
 			static bool isSave = false;
@@ -225,13 +225,13 @@ namespace CG
 			JsonIO::FrameData curFD, nextFD;
 
 			curFD = targetScene->GetFrameData();
-			curFrame = curFD.frame;
+			curFrame = (int)curFD.frame;
 
 			//get model position and rotation
 			for (int i = 0; i < 3; i++) {
 				position[i] = curFD.position[i];
 			}
-			for (int i = 0; i < PARTSNUM; i++)
+			for (int i = 0; i < PARTSNUM-1; i++)
 			{
 				alphas[i] = curFD.partRotations[i].alpha;
 				betas[i] = curFD.partRotations[i].beta;
@@ -253,8 +253,7 @@ namespace CG
 
 			//set action data after change curFrame
 			actionData = targetScene->GetAction();
-			curFD = targetScene->GetFrameData();
-			curFrame = curFD.frame;
+			
 
 			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 			//set modle position
@@ -262,7 +261,6 @@ namespace CG
 				if (ImGui::InputFloat(axes[i], &position[i], 0.1f, 2.0f, "%.1f", flag)) {
 					position[i] = (position[i] < -180.0f) ? -180.0f : (position[i] > 180.0f) ? 180.0f : position[i];
 					targetScene->SetPosition(i, position[i]);
-					curFD.position[i] = position[i];
 					std::cout << "Set position " << axes[i] << ": " << position[i] << "\n";
 				}
 			}
@@ -295,12 +293,10 @@ namespace CG
 				ImGui::TreePop();
 			}
 			if(isEdit)
-				targetScene->SetFrameData(curFD, (int)curFrame);
+				//targetScene->SetFrameData(curFD, (int)curFrame);
 			if (isSave) {
-				targetScene->SetActionData(actionData, actionIndex);
-				JsonIO::SaveFrames("../../res/actions/edited_action.json", actionData.FDs);
 				isSave = false;
-				ImGui::OpenPopup("Saved!"); // 顯示保存成功提示
+				targetScene->SetFrameData(curFD, (int)curFrame);
 			}
 			ImGui::EndChild();
 		}

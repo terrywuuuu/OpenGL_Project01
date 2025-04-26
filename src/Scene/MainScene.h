@@ -42,9 +42,9 @@ namespace CG
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
 		void SetEdit(bool isEdit,int mode);
-		void SetFrame(int frame);
+		//void SetFrame(int frame);
 		
-		void SetActionData(JsonIO::Action actionData, int actionIndex);
+		//void SaveAction();
 		void SetFrameData(JsonIO::FrameData frameData, int frame);
 
 		JsonIO::FrameData GetFrameData();

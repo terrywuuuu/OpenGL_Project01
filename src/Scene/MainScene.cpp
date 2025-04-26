@@ -221,6 +221,7 @@ namespace CG
 
 	void MainScene::SetAction(int action)
 	{
+		curAction = actionDatas[action];
 		this->action = action;
 		instancedNum = 1;
 		frame = 0;
@@ -249,15 +250,15 @@ namespace CG
 
 	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
 	{
-		alphas[bodyPart] = alpha;
-		betas[bodyPart] = beta;
-		gammas[bodyPart] = gamma;
+		curAction.FDs[frame].partRotations[bodyPart].alpha = alpha;
+		curAction.FDs[frame].partRotations[bodyPart].beta = beta;
+		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
 	}
 
 	//todo delete this func
 	void MainScene::SetPosition(int axis, float position)
 	{
-		this->position[axis] = position;
+		curAction.FDs[frame].position[axis] = position;
 	}
 
 	void MainScene::SetMtl(int partsNum, std::string material)
@@ -303,27 +304,38 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetFrame(int frame) {
+	//void MainScene::SetFrame(int frame) {
+	//	this->frame = frame;
+	//}
+
+	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame)
+	{
 		this->frame = frame;
+		curAction.FDs[frame] = frameData;
 	}
 
 	JsonIO::Action MainScene::GetAction()
 	{
-		return actionDatas[action];
+		return curAction;
 	}
+
+	//void MainScene::SaveAction()
+	//{
+	//	actionDatas[action] = curAction;
+	//}
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
 		JsonIO::FrameData fd;
 		fd.frame = frame;
-		fd.isKeyFrame = actionDatas[action].FDs[frame].isKeyFrame;
+		fd.isKeyFrame = curAction.FDs[frame].isKeyFrame;
 		for (int i = 0; i < 3; ++i) {
-			fd.position[i] = actionDatas[action].FDs[frame].position[i];
+			fd.position[i] = curAction.FDs[frame].position[i];
 		}
 		for (int i = 0; i < PARTSNUM-1/*without tree*/ ; i++) {
-			fd.partRotations[i].alpha = actionDatas[action].FDs[frame].partRotations[i].alpha;
-			fd.partRotations[i].beta = actionDatas[action].FDs[frame].partRotations[i].beta;
-			fd.partRotations[i].gamma = actionDatas[action].FDs[frame].partRotations[i].gamma;
+			fd.partRotations[i].alpha = curAction.FDs[frame].partRotations[i].alpha;
+			fd.partRotations[i].beta = curAction.FDs[frame].partRotations[i].beta;
+			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
 		}
 		return fd;
 	}
@@ -506,11 +518,12 @@ namespace CG
 		if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
 			actionDatas.push_back(JsonIO::Action(frameData));
 		}
+		SetAction(Action::idle);
 	}
 
 	void MainScene::UpdateAction(double dt)
 	{
-		const JsonIO::Action& act = actionDatas[action];
+		const JsonIO::Action& act = curAction;
 		const size_t end = act.FDs.size();
 
 		dt *= isEdit ? 0.0 : speed;//todo act.speed
@@ -533,14 +546,6 @@ namespace CG
 		if (frame > end) {
 			frame = 0.0;
 		}
-	}
-
-	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame) {
-		this->actionDatas[action].FDs[frame] = frameData;
-	}
-
-	void MainScene::SetActionData(JsonIO::Action actionData, int actionIndex) {
-		this->actionDatas[actionIndex] = actionData;
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
