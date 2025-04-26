@@ -48,7 +48,6 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
-		isActionChange = true;
 		return LoadScene();
 	}
 
@@ -141,7 +140,7 @@ namespace CG
 
 			int vertexIDoffset = 0;//glVertexID's offset 
 			std::string mtlname;//material name
-			
+
 			for (int j = 0; j < mtls[i].size(); j++)
 			{
 				mtlname = mtls[i][j];
@@ -195,46 +194,37 @@ namespace CG
 		//5: Mouse wheel down
 		switch (key)
 		{
-			case 0:
-				eyeAngley -= 10;
-				break;
-			case 1:
-				eyeAngley += 10;
-				break;
-			case 2:
-				angle += 3;
-				if (angle >= 90) angle = 89;
-				printf("beta:%f\n", angle);
-				break;
-			case 3:
-				angle -= 3;
-				if (angle <= -90) angle = -89;
-				printf("beta:%f\n", angle);
-				break;
-			case 4:
-				eyedistance -= 2.0;
-				break;
-
-			case 5:
-				eyedistance += 2.0;
-				break;
+		case 0:
+			eyeAngley -= 10;
+			break;
+		case 1:
+			eyeAngley += 10;
+			break;
+		case 2:
+			angle += 3;
+			if (angle >= 90) angle = 89;
+			printf("beta:%f\n", angle);
+			break;
+		case 3:
+			angle -= 3;
+			if (angle <= -90) angle = -89;
+			printf("beta:%f\n", angle);
+			break;
+		case 4:
+			eyedistance -= 2.0;
+			break;
+		case 5:
+			eyedistance += 2.0;
+			break;
 		}
-		/*
-			
-		*/
 	}
 
 	void MainScene::SetAction(int action)
 	{
-		this->action = action;
-		isActionChange = true;
+		curAction = actionDatas[action];
+		this->actionIndex = action;
 		instancedNum = 1;
-		for (int i = 0; i < PARTSNUM; i++) //reset model pos
-		{
-			alphas[i] = 0.0f;
-			betas[i] = 0.0f;
-			gammas[i] = 0.0f;
-		}
+		frame = 0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -260,14 +250,15 @@ namespace CG
 
 	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
 	{
-		alphas[bodyPart] = alpha;
-		betas[bodyPart] = beta;
-		gammas[bodyPart] = gamma;
+		curAction.FDs[frame].partRotations[bodyPart].alpha = alpha;
+		curAction.FDs[frame].partRotations[bodyPart].beta = beta;
+		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
 	}
 
+	//todo delete this func
 	void MainScene::SetPosition(int axis, float position)
 	{
-		this->position[axis] = position;
+		curAction.FDs[frame].position[axis] = position;
 	}
 
 	void MainScene::SetMtl(int partsNum, std::string material)
@@ -301,6 +292,54 @@ namespace CG
 				KDs[mtlname] = kd;
 			}
 		}
+	}
+
+	void MainScene::SetEdit(bool isEdit,int mode) {
+		this->isEdit = isEdit;
+		if (mode == 0) {//edit cur action
+
+		}
+		else {// new action
+
+		}
+	}
+
+	void MainScene::SetFrame(int frame) {
+		this->frame = frame;
+	}
+
+	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD=0)
+	{
+		if (isNewFD) {
+			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
+		}
+		else {
+			actionDatas[actionIndex] = curAction;
+			JsonIO::SaveFrames("../../res/actions/action.json", actionDatas[actionIndex]);
+		}
+		this->frame = frame;
+		curAction.FDs[frame] = frameData;
+	}
+
+	JsonIO::Action MainScene::GetAction()
+	{
+		return curAction;
+	}
+
+	JsonIO::FrameData MainScene::GetFrameData()
+	{
+		JsonIO::FrameData fd;
+		fd.frame = frame;
+		fd.isKeyFrame = curAction.FDs[frame].isKeyFrame;
+		for (int i = 0; i < 3; ++i) {
+			fd.position[i] = curAction.FDs[frame].position[i];
+		}
+		for (int i = 0; i < PARTSNUM-1/*without tree*/ ; i++) {
+			fd.partRotations[i].alpha = curAction.FDs[frame].partRotations[i].alpha;
+			fd.partRotations[i].beta = curAction.FDs[frame].partRotations[i].beta;
+			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
+		}
+		return fd;
 	}
 
 	auto MainScene::LoadScene() -> bool
@@ -344,6 +383,8 @@ namespace CG
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
 
+		LoadAction();
+
 		return true;
 	}
 
@@ -372,7 +413,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -429,7 +470,6 @@ namespace CG
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
 
-
 	void MainScene::Load2Buffer(const char* obj, int i)
 	{
 		std::vector<glm::vec3> vertices;
@@ -456,70 +496,58 @@ namespace CG
 		normals_size[i] = normals.size();
 	}
 
+	void MainScene::LoadAction()
+	{
+		JsonIO::Action actionData;
+		if (JsonIO::LoadFrames("../../res/actions/idle.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/walk.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/push_up.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/multiple.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		if (JsonIO::LoadFrames("../../res/actions/apt.json", actionData)) {
+			actionDatas.push_back(JsonIO::Action(actionData));
+		}
+		SetAction(Action::idle);
+	}
+
 	void MainScene::UpdateAction(double dt)
 	{
-		static double _frame = 0.0;
-		static short isMultiple = 0;
-		std::vector<JsonIO::FrameData> frameData;
-		int end = 0;
+		const JsonIO::Action& act = curAction;
+		const size_t end = act.FDs.size();
+
+		dt *= isEdit ? 0.0 : speed;//todo act.speed
+
 		if (isActionChange) {
 			isActionChange = false;
-			_frame = 0;
+		}
+		if (actionIndex == Action::multiple)
+		{
+			if (frame >= end - 1)
+				instancedNum = 100;
+		}
+		else
+			instancedNum = 1;
+		if (instancedNum == 1) {
+			HandleAction(act.FDs, frame, dt);
 		}
 
-		dt *= speed;
-
-		if (action == Action::idle)
-		{
-			if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
+		frame += dt;
+		if (frame > end) {
+			frame = 0.0;
 		}
-		else if (action == Action::walk)
-		{
-			if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData))
-			{
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::sit_up) {
-			if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::push_up) {
-			if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::multiple) {
-			if (instancedNum == 1 && JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-			if (_frame >= end-1) {
-				instancedNum = 50;
-			}
-		}
-		else if (action == Action::hopak_dance) {
-			if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::apt) {
-			if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		_frame += dt;
-		if (_frame > end)
-			_frame = 0;
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -570,9 +598,9 @@ namespace CG
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
 	}
 
-	void MainScene::HandleAction(std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
+	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
 		JsonIO::FrameData curFD = frameDatas[frame], perFD;
-		if (frame == 0) {
+		if (frame == 0 || isEdit) {
 			for (int i = 0; i < 3; ++i) {
 				position[i] = curFD.position[i];
 			}
