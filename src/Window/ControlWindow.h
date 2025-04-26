@@ -13,15 +13,17 @@ namespace CG
 		auto Initialize() -> bool;
 		void Display();
 		void DisplayMtl();
-		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, bool isEdit);
+		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, bool isEdit, JsonIO::Action actionData);
 		void SetActionData();
+		void HandleInput();
 
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
 		bool isEdit;
 		float speed;
-		JsonIO::Action actionData;
+		//JsonIO::Action actionData;
+		JsonIO::FrameData frameData;
 		
 
 	private:

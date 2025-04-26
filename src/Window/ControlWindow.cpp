@@ -17,86 +17,8 @@ namespace CG
 		return true;
 	}
 
-	void ControlWindow::Display()
+	void ControlWindow::HandleInput()
 	{
-		static int _actionIndex = 0;
-		ImGui::Begin("Control");
-		{
-			ImGui::Checkbox("Demo Window", &showDemoWindow);
-			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
-			ImGui::Checkbox("Edit Action", &isEdit);
-
-			//todo get action data from MainScene
-			std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT" };
-			ImGui::Text("Action: ");
-			ImGui::SameLine(100);
-			ImGui::SameLine(100);
-			ImGui::SetNextItemWidth(150);
-			if (ImGui::BeginCombo("##Action", actions[_actionIndex].c_str()))
-			{
-				for (int n = 0; n < actions.size(); n++)
-				{
-					const bool is_selected = (_actionIndex == n);
-					if (ImGui::Selectable(actions[n].c_str(), is_selected))
-					{
-						_actionIndex = n;
-						std::cout << "Set Action " << _actionIndex << std::endl;
-						targetScene->SetAction(n);
-					}
-
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-			ImGui::SetNextItemWidth(150);
-			if (ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.3f"))
-			{
-				targetScene->SetSpeed(speed);
-			}
-
-			static int modeIndex = 0;
-			std::vector<std::string> modes = { "Fill", "Line" };
-			ImGui::Text("Mode: ");
-			ImGui::SameLine(100);
-			ImGui::SetNextItemWidth(150);
-			if (ImGui::BeginCombo("##Mode", modes[modeIndex].c_str()))
-			{
-				for (int n = 0; n < modes.size(); n++)
-				{
-					const bool is_selected = (modeIndex == n);
-					if (ImGui::Selectable(modes[n].c_str(), is_selected))
-					{
-						modeIndex = n;
-						std::cout << "Set Mode " << modeIndex << std::endl;
-						targetScene->SetMode(n);
-					}
-
-					if (is_selected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-		}
-		ImVec2 controlPos = ImGui::GetWindowPos();
-		ImVec2 controlSize = ImGui::GetWindowSize();
-		ImGui::End();
-
-		// Show the big demo window or not
-		if (showDemoWindow)
-			ImGui::ShowDemoWindow(&showDemoWindow);
-		if (showMtlWindow)
-			DisplayMtl();
-		//if (isEdit)
-		DisplayEditor(controlPos, controlSize, _actionIndex, isEdit);
-		targetScene->SetEdit(isEdit, 0);
-
-		targetScene->SetEdit(isEdit, 0);
-
 		ImGuiIO& io = ImGui::GetIO();
 
 		static float lastPressTime = 0.0f;  // last keydown time
@@ -147,15 +69,98 @@ namespace CG
 		}
 
 		//Mouse wheel control eyes distance
-		if (io.MouseWheel != 0.0f)
-		{
-			if (io.MouseWheel > 0)
-				//Mouse wheel up
-				targetScene->OnKeyboard(4);
-			else
-				//Mouse wheel down
-				targetScene->OnKeyboard(5);
+		if (io.MouseWheel != 0.0f) {
+			{
+				if (io.MouseWheel > 0)
+					//Mouse wheel up
+					targetScene->OnKeyboard(4);
+				else
+					//Mouse wheel down
+					targetScene->OnKeyboard(5);
+			}
 		}
+	}
+
+	void ControlWindow::Display()
+	{
+		static int _actionIndex = 0;
+		static JsonIO::Action actionData;
+		ImGui::Begin("Control");
+		{
+			ImGui::Checkbox("Demo Window", &showDemoWindow);
+			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
+			ImGui::Checkbox("Edit Action", &isEdit);
+
+			//todo get action data from MainScene
+			std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT" };
+			ImGui::Text("Action: ");
+			ImGui::SameLine(100);
+			ImGui::SameLine(100);
+			ImGui::SetNextItemWidth(150);
+			if (ImGui::BeginCombo("##Action", actions[_actionIndex].c_str()))
+			{
+				for (int n = 0; n < actions.size(); n++)
+				{
+					const bool is_selected = (_actionIndex == n);
+					if (ImGui::Selectable(actions[n].c_str(), is_selected))
+					{
+						_actionIndex = n;
+						std::cout << "Set Action " << _actionIndex << std::endl;
+						targetScene->SetAction(n);
+						actionData = targetScene->GetAction();
+					}
+
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::SetNextItemWidth(150);
+			if (ImGui::SliderFloat("Speed", &speed, 0.1f, 10.0f, "%.3f"))
+			{
+				targetScene->SetSpeed(speed);
+			}
+
+			static int modeIndex = 0;
+			std::vector<std::string> modes = { "Fill", "Line" };
+			ImGui::Text("Mode: ");
+			ImGui::SameLine(100);
+			ImGui::SetNextItemWidth(150);
+			if (ImGui::BeginCombo("##Mode", modes[modeIndex].c_str()))
+			{
+				for (int n = 0; n < modes.size(); n++)
+				{
+					const bool is_selected = (modeIndex == n);
+					if (ImGui::Selectable(modes[n].c_str(), is_selected))
+					{
+						modeIndex = n;
+						std::cout << "Set Mode " << modeIndex << std::endl;
+						targetScene->SetMode(n);
+					}
+
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+		}
+		ImVec2 controlPos = ImGui::GetWindowPos();
+		ImVec2 controlSize = ImGui::GetWindowSize();
+		ImGui::End();
+
+		// Show the big demo window or not
+		if (showDemoWindow)
+			ImGui::ShowDemoWindow(&showDemoWindow);
+		if (showMtlWindow)
+			DisplayMtl();
+		//if (isEdit)
+		DisplayEditor(controlPos, controlSize, _actionIndex, isEdit, actionData);
+		targetScene->SetEdit(isEdit, 0);
+		HandleInput();
 	}
 
 	void ControlWindow::DisplayMtl() {
@@ -198,20 +203,18 @@ namespace CG
 		}
 	}
 
-	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, bool isEdit) {
+	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, bool isEdit,JsonIO::Action actionData) {
 		ImGui::SetNextWindowPos(ImVec2(postPos.x, postPos.y + postSize.y + 10));
 		ImGui::SetNextWindowSize(ImVec2(postSize.x, 400));
 		ImGui::Begin("Editor");
 		{
-			//handle mouse wheel event
 			ImGuiIO& io = ImGui::GetIO();
-			// is mouse hover over editor window
 			bool editorHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
-			if (editorHovered && io.MouseWheel != 0.0f) {
-				// remove this mouse wheel event to prevent the main window receive it
+
+			// Disable the mouse wheel input when the editor is hovered
+			if (editorHovered) {
 				io.MouseWheel = 0.0f;
 			}
-
 			static float curFrame = 0.0f;
 			static bool isChangeFD = false;
 			static bool isSave = false;
@@ -219,7 +222,10 @@ namespace CG
 			const char* bodyParts[10] = { "body", "left_arm", "left_hand", "head", "right_arm",
 									   "right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
 			const char* axes[3] = { "X", "Y", "Z" };
-			JsonIO::FrameData curFD = targetScene->GetFrameData(), nextFD = curFD;
+			JsonIO::FrameData curFD, nextFD;
+
+			curFD = targetScene->GetFrameData();
+			curFrame = curFD.frame;
 
 			//get model position and rotation
 			for (int i = 0; i < 3; i++) {
@@ -237,14 +243,13 @@ namespace CG
 
 			//draw editor window
 			//total frames todo add a button to add keyframe
-			ImGui::Checkbox("Save Current Frame", &isSave);
-			if (ImGui::InputFloat("frames", &curFrame, 1.0f, 1.0f, "%.01f", flag)) {
-				if (curFrame >= actionData.FDs.size())
-					curFrame = actionData.FDs.size() - 1;
-				if (curFrame < 0.0f)
-					curFrame = 0.0f;
-				targetScene->SetFrame((int)curFrame);
+			ImGui::SliderFloat("Timeline", &curFrame, 0.0f, actionData.FDs.size() - 1, "Frame: %.1f");
+			if (ImGui::Button("Add Keyframe")) {
+				// copy current frame data to a new frame
+				actionData.FDs.push_back(curFD);
+				actionData.FDs.back().frame = actionData.FDs.size() - 1;
 			}
+			ImGui::Checkbox("Save Current Frame", &isSave);
 
 			//set action data after change curFrame
 			actionData = targetScene->GetAction();
@@ -292,7 +297,10 @@ namespace CG
 			if(isEdit)
 				targetScene->SetFrameData(curFD, (int)curFrame);
 			if (isSave) {
-
+				targetScene->SetActionData(actionData, actionIndex);
+				JsonIO::SaveFrames("../../res/actions/edited_action.json", actionData.FDs);
+				isSave = false;
+				ImGui::OpenPopup("Saved!"); // 顯示保存成功提示
 			}
 			ImGui::EndChild();
 		}

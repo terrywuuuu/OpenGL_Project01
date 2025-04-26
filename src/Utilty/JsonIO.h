@@ -23,6 +23,9 @@ public:
 		std::vector<FrameData> FDs;
 		Action():FDs(),speed(){}
 		Action(std::vector<FrameData> fd) : FDs(fd) {}
+		Action(const Action& other) {
+			FDs = other.FDs;
+		}
 	};
 
 	// Load frames from JSON file

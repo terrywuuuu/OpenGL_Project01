@@ -48,7 +48,6 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
-		isActionChange = true;
 		return LoadScene();
 	}
 
@@ -223,8 +222,8 @@ namespace CG
 	void MainScene::SetAction(int action)
 	{
 		this->action = action;
-		isActionChange = true;
 		instancedNum = 1;
+		frame = 0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -518,7 +517,6 @@ namespace CG
 
 		if (isActionChange) {
 			isActionChange = false;
-			frame = 0.0;
 		}
 		if (action == Action::multiple)
 		{

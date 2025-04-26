@@ -62,7 +62,6 @@ namespace CG
 		void UpdateModel();
 		glm::mat4 bodyRotateMatrix(int body);
 
-
 		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
 	private:
 		Camera camera;
@@ -116,6 +115,7 @@ namespace CG
 		bool isActionChange;
 		bool isEdit = false;
 		std::vector<JsonIO::Action> actionDatas;
+		JsonIO::Action curAction;
 		
 		//control speed
 		float speed = 1;
