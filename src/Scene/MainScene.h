@@ -41,9 +41,14 @@ namespace CG
 		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
+		void SetEffect(float num, int effect, bool isActive);
 
 		void SetEdit(bool isEdit,int mode);
 		void SetFrame(int frame);
+
+		// Initialize texture and framebuffer
+		void SetTexture();
+		void CreateScreenQuad();
 		
 		//void SaveAction();
 		void SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD);
@@ -76,7 +81,11 @@ namespace CG
 		std::array<GLuint, PARTSNUM> VBOs;
 		std::array<GLuint, PARTSNUM> uVBOs;
 		std::array<GLuint, PARTSNUM> nVBOs;
+		GLuint screenQuadVAO, screenQuadVBO;
+		GLuint FBO;
+		GLuint texture;
 		GLuint program;
+		GLuint Post_Process;		// ¯S®ÄªºProgram
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -89,6 +98,7 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
+
 		int instancedNum = 1;  // How many robot
 
 		int vertices_size[PARTSNUM];
@@ -121,6 +131,12 @@ namespace CG
 		//control speed
 		float speed = 1;
 		double frame;
+
+		int screenWidth = 1280;
+		int screenHeight = 720;
+
+		bool enableBlur = false;
+		float blurStrength;
 
 		enum Body
 		{

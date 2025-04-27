@@ -14,12 +14,14 @@ namespace CG
 		void Display();
 		void DisplayMtl();
 		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, JsonIO::Action actionData);
+		void DisplayEffect();
 		void SetActionData();
 		void HandleInput();
 
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
+		bool showEffectWindow;
 		bool isEdit;
 		float speed;
 		//JsonIO::Action actionData;

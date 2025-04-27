@@ -106,5 +106,7 @@
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Post-Process.fp" />
+    <None Include="..\res\shaders\Post-Process.vp" />
   </ItemGroup>
 </Project>
