@@ -256,7 +256,6 @@ namespace CG
 		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
 	}
 
-	//todo delete this func
 	void MainScene::SetPosition(int axis, float position)
 	{
 		curAction.FDs[frame].position[axis] = position;
@@ -295,31 +294,29 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetEdit(bool isEdit,int mode) {
+	void MainScene::SetEdit(bool isEdit, int mode) {
 		this->isEdit = isEdit;
-		if (mode == 0) {//edit cur action
-
-		}
-		else {// new action
-
-		}
 	}
 
 	void MainScene::SetFrame(int frame) {
 		this->frame = frame;
 	}
 
-	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD=0)
+	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
 	{
-		if (isNewFD) {
-			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
-		}
-		else {
-			actionDatas[actionIndex] = curAction;
-			JsonIO::SaveAction("../../res/actions/action.json", actionDatas[actionIndex]);
-		}
+		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
 		this->frame = frame;
 		curAction.FDs[frame] = frameData;
+	}
+
+	void MainScene::SaveAction(std::string newFileName) {
+		if (newFileName.empty()) {
+			JsonIO::SaveAction("../../res/actions/" + curAction.name, curAction);
+		}
+		else {
+			JsonIO::SaveAction("../../res/actions/" + newFileName, curAction);
+		}
+		LoadAction();
 	}
 
 	JsonIO::Action MainScene::GetAction()
@@ -329,18 +326,7 @@ namespace CG
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
-		JsonIO::FrameData fd;
-		fd.frame = frame;
-		fd.isKeyFrame = curAction.FDs[frame].isKeyFrame;
-		for (int i = 0; i < 3; ++i) {
-			fd.position[i] = curAction.FDs[frame].position[i];
-		}
-		for (int i = 0; i < PARTSNUM-1/*without tree*/ ; i++) {
-			fd.partRotations[i].alpha = curAction.FDs[frame].partRotations[i].alpha;
-			fd.partRotations[i].beta = curAction.FDs[frame].partRotations[i].beta;
-			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
-		}
-		return fd;
+		return curAction.FDs[frame];
 	}
 
 	std::vector<std::string> MainScene::GetActionNames()
@@ -509,37 +495,34 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		const std::string actionsDir = "../../res/actions/";        // 資料夾路徑
-		const std::string pattern = actionsDir + "*.json";      // 搜尋所有 .json
+		const std::string actionsDir = "../../res/actions/";
+		const std::string pattern = actionsDir + "*.json"; // find all json files
 
 		struct _finddata_t fd;
 		intptr_t handle = _findfirst(pattern.c_str(), &fd);
 		if (handle != -1) {
 			do {
 				JsonIO::Action actionData;
-				// 檔名在 fd.name
 				std::string filePath = actionsDir + fd.name;
 				if (JsonIO::LoadAction(filePath, actionData)) {
 					actionDatas.push_back(actionData);
-					std::cout << "action name:" << actionData.name << std::endl;
-					std::cout << "action name:" << actionDatas.back().name << std::endl;
 				}
 			} while (_findnext(handle, &fd) == 0);
 			_findclose(handle);
 		}
-		SetAction(Action::idle);
+		SetAction(0);
 	}
 
 	void MainScene::UpdateAction(double dt)
 	{
 		const size_t end = curAction.FDs.size();
 
-		dt *= isEdit ? 0.0 : speed;//todo act.speed
+		dt *= isEdit ? 0.0 : speed;
 
 		if (isActionChange) {
 			isActionChange = false;
 		}
-		if (actionIndex == Action::multiple)
+		if (curAction.name == "multiple")
 		{
 			if (frame >= end - 1)
 				instancedNum = 100;

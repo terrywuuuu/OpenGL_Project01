@@ -13,8 +13,9 @@ namespace CG
 		auto Initialize() -> bool;
 		void Display();
 		void DisplayMtl();
-		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex, JsonIO::Action actionData);
-		void SetActionData();
+		void DisplayEditor(ImVec2 postPos,ImVec2 postSize,int actionIndex);
+		void DisplayEditorItem(bool& isEdit, float curFrame,bool isReadOnly, JsonIO::FrameData& curFD, JsonIO::Action& actionData);
+		void DisplayModleControl(bool isEdit, float curFrame, bool isReadOnly, JsonIO::FrameData& curFD, JsonIO::Action& actionData);
 		void HandleInput();
 
 	private:

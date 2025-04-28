@@ -156,7 +156,7 @@ namespace CG
 			ImGui::ShowDemoWindow(&showDemoWindow);
 		if (showMtlWindow)
 			DisplayMtl();
-		DisplayEditor(controlPos, controlSize, _actionIndex, actionData);
+		DisplayEditor(controlPos, controlSize, _actionIndex);
 		HandleInput();
 	}
 
@@ -200,101 +200,140 @@ namespace CG
 		}
 	}
 
-	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex, JsonIO::Action actionData) {
+	void removeInput() {
+		ImGuiIO& io = ImGui::GetIO();
+
+		// 如果有任何 Popup 顯示，就允許接受鍵盤輸入
+		if (1) {
+			io.WantTextInput = true;  // 允許接受鍵盤輸入
+		}
+		else {
+			io.WantTextInput = false; // 禁用主視窗的鍵盤輸入
+		}
+
+		// 禁用滑鼠滾輪輸入，當編輯器被懸停時
+		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows)) {
+			io.MouseWheel = 0.0f;
+		}
+	}
+
+	void ControlWindow::DisplayEditor(ImVec2 postPos, ImVec2 postSize, int actionIndex) {
 		ImGui::SetNextWindowPos(ImVec2(postPos.x, postPos.y + postSize.y + 10));
 		ImGui::SetNextWindowSize(ImVec2(postSize.x, 400));
 		ImGui::Begin("Editor");
 		{
-			ImGuiIO& io = ImGui::GetIO();
-			bool editorHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
-			// Disable the mouse wheel input when the editor is hovered
-			if (editorHovered) {
-				io.MouseWheel = 0.0f;
-			}
-
+			removeInput();
 			static float curFrame = 0.0f;
 			static bool isSave = false;
 			static bool isEdit = false;
-			static float alphas[10] = { 0 }, betas[10] = { 0 }, gammas[10] = { 0 }, position[3] = { 0 };
-			const char* bodyParts[10] = { "body", "left_arm", "left_hand", "head", "right_arm",
-									   "right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
-			const char* axes[3] = { "X", "Y", "Z" };
-			JsonIO::FrameData curFD, nextFD;
+			JsonIO::Action actionData;
+			JsonIO::FrameData curFD;
 
+			actionData = targetScene->GetAction();
 			curFD = targetScene->GetFrameData();
 			curFrame = (int)curFD.frame;
 
-			//get model position and rotation
-			for (int i = 0; i < 3; i++) {
-				position[i] = curFD.position[i];
-			}
-			for (int i = 0; i < PARTSNUM - 1; i++)
-			{
-				alphas[i] = curFD.partRotations[i].alpha;
-				betas[i] = curFD.partRotations[i].beta;
-				gammas[i] = curFD.partRotations[i].gamma;
-			}
-
-			ImGuiInputTextFlags flag = (isEdit ? 0 : ImGuiInputTextFlags_ReadOnly);
-
+			ImGuiInputTextFlags isReadOnly = (isEdit ? 0 : ImGuiInputTextFlags_ReadOnly);// read only when not edit
 			//draw editor window
-			if (ImGui::Checkbox("Edit Action", &isEdit)) {// when state change
-				targetScene->SetEdit(isEdit, 0);
-			}
-			float maxFrame = (actionData.FDs.empty()) ? 0.0f : (actionData.FDs.size() - 1.0f);
-			ImGui::SliderFloat("Timeline", &curFrame, 0.0f, maxFrame, "Frame: %.1f", flag);
-			if (isEdit)
-				targetScene->SetFrame((int)curFrame);
-			if (isEdit && ImGui::Button("Add Keyframe")) {
-				targetScene->SetFrameData(curFD, curFrame, 1);
-			}
-			if (isEdit && ImGui::Button("Save")) {
-				targetScene->SetFrameData(curFD, (int)curFrame, 0);
-			}/*
-			if (isEdit && ImGui::Button("Save as new action")) {
-
-			}*/
-
-			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
-			//set modle position
-			for (int i = 0; i < 3; i++) {
-				if (ImGui::InputFloat(axes[i], &position[i], 0.1f, 2.0f, "%.1f", flag)) {
-					position[i] = (position[i] < -180.0f) ? -180.0f : (position[i] > 180.0f) ? 180.0f : position[i];
-					targetScene->SetPosition(i, position[i]);
-					std::cout << "Set position " << axes[i] << ": " << position[i] << "\n";
-				}
-			}
-			//set modle parts rotation
-			for (int i = 0; i < 10; i++) if (ImGui::TreeNode(bodyParts[i])) {
-				bool changed = false;
-
-				if (ImGui::InputFloat(("Alpha##" + std::to_string(i)).c_str(), &alphas[i], 1.0f, 10.0f, "%.1f",
-					ImGuiInputTextFlags_EnterReturnsTrue)) {
-					alphas[i] = (alphas[i] < -180.0f) ? -180.0f : (alphas[i] > 180.0f) ? 180.0f : alphas[i];
-					changed = true;
-				}
-				if (ImGui::InputFloat(("Beta##" + std::to_string(i)).c_str(), &betas[i], 1.0f, 10.0f, "%.1f",
-					ImGuiInputTextFlags_EnterReturnsTrue)) {
-					betas[i] = (betas[i] < -180.0f) ? -180.0f : (betas[i] > 180.0f) ? 180.0f : betas[i];
-					changed = true;
-				}
-				if (ImGui::InputFloat(("Gamma##" + std::to_string(i)).c_str(), &gammas[i], 1.0f, 10.0f, "%.1f",
-					ImGuiInputTextFlags_EnterReturnsTrue)) {
-					gammas[i] = (gammas[i] < -180.0f) ? -180.0f : (gammas[i] > 180.0f) ? 180.0f : gammas[i];
-					changed = true;
-				}
-
-				if (changed) {
-					targetScene->SetRotate(i, alphas[i], betas[i], gammas[i]);
-					curFD.partRotations[i].alpha = alphas[i];
-					std::cout << "Set rotation " << bodyParts[i] << ": Alpha=" << alphas[i]
-						<< ", Beta=" << betas[i] << ", Gamma=" << gammas[i] << "\n";
-				}
-				ImGui::TreePop();
-			}
-
-			ImGui::EndChild();
+			DisplayEditorItem(isEdit, curFrame, isReadOnly, curFD, actionData);
+			DisplayModleControl(isEdit, curFrame, isReadOnly, curFD, actionData);
 		}
 		ImGui::End();
+	}
+
+	void ControlWindow::DisplayEditorItem(bool& isEdit, float curFrame, bool isReadOnly, JsonIO::FrameData& curFD, JsonIO::Action& actionData) {
+		if (ImGui::Checkbox("Edit Action", &isEdit)) {// when state change
+			targetScene->SetEdit(isEdit, 0);
+		}
+		float maxFrame = (actionData.FDs.empty()) ? 0.0f : (actionData.FDs.size() - 1.0f);
+		ImGui::SliderFloat("Timeline", &curFrame, 0.0f, maxFrame, "Frame: %.1f", isReadOnly);
+		if (isEdit)
+			targetScene->SetFrame((int)curFrame);
+		if (isEdit && ImGui::Button("Add Frame")) { // copy current frame
+			targetScene->SetNewFrameData(curFD, (int)curFrame);
+		}
+		if (isEdit && ImGui::Button("Save")) {
+			targetScene->SaveAction(actionData.name);
+			ImGui::OpenPopup("SaveSuccessPopup");
+		}
+		if (isEdit && ImGui::Button("Save as New Action")) {
+			ImGui::OpenPopup("InputPopup"); // Open the input popup
+		}
+		if (ImGui::BeginPopupModal("InputPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			static char input_buf[128] = "";
+			ImGui::InputTextWithHint("##input", "input action name", input_buf, IM_ARRAYSIZE(input_buf));
+			if (ImGui::Button("ok")) {
+				targetScene->SaveAction(input_buf);
+				ImGui::CloseCurrentPopup();  // Close the popup
+				ImGui::OpenPopup("SaveSuccessPopup");  // Open the "Save success" popup
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("cancel")) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		if (ImGui::BeginPopupModal("SaveSuccessPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Success!");  // Save success message
+			if (ImGui::Button("OK")) {
+				ImGui::CloseCurrentPopup();  // Close the success popup when "OK" is clicked
+			}
+			ImGui::EndPopup();
+		}
+	}
+
+	void ControlWindow::DisplayModleControl(bool isEdit, float curFrame, bool isReadOnly, JsonIO::FrameData& curFD, JsonIO::Action& actionData) {
+		static float position[3] = { 0 };
+		static float alphas[10] = { 0 }, betas[10] = { 0 }, gammas[10] = { 0 };
+		const char* bodyParts[10] = { "body", "left_arm", "left_hand", "head", "right_arm",
+			"right_hand", "left_leg", "left_foot", "right_leg", "right_foot" };
+		const char* axes[3] = { "X", "Y", "Z" };
+
+		//get model position and rotation
+		for (int i = 0; i < 3; i++) {
+			position[i] = curFD.position[i];
+		}
+		for (int i = 0; i < PARTSNUM - 1; i++)
+		{
+			alphas[i] = curFD.partRotations[i].alpha;
+			betas[i] = curFD.partRotations[i].beta;
+			gammas[i] = curFD.partRotations[i].gamma;
+		}
+
+		ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+		//set modle position
+		for (int i = 0; i < 3; i++) {
+			if (ImGui::InputFloat(axes[i], &position[i], 0.1f, 2.0f, "%.1f", isReadOnly)) {
+				position[i] = (position[i] < -180.0f) ? -180.0f : (position[i] > 180.0f) ? 180.0f : position[i];
+				targetScene->SetPosition(i,position[i]);
+			}
+		}
+		//set modle parts rotation
+		for (int i = 0; i < 10; i++) if (ImGui::TreeNode(bodyParts[i])) {
+			bool isChange = false;
+			if (ImGui::InputFloat(("Alpha##" + std::to_string(i)).c_str(), &alphas[i], 1.0f, 10.0f, "%.1f",
+				ImGuiInputTextFlags_EnterReturnsTrue)) {
+				isChange = true;
+				alphas[i] = (alphas[i] < -180.0f) ? -180.0f : (alphas[i] > 180.0f) ? 180.0f : alphas[i];
+			}
+			if (ImGui::InputFloat(("Beta##" + std::to_string(i)).c_str(), &betas[i], 1.0f, 10.0f, "%.1f",
+				ImGuiInputTextFlags_EnterReturnsTrue)) {
+				isChange = true;
+				betas[i] = (betas[i] < -180.0f) ? -180.0f : (betas[i] > 180.0f) ? 180.0f : betas[i];
+			}
+			if (ImGui::InputFloat(("Gamma##" + std::to_string(i)).c_str(), &gammas[i], 1.0f, 10.0f, "%.1f",
+				ImGuiInputTextFlags_EnterReturnsTrue)) {
+				isChange = true;
+				gammas[i] = (gammas[i] < -180.0f) ? -180.0f : (gammas[i] > 180.0f) ? 180.0f : gammas[i];
+			}
+
+			if (isChange) {
+				targetScene->SetRotate(i, alphas[i], betas[i], gammas[i]);
+				std::cout << "Set " << bodyParts[i] << " rotation: " << alphas[i] << ", " << betas[i] << ", " << gammas[i] << std::endl;
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::EndChild();
 	}
 }

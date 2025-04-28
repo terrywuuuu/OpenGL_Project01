@@ -1,14 +1,15 @@
-[
+{"name":"sit_up",
+  "speed":2.0,
+  "action":[
   {
     "frame": 0,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -90,
       "beta": 0,
       "gamma": 0
     },
@@ -18,56 +19,55 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": 0,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": 0,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -76,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -76,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   },
   {
     "frame": 1,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -76,
       "beta": 0,
       "gamma": 0
     },
@@ -77,56 +77,55 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": -15,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": -15,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -90,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -90,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   },
   {
     "frame": 2,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -62,
       "beta": 0,
       "gamma": 0
     },
@@ -136,56 +135,55 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": -30,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": -30,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -104,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -104,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   },
   {
     "frame": 3,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -48,
       "beta": 0,
       "gamma": 0
     },
@@ -195,56 +193,55 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
       "alpha": 0,
-      "beta": 0,
-      "gamma": 0
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -118,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -118,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   },
   {
     "frame": 4,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -62,
       "beta": 0,
       "gamma": 0
     },
@@ -254,56 +251,55 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
-      "alpha": -10,
-      "beta": 0,
-      "gamma": -20
+      "alpha": 0,
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
-      "alpha": -10,
-      "beta": 0,
-      "gamma": 20
+      "alpha": 0,
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -104,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -104,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   },
   {
     "frame": 5,
-    "isKeyFrame": 0,
     "position": {
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
     },
     "body": {
-      "alpha": 0,
+      "alpha": -76,
       "beta": 0,
       "gamma": 0
     },
@@ -313,103 +309,44 @@
       "gamma": 0
     },
     "left_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": -70
+      "gamma": -50
     },
     "left_hand": {
-      "alpha": -20,
-      "beta": 0,
-      "gamma": -40
+      "alpha": 0,
+      "beta": -150,
+      "gamma": -30
     },
     "right_arm": {
-      "alpha": -45,
+      "alpha": -160,
       "beta": 0,
-      "gamma": 70
+      "gamma": 50
     },
     "right_hand": {
-      "alpha": -20,
-      "beta": 0,
-      "gamma": 40
+      "alpha": 0,
+      "beta": 150,
+      "gamma": 30
     },
     "left_leg": {
-      "alpha": 0,
+      "alpha": -90,
       "beta": 0,
       "gamma": 0
     },
     "left_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     },
     "right_leg": {
-      "alpha": 0,
+      "alpha": -90,
       "beta": 0,
       "gamma": 0
     },
     "right_foot": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    }
-  },
-  {
-    "frame": 6,
-    "isKeyFrame": 0,
-    "position": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    },
-    "body": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    },
-    "head": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    },
-    "left_arm": {
-      "alpha": -45,
-      "beta": 0,
-      "gamma": -70
-    },
-    "left_hand": {
-      "alpha": -30,
-      "beta": 0,
-      "gamma": -60
-    },
-    "right_arm": {
-      "alpha": -45,
-      "beta": 0,
-      "gamma": 70
-    },
-    "right_hand": {
-      "alpha": -30,
-      "beta": 0,
-      "gamma": 60
-    },
-    "left_leg": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    },
-    "left_foot": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    },
-    "right_leg": {
-      "alpha": 0,
-      "beta": 0,
-      "gamma": 0
-    },
-    "right_foot": {
-      "alpha": 0,
+      "alpha": 124,
       "beta": 0,
       "gamma": 0
     }
   }
-]
+]}

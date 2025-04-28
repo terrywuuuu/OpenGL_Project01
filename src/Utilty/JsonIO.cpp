@@ -57,14 +57,14 @@ bool JsonIO::LoadAction(const std::string& filename, Action& out) {
 }
 
 bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
-    json j = json::array();
+    json j;
 
 	j["name"] = action.name;
 	j["speed"] = action.speed;
 
     for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;
-        frameJson["action"] = f.frame;
+        frameJson["frame"] = f.frame;
         frameJson["position"] = {
             {"x", f.position[0]},
             {"y", f.position[1]},
@@ -80,10 +80,10 @@ bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
             };
         }
 
-        j["frame"].push_back(frameJson);
+        j["action"].push_back(frameJson);
     }
 
-    std::ofstream ofs(filename);
+    std::ofstream ofs(filename + ".json");
     if (!ofs.is_open()) {
         std::cerr << "Cannot open " << filename << " for writing\n";
         return false;

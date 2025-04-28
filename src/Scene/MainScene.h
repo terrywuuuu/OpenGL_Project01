@@ -46,7 +46,8 @@ namespace CG
 		void SetFrame(int frame);
 		
 		//void SaveAction();
-		void SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD);
+		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
+		void SaveAction(std::string newFileName = "");
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
@@ -135,17 +136,6 @@ namespace CG
 			left_foot,
 			right_leg,
 			right_foot
-		};
-
-		enum Action
-		{
-			idle = 0,
-			walk,
-			sit_up,
-			push_up,
-			multiple,
-			hopak_dance,
-			apt
 		};
 
 		enum Axis {
