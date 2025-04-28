@@ -205,6 +205,7 @@ namespace CG
 		// calc aspect and update camera
 		float aspect = static_cast<float>(width) / static_cast<float>(height);
 		camera.SetAspect(aspect);
+		SetTexture();
 	}
 
 	void MainScene::OnKeyboard(int key)
@@ -481,7 +482,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
