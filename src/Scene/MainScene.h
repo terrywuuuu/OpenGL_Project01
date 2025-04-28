@@ -12,6 +12,8 @@
 
 #include "../Utilty/JsonIO.h"
 #include "Camera.h"
+#include "Scene.h"
+
 constexpr auto PARTSNUM = 11;
 //new
 // 0:body	1:ulefthand	2:dlefthand	3:head
@@ -34,7 +36,6 @@ namespace CG
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
 
-		void ResetAction();
 		void SetAction(int action);
 
 		void SetMode(int mode);
@@ -55,6 +56,7 @@ namespace CG
 		
 	private:
 		Camera camera;
+		Scene scene;
 
 		GLuint VAO;
 		GLuint VBO;

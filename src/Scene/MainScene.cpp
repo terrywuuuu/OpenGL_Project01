@@ -49,12 +49,13 @@ namespace CG
 	auto MainScene::Initialize() -> bool
 	{
 		isActionChange = true;
+		scene.Initialize();
 		return LoadScene();
 	}
 
 	void MainScene::Update(double dt)
 	{
-		UpdateAction(dt);
+		//UpdateAction(dt);
 		UpdateModel();
 	}
 
@@ -66,16 +67,6 @@ namespace CG
 
 		glBindVertexArray(VAO);
 		glUseProgram(program);//uniform參數數值前必須先use shader
-
-
-		/*
-		float eyey = glm::radians(eyeAngley);
-		camera.LookAt(
-			glm::vec3(eyedistance * sin(eyey), 2, eyedistance * cos(eyey)), // Camera is at (0,0,20), in World Space
-			glm::vec3(0, 0, 0), // and looks at the origin
-			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-		*/
 
 		float theta = glm::radians(eyeAngley); // 左右
 		float phi = glm::radians(angle);   // 上下
@@ -167,6 +158,8 @@ namespace CG
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
+
+		scene.Render(camX, camY, camZ, aspect, mode);
 		glFlush();
 	}
 
@@ -329,7 +322,6 @@ namespace CG
 		BackGround = glGetUniformLocation(program, "isInstanced");
 
 		// Camera matrix
-		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		LoadModel();
 
@@ -343,7 +335,6 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
-
 		return true;
 	}
 
@@ -353,7 +344,7 @@ namespace CG
 		std::vector<glm::vec3> Kas;
 		std::vector<glm::vec3> Kss;
 		std::vector<std::string> Materials; // mtl-name
-		std::string texture;
+		std::vector<std::string> texture;
 		LoadMTL("../../res/Parts/material.mtl", Kds, Kas, Kss, Materials, texture);
 		for (int i = 0; i < Materials.size(); i++)
 		{
@@ -372,7 +363,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -428,7 +419,6 @@ namespace CG
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
-
 
 	void MainScene::Load2Buffer(const char* obj, int i)
 	{
