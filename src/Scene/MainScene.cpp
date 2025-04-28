@@ -62,7 +62,6 @@ namespace CG
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
@@ -175,7 +174,6 @@ namespace CG
 		glBindVertexArray(screenQuadVAO);  // 綁定四邊形 VAO
 		glClear(GL_COLOR_BUFFER_BIT); // 這裡只清 color，不清 depth
 		glDisable(GL_DEPTH_TEST); // 關掉深度測試
-		glViewport(0, 0, screenWidth, screenHeight);
 
 		// 傳遞 FBO 渲染結果的紋理和紋理大小
 		glActiveTexture(GL_TEXTURE0);  // 激活紋理單元
@@ -187,6 +185,7 @@ namespace CG
 
 		// 渲染屏幕四邊形顯示結果
 		glDrawArrays(GL_TRIANGLES, 0, 6);  // 渲染四邊形*/
+		glEnable(GL_DEPTH_TEST); // 重新啟用深度測試
 		glFlush();
 	}
 
@@ -339,6 +338,15 @@ namespace CG
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+		glGenTextures(1, &depth_texture);
+		glBindTexture(GL_TEXTURE_2D, depth_texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			std::cerr << "Framebuffer not complete!" << std::endl;

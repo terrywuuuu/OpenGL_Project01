@@ -84,6 +84,7 @@ namespace CG
 		GLuint screenQuadVAO, screenQuadVBO;
 		GLuint FBO;
 		GLuint texture;
+		GLuint depth_texture;
 		GLuint program;
 		GLuint Post_Process;		// ¯S®ÄªºProgram
 
