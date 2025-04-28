@@ -91,17 +91,17 @@ namespace CG
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
 
 			//todo get action data from MainScene
-			std::vector<std::string> actions = { "Idle", "Walk", "sit_up", "push_up","multiple", "Hopak Dance", "APT" };
+			std::vector<std::string> actionNames = targetScene->GetActionNames();
 			ImGui::Text("Action: ");
 			ImGui::SameLine(100);
 			ImGui::SameLine(100);
 			ImGui::SetNextItemWidth(150);
-			if (ImGui::BeginCombo("##Action", actions[_actionIndex].c_str()))
+			if (ImGui::BeginCombo("##Action", actionNames[_actionIndex].c_str()))
 			{
-				for (int n = 0; n < actions.size(); n++)
+				for (int n = 0; n < actionNames.size(); n++)
 				{
 					const bool is_selected = (_actionIndex == n);
-					if (ImGui::Selectable(actions[n].c_str(), is_selected))
+					if (ImGui::Selectable(actionNames[n].c_str(), is_selected))
 					{
 						_actionIndex = n;
 						std::cout << "Set Action " << _actionIndex << std::endl;
@@ -250,7 +250,10 @@ namespace CG
 			}
 			if (isEdit && ImGui::Button("Save")) {
 				targetScene->SetFrameData(curFD, (int)curFrame, 0);
-			}
+			}/*
+			if (isEdit && ImGui::Button("Save as new action")) {
+
+			}*/
 
 			ImGui::BeginChild("BodyPartsScroll", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 			//set modle position

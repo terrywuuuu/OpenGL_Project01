@@ -1,6 +1,7 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
 #include <../src/Utilty/JsonIO.h>
+#include <io.h>
 
 #include "MainScene.h"
 
@@ -224,7 +225,7 @@ namespace CG
 		curAction = actionDatas[action];
 		this->actionIndex = action;
 		instancedNum = 1;
-		frame = 0;
+		frame = 0.0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -315,7 +316,7 @@ namespace CG
 		}
 		else {
 			actionDatas[actionIndex] = curAction;
-			JsonIO::SaveFrames("../../res/actions/action.json", actionDatas[actionIndex]);
+			JsonIO::SaveAction("../../res/actions/action.json", actionDatas[actionIndex]);
 		}
 		this->frame = frame;
 		curAction.FDs[frame] = frameData;
@@ -340,6 +341,16 @@ namespace CG
 			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
 		}
 		return fd;
+	}
+
+	std::vector<std::string> MainScene::GetActionNames()
+	{
+		std::vector<std::string> actionNames;
+		for (int i = 0; i < actionDatas.size(); i++)
+		{
+			actionNames.push_back(actionDatas[i].name);
+		}
+		return actionNames;
 	}
 
 	auto MainScene::LoadScene() -> bool
@@ -498,35 +509,30 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		JsonIO::Action actionData;
-		if (JsonIO::LoadFrames("../../res/actions/idle.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/walk.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/push_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/multiple.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/apt.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
+		const std::string actionsDir = "../../res/actions/";        // 資料夾路徑
+		const std::string pattern = actionsDir + "*.json";      // 搜尋所有 .json
+
+		struct _finddata_t fd;
+		intptr_t handle = _findfirst(pattern.c_str(), &fd);
+		if (handle != -1) {
+			do {
+				JsonIO::Action actionData;
+				// 檔名在 fd.name
+				std::string filePath = actionsDir + fd.name;
+				if (JsonIO::LoadAction(filePath, actionData)) {
+					actionDatas.push_back(actionData);
+					std::cout << "action name:" << actionData.name << std::endl;
+					std::cout << "action name:" << actionDatas.back().name << std::endl;
+				}
+			} while (_findnext(handle, &fd) == 0);
+			_findclose(handle);
 		}
 		SetAction(Action::idle);
 	}
 
 	void MainScene::UpdateAction(double dt)
 	{
-		const JsonIO::Action& act = curAction;
-		const size_t end = act.FDs.size();
+		const size_t end = curAction.FDs.size();
 
 		dt *= isEdit ? 0.0 : speed;//todo act.speed
 
@@ -541,7 +547,7 @@ namespace CG
 		else
 			instancedNum = 1;
 		if (instancedNum == 1) {
-			HandleAction(act.FDs, frame, dt);
+			HandleAction(curAction.FDs, frame, dt);
 		}
 
 		frame += dt;
@@ -599,7 +605,7 @@ namespace CG
 	}
 
 	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
-		JsonIO::FrameData curFD = frameDatas[frame], perFD;
+		JsonIO::FrameData curFD = curAction.FDs[frame], perFD;
 		if (frame == 0 || isEdit) {
 			for (int i = 0; i < 3; ++i) {
 				position[i] = curFD.position[i];

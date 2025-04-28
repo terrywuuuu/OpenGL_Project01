@@ -19,18 +19,20 @@ public:
 	};
 	struct Action
 	{
+		std::string name;
 		float speed;
 		std::vector<FrameData> FDs;
-		Action():FDs(),speed(){}
-		Action(std::vector<FrameData> fd) : FDs(fd) {}
-		Action(const Action& other) {
+
+		Action():FDs(),speed(0.0),name("") {}
+		Action(std::string name, float speed, std::vector<FrameData> fd) :name(name),speed(speed), FDs(fd) {}
+		/*Action(const Action& other) {
 			FDs = other.FDs;
-		}
+		}*/
 	};
 
 	// Load frames from JSON file
-	static bool LoadFrames(const std::string& filename, Action& out);
+	static bool LoadAction(const std::string& filename, Action& out);
 
 	// Save frames to JSON file
-	static bool SaveFrames(const std::string& filename, const Action& ad);
+	static bool SaveAction(const std::string& filename, const Action& ad);
 };

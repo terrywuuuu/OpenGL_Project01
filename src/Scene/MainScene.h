@@ -50,6 +50,7 @@ namespace CG
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
+		std::vector<std::string> GetActionNames();
 		double GetFrame() { return frame; }
 
 	private:
