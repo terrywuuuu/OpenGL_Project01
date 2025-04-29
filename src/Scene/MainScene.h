@@ -30,6 +30,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void Render(float aspect);
+		void Texture_Render();
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
@@ -84,6 +85,7 @@ namespace CG
 		GLuint screenQuadVAO, screenQuadVBO;
 		GLuint FBO;
 		GLuint texture;
+		GLuint depth_texture;
 		GLuint program;
 		GLuint Post_Process;		// ¯S®ÄªºProgram
 
@@ -136,7 +138,9 @@ namespace CG
 		int screenHeight = 720;
 
 		bool enableBlur = false;
+		bool enableQuan = false;
 		float blurStrength;
+		float quanStrength;
 
 		enum Body
 		{

@@ -8,9 +8,14 @@ in vec2 TexCoords;
 out vec4 FragColor;
 
 uniform bool enableBlur;    // 用來控制是否啟用模糊
+uniform bool enableQuan;    // 用來控制是否啟用量化
+
 uniform sampler2D sceneTexture;  // 用來存儲渲染結果的紋理
 uniform vec2 texSize;            // 紋理的大小，用於計算偏移量
+
 uniform float blurStrength;     // 模糊程度
+uniform float quanStrength;     // 量化程度
+
 
 // 計算模糊效果
 vec3 applyBlur() {
@@ -36,6 +41,14 @@ void main(void)
     if (enableBlur) {
         vec3 results = applyBlur();
         FragColor = vec4(results, 1.0);           // 應用模糊效果
+    }
+    else if(enableQuan){
+        float nbins = quanStrength;
+        vec4 tex_color = texture(sceneTexture, TexCoords);
+        float r = floor(tex_color.r * nbins) / nbins;
+        float g = floor(tex_color.g * nbins) / nbins;
+        float b = floor(tex_color.b * nbins) / nbins;
+        FragColor = vec4(r,g,b,tex_color.a);
     }
     else{
         FragColor = texture(sceneTexture, TexCoords);
