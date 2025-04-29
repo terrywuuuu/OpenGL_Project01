@@ -6,7 +6,7 @@
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,«hx,y,z=0®É¤]¯àtranslate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,å‰‡x,y,z=0æ™‚ä¹Ÿèƒ½translate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -65,7 +65,7 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
 		/*
 		float eyey = glm::radians(eyeAngley);
@@ -76,8 +76,8 @@ namespace CG
 		);
 		*/
 
-		float theta = glm::radians(eyeAngley); // ¥ª¥k
-		float phi = glm::radians(angle);   // ¤W¤U
+		float theta = glm::radians(eyeAngley); // å·¦å³
+		float phi = glm::radians(angle);   // ä¸Šä¸‹
 
 		float camX = eyedistance * cos(phi) * sin(theta);
 		float camY = eyedistance * sin(phi);
@@ -111,7 +111,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,buffer point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -123,7 +123,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec2,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -135,7 +135,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
@@ -174,30 +174,25 @@ namespace CG
 	}
 
 	void MainScene::Texture_Render() {
-		// Åã¥Ü´è¬Vµ²ªG¨ÃÀ³¥Î¼Ò½k
-		glUseProgram(Post_Process);  // ¨Ï¥Î¥t¤@­Ó program
-		glBindVertexArray(screenQuadVAO);  // ¸j©w¥|Ãä§Î VAO
-		glClear(GL_COLOR_BUFFER_BIT); // ³o¸Ì¥u²M color¡A¤£²M depth
-		glDisable(GL_DEPTH_TEST); // Ãö±¼²`«×´ú¸Õ
+		// é¡¯ç¤ºæ¸²æŸ“çµæœä¸¦æ‡‰ç”¨æ¨¡ç³Š
+		glUseProgram(Post_Process);  // ä½¿ç”¨å¦ä¸€å€‹ program
+		glBindVertexArray(screenQuadVAO);  // ç¶å®šå››é‚Šå½¢ VAO
+		glClear(GL_COLOR_BUFFER_BIT); // é€™è£¡åªæ¸… colorï¼Œä¸æ¸… depth
+		glDisable(GL_DEPTH_TEST); // é—œæ‰æ·±åº¦æ¸¬è©¦
 
-		// ¶Ç»¼ FBO ´è¬Vµ²ªGªº¯¾²z©M¯¾²z¤j¤p
-		glActiveTexture(GL_TEXTURE0);  // ¿E¬¡¯¾²z³æ¤¸
-		glBindTexture(GL_TEXTURE_2D, texture);  // ¸j©w³õ´º´è¬Vªº¯¾²z
-		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ¶Ç»¼¯¾²z¨ì shader
-		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ¶Ç»¼¯¾²z¤j¤p¨ì shader
+		// å‚³é FBO æ¸²æŸ“çµæœçš„ç´‹ç†å’Œç´‹ç†å¤§å°
+		glActiveTexture(GL_TEXTURE0);  // æ¿€æ´»ç´‹ç†å–®å…ƒ
+		glBindTexture(GL_TEXTURE_2D, texture);  // ç¶å®šå ´æ™¯æ¸²æŸ“çš„ç´‹ç†
+		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // å‚³éç´‹ç†åˆ° shader
+		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // å‚³éç´‹ç†å¤§å°åˆ° shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
 
-		// ´è¬V«Ì¹õ¥|Ãä§ÎÅã¥Üµ²ªG
-		glDrawArrays(GL_TRIANGLES, 0, 6);  // ´è¬V¥|Ãä§Î*/
-<<<<<<< HEAD
-		glEnable(GL_DEPTH_TEST); // ­«·s±Ò¥Î²`«×´ú¸Õ
-		glFlush();
-=======
+		// æ¸²æŸ“å±å¹•å››é‚Šå½¢é¡¯ç¤ºçµæœ
+		glDrawArrays(GL_TRIANGLES, 0, 6);  // æ¸²æŸ“å››é‚Šå½¢*/
 		glEnable(GL_DEPTH_TEST);
->>>>>>> main
 	}
 
 	void MainScene::OnResize(int width, int height)
@@ -433,15 +428,15 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //è®€å–shader
 
 		ShaderInfo shader[] = {
 			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		Post_Process = LoadShaders(shader); //Åª¨úshader
+		Post_Process = LoadShaders(shader); //è®€å–shader
 
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -487,7 +482,7 @@ namespace CG
 			KDs[mtlname] = Kds[i];
 		}
 
-		// ¥[¸ü¦U³¡¥ó
+		// åŠ è¼‰å„éƒ¨ä»¶
 		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
 		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
 		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
@@ -509,7 +504,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ¥Í¦¨ VBO
+		// ç”Ÿæˆ VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -525,31 +520,31 @@ namespace CG
 
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			// ½Æ»s³»ÂI¸ê®Æ
+			// è¤‡è£½é ‚é»è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(VBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»s UV ¸ê®Æ
+			// è¤‡è£½ UV è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(uVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»sªk½u¸ê®Æ
+			// è¤‡è£½æ³•ç·šè³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(nVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
@@ -711,13 +706,13 @@ namespace CG
 	void MainScene::CreateScreenQuad()
 	{
 		GLfloat quadVertices[] = {
-			-1.0f,  1.0f,  0.0f, 1.0f, // ¥ª¤W
-			-1.0f, -1.0f,  0.0f, 0.0f, // ¥ª¤U
-			1.0f, -1.0f,  1.0f, 0.0f, // ¥k¤U
+			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä¸Š
+			-1.0f, -1.0f,  0.0f, 0.0f, // å·¦ä¸‹
+			1.0f, -1.0f,  1.0f, 0.0f, // å³ä¸‹
 
-			-1.0f,  1.0f,  0.0f, 1.0f, // ¥ª¤W
-			1.0f, -1.0f,  1.0f, 0.0f, // ¥k¤U
-			1.0f,  1.0f,  1.0f, 1.0f  // ¥k¤W
+			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä¸Š
+			1.0f, -1.0f,  1.0f, 0.0f, // å³ä¸‹
+			1.0f,  1.0f,  1.0f, 1.0f  // å³ä¸Š
 		};
 
 		glGenVertexArrays(1, &screenQuadVAO);
