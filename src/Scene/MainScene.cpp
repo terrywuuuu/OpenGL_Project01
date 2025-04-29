@@ -192,12 +192,7 @@ namespace CG
 
 		// 渲染屏幕四邊形顯示結果
 		glDrawArrays(GL_TRIANGLES, 0, 6);  // 渲染四邊形*/
-<<<<<<< HEAD
-		glEnable(GL_DEPTH_TEST); // 重新啟用深度測試
-		glFlush();
-=======
 		glEnable(GL_DEPTH_TEST);
->>>>>>> main
 	}
 
 	void MainScene::OnResize(int width, int height)
