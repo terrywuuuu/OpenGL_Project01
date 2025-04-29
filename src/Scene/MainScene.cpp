@@ -305,14 +305,9 @@ namespace CG
 		this->curAction.FDs[frame] = curFD;
 	}
 
-	void MainScene::SaveAction(std::string newFileName) {
-		if (newFileName.empty()) {
-			JsonIO::SaveAction("../../res/actions/" + curAction.name, curAction);
-		}
-		else {
-			curAction.name = newFileName;
-			JsonIO::SaveAction("../../res/actions/" + newFileName, curAction);
-		}
+	void MainScene::SaveAction(std::string fileName) {
+		curAction.name = fileName;
+		JsonIO::SaveAction("../../res/actions/" + fileName, curAction);
 		LoadAction();
 	}
 
@@ -323,7 +318,6 @@ namespace CG
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
-		//std::cout << frame << "\n";
 		return curAction.FDs[frame];
 	}
 
@@ -504,7 +498,7 @@ namespace CG
 				JsonIO::Action actionData;
 				std::string filePath = actionsDir + fd.name;
 				if (JsonIO::LoadAction(filePath, actionData)) {
-					if(actionData.name == "idle") // let idle be first action
+					if (actionData.name == "idle") // let idle be first action
 						actionDatas.insert(actionDatas.begin(), actionData);
 					else
 						actionDatas.push_back(actionData);

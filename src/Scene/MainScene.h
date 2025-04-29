@@ -45,7 +45,7 @@ namespace CG
 		
 		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
 		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
-		void SaveAction(std::string newFileName = "");
+		void SaveAction(std::string fileName);
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();

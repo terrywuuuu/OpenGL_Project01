@@ -260,12 +260,11 @@ namespace CG
 		static float lastPressTime = 0.0f;  // last keydown time
 		float triggerInterval = 0.05f;
 
-		//run other window first to avoid input conflict
-		//Key event A, D control eyes Angley
 		if (!isKeyboardEnable)
 		{
 			return;
 		}
+		//Key event A, D control eyes Angley
 		if (ImGui::IsKeyDown(ImGuiKey_A)) {
 			lastPressTime += io.DeltaTime;
 
@@ -329,10 +328,10 @@ namespace CG
 			io.MouseWheel = 0.0f;
 		}
 		if (!isMouseEnable && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
-			isKeyboardEnable = 0;
+			this->isKeyboardEnable = 0;
 		}
 		else {
-			isKeyboardEnable = 1;
+			this->isKeyboardEnable = 1;
 		}
 	}
 }
