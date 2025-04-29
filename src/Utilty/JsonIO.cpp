@@ -13,7 +13,7 @@ static const char* bodyNames[10] = {
             "right_leg","right_foot"
 };
 
-bool JsonIO::LoadFrames(const std::string& filename, Action& out) {
+bool JsonIO::LoadAction(const std::string& filename, Action& out) {
     std::ifstream ifs(filename);
     json j;
     if (!ifs.is_open()) {
@@ -33,7 +33,10 @@ bool JsonIO::LoadFrames(const std::string& filename, Action& out) {
     // Clear the existing action data
     out.FDs.clear();
 
-    for (auto& frameJson : j) {
+    out.name = j.at("name").get<std::string>();
+    out.speed = j.at("speed").get<float>();
+    
+    for (auto& frameJson : j.at("action")) {
         FrameData ofd;
         ofd.frame = frameJson.at("frame").get<int>();
         ofd.position[0] = frameJson["position"].at("x").get<float>();
@@ -53,8 +56,11 @@ bool JsonIO::LoadFrames(const std::string& filename, Action& out) {
     return true;
 }
 
-bool JsonIO::SaveFrames(const std::string& filename, const Action& action) {
-    json j = json::array();
+bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
+    json j;
+
+	j["name"] = action.name;
+	j["speed"] = action.speed;
 
     for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;
@@ -74,16 +80,10 @@ bool JsonIO::SaveFrames(const std::string& filename, const Action& action) {
             };
         }
 
-		std::cout << "frame: " << f.frame << "\n";
-		std::cout << "position: " << f.position[0] << "," << f.position[1] << "," << f.position[2] << "\n";
-		for (int i = 0; i < 10; ++i) {
-			std::cout << bodyNames[i] << ": " << f.partRotations[i].alpha << "," << f.partRotations[i].beta << "," << f.partRotations[i].gamma << "\n";
-		}
-
-        j.push_back(frameJson);
+        j["action"].push_back(frameJson);
     }
 
-    std::ofstream ofs(filename);
+    std::ofstream ofs(filename + ".json");
     if (!ofs.is_open()) {
         std::cerr << "Cannot open " << filename << " for writing\n";
         return false;

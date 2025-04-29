@@ -37,20 +37,19 @@ namespace CG
 		void SetAction(int action);
 
 		void SetMode(int mode);
-		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
-		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
-		void SetSpeed(float speed);
 
-		void SetEdit(bool isEdit,int mode);
+		void SetEdit(bool isEdit);
 		void SetFrame(int frame);
+		void SetSpeed(float speed);
 		
-		//void SaveAction();
-		void SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD);
+		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
+		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
+		void SaveAction(std::string fileName);
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
-		double GetFrame() { return frame; }
+		std::vector<std::string> GetActionNames();
 
 	private:
 		auto LoadScene() -> bool;
@@ -113,13 +112,10 @@ namespace CG
 		float betas[PARTSNUM];
 		float gammas[PARTSNUM];
 		float position[3];
-		bool isActionChange;
 		bool isEdit = false;
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
 		
-		//control speed
-		float speed = 1;
 		double frame;
 
 		enum Body
@@ -134,17 +130,6 @@ namespace CG
 			left_foot,
 			right_leg,
 			right_foot
-		};
-
-		enum Action
-		{
-			idle = 0,
-			walk,
-			sit_up,
-			push_up,
-			multiple,
-			hopak_dance,
-			apt
 		};
 
 		enum Axis {

@@ -1,6 +1,7 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
 #include <../src/Utilty/JsonIO.h>
+#include <io.h>
 
 #include "MainScene.h"
 
@@ -224,7 +225,7 @@ namespace CG
 		curAction = actionDatas[action];
 		this->actionIndex = action;
 		instancedNum = 1;
-		frame = 0;
+		frame = 0.0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -241,24 +242,6 @@ namespace CG
 			this->mode = GL_FILL;
 			break;
 		}
-	}
-
-	void MainScene::SetSpeed(float speed)
-	{
-		this->speed = speed;
-	}
-
-	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
-	{
-		curAction.FDs[frame].partRotations[bodyPart].alpha = alpha;
-		curAction.FDs[frame].partRotations[bodyPart].beta = beta;
-		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
-	}
-
-	//todo delete this func
-	void MainScene::SetPosition(int axis, float position)
-	{
-		curAction.FDs[frame].position[axis] = position;
 	}
 
 	void MainScene::SetMtl(int partsNum, std::string material)
@@ -294,31 +277,38 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetEdit(bool isEdit,int mode) {
+	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
-		if (mode == 0) {//edit cur action
-
-		}
-		else {// new action
-
-		}
 	}
 
 	void MainScene::SetFrame(int frame) {
 		this->frame = frame;
 	}
 
-	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD=0)
+	void MainScene::SetSpeed(float speed)
 	{
-		if (isNewFD) {
-			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
-		}
-		else {
-			actionDatas[actionIndex] = curAction;
-			JsonIO::SaveFrames("../../res/actions/action.json", actionDatas[actionIndex]);
-		}
+		curAction.speed = speed;
+	}
+
+	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
+	{
+		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
 		this->frame = frame;
-		curAction.FDs[frame] = frameData;
+		for (int i = frame + 1; i < curAction.FDs.size(); i++)
+		{
+			curAction.FDs[i].frame = i;
+		}
+	}
+
+	void MainScene::SetCurFrameData(JsonIO::FrameData curFD, int frame)
+	{
+		this->curAction.FDs[frame] = curFD;
+	}
+
+	void MainScene::SaveAction(std::string fileName) {
+		curAction.name = fileName;
+		JsonIO::SaveAction("../../res/actions/" + fileName, curAction);
+		LoadAction();
 	}
 
 	JsonIO::Action MainScene::GetAction()
@@ -328,18 +318,17 @@ namespace CG
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
-		JsonIO::FrameData fd;
-		fd.frame = frame;
-		fd.isKeyFrame = curAction.FDs[frame].isKeyFrame;
-		for (int i = 0; i < 3; ++i) {
-			fd.position[i] = curAction.FDs[frame].position[i];
+		return curAction.FDs[frame];
+	}
+
+	std::vector<std::string> MainScene::GetActionNames()
+	{
+		std::vector<std::string> actionNames;
+		for (int i = 0; i < actionDatas.size(); i++)
+		{
+			actionNames.push_back(actionDatas[i].name);
 		}
-		for (int i = 0; i < PARTSNUM-1/*without tree*/ ; i++) {
-			fd.partRotations[i].alpha = curAction.FDs[frame].partRotations[i].alpha;
-			fd.partRotations[i].beta = curAction.FDs[frame].partRotations[i].beta;
-			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
-		}
-		return fd;
+		return actionNames;
 	}
 
 	auto MainScene::LoadScene() -> bool
@@ -498,42 +487,35 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		JsonIO::Action actionData;
-		if (JsonIO::LoadFrames("../../res/actions/idle.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
+		const std::string actionsDir = "../../res/actions/";
+		const std::string pattern = actionsDir + "*.json"; // find all json files
+		actionDatas.clear();
+
+		struct _finddata_t fd;
+		intptr_t handle = _findfirst(pattern.c_str(), &fd);
+		if (handle != -1) {
+			do {
+				JsonIO::Action actionData;
+				std::string filePath = actionsDir + fd.name;
+				if (JsonIO::LoadAction(filePath, actionData)) {
+					if (actionData.name == "idle") // let idle be first action
+						actionDatas.insert(actionDatas.begin(), actionData);
+					else
+						actionDatas.push_back(actionData);
+				}
+			} while (_findnext(handle, &fd) == 0);
+			_findclose(handle);
 		}
-		if (JsonIO::LoadFrames("../../res/actions/walk.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/push_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/multiple.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/apt.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		SetAction(Action::idle);
+		SetAction(0);
 	}
 
 	void MainScene::UpdateAction(double dt)
 	{
-		const JsonIO::Action& act = curAction;
-		const size_t end = act.FDs.size();
+		const size_t end = curAction.FDs.size();
 
-		dt *= isEdit ? 0.0 : speed;//todo act.speed
+		dt *= isEdit ? 0.0 : curAction.speed;
 
-		if (isActionChange) {
-			isActionChange = false;
-		}
-		if (actionIndex == Action::multiple)
+		if (curAction.name == "multiple")
 		{
 			if (frame >= end - 1)
 				instancedNum = 100;
@@ -541,7 +523,7 @@ namespace CG
 		else
 			instancedNum = 1;
 		if (instancedNum == 1) {
-			HandleAction(act.FDs, frame, dt);
+			HandleAction(curAction.FDs, frame, dt);
 		}
 
 		frame += dt;
@@ -599,7 +581,7 @@ namespace CG
 	}
 
 	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
-		JsonIO::FrameData curFD = frameDatas[frame], perFD;
+		JsonIO::FrameData curFD = curAction.FDs[frame], perFD;
 		if (frame == 0 || isEdit) {
 			for (int i = 0; i < 3; ++i) {
 				position[i] = curFD.position[i];
