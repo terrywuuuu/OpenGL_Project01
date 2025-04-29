@@ -1,6 +1,4 @@
-{"name":"walk",
-  "speed":2.0,
-  "action":[
+[
   {
     "frame": 0,
     "position": {
@@ -929,4 +927,4 @@
       "gamma": 0
     }
   }
-]}
+]

@@ -1,7 +1,4 @@
-{
-  "name":"hopak",
-  "speed":2.9,
-  "action":[
+[
   {
     "frame": 0,
     "isKeyFrame": 0,
@@ -708,5 +705,6 @@
       "alpha": 110,
       "beta": 0,
       "gamma": 0
-    }}]
+    }
   }
+]

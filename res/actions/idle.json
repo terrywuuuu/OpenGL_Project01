@@ -1,6 +1,4 @@
-{"name":"idle",
-  "speed":1.0,
-  "action":[
+[
   {
     "frame": 0,
     "isKeyFrame": 0,
@@ -60,4 +58,4 @@
       "gamma": 0
     }
   }
-]}
+]

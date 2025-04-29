@@ -244,23 +244,6 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetSpeed(float speed)
-	{
-		this->speed = speed;
-	}
-
-	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
-	{
-		curAction.FDs[frame].partRotations[bodyPart].alpha = alpha;
-		curAction.FDs[frame].partRotations[bodyPart].beta = beta;
-		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
-	}
-
-	void MainScene::SetPosition(int axis, float position)
-	{
-		curAction.FDs[frame].position[axis] = position;
-	}
-
 	void MainScene::SetMtl(int partsNum, std::string material)
 	{
 		std::string mtlname;//material name
@@ -294,7 +277,7 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetEdit(bool isEdit, int mode) {
+	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
 	}
 
@@ -302,11 +285,24 @@ namespace CG
 		this->frame = frame;
 	}
 
+	void MainScene::SetSpeed(float speed)
+	{
+		curAction.speed = speed;
+	}
+
 	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
 	{
 		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
 		this->frame = frame;
-		curAction.FDs[frame] = frameData;
+		for (int i = frame + 1; i < curAction.FDs.size(); i++)
+		{
+			curAction.FDs[i].frame = i;
+		}
+	}
+
+	void MainScene::SetCurFrameData(JsonIO::FrameData curFD, int frame)
+	{
+		this->curAction.FDs[frame] = curFD;
 	}
 
 	void MainScene::SaveAction(std::string newFileName) {
@@ -314,6 +310,7 @@ namespace CG
 			JsonIO::SaveAction("../../res/actions/" + curAction.name, curAction);
 		}
 		else {
+			curAction.name = newFileName;
 			JsonIO::SaveAction("../../res/actions/" + newFileName, curAction);
 		}
 		LoadAction();
@@ -326,6 +323,7 @@ namespace CG
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
+		//std::cout << frame << "\n";
 		return curAction.FDs[frame];
 	}
 
@@ -497,6 +495,7 @@ namespace CG
 	{
 		const std::string actionsDir = "../../res/actions/";
 		const std::string pattern = actionsDir + "*.json"; // find all json files
+		actionDatas.clear();
 
 		struct _finddata_t fd;
 		intptr_t handle = _findfirst(pattern.c_str(), &fd);
@@ -505,7 +504,10 @@ namespace CG
 				JsonIO::Action actionData;
 				std::string filePath = actionsDir + fd.name;
 				if (JsonIO::LoadAction(filePath, actionData)) {
-					actionDatas.push_back(actionData);
+					if(actionData.name == "idle") // let idle be first action
+						actionDatas.insert(actionDatas.begin(), actionData);
+					else
+						actionDatas.push_back(actionData);
 				}
 			} while (_findnext(handle, &fd) == 0);
 			_findclose(handle);
@@ -517,11 +519,8 @@ namespace CG
 	{
 		const size_t end = curAction.FDs.size();
 
-		dt *= isEdit ? 0.0 : speed;
+		dt *= isEdit ? 0.0 : curAction.speed;
 
-		if (isActionChange) {
-			isActionChange = false;
-		}
 		if (curAction.name == "multiple")
 		{
 			if (frame >= end - 1)
