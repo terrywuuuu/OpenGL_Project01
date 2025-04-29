@@ -50,6 +50,9 @@
     <ClCompile Include="..\src\Utilty\stb_image.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene\Skybox.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -117,11 +120,16 @@
     <ClInclude Include="..\src\Utilty\stb_image.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Scene\SkyBox.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />
     <None Include="..\res\shaders\Scene_Material.vp" />
+    <None Include="..\res\shaders\SkyBox_Material.fp" />
+    <None Include="..\res\shaders\SkyBox_Material.vp" />
   </ItemGroup>
 </Project>

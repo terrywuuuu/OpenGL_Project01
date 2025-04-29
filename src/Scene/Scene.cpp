@@ -19,7 +19,7 @@ namespace CG
 {
 	auto Scene::Initialize() -> bool
 	{
-		Models[0] *= scale(3, 3, 3);
+		Models[0] *= scale(10, 10, 10);
 		return LoadScene();
 	}
 
@@ -64,11 +64,6 @@ namespace CG
 		glUniformBlockBinding(program, MatricesIdx, 0);
 
 		return true;
-	}
-
-	void Scene::Update(double dt)
-	{
-
 	}
 
 	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode)
@@ -190,10 +185,10 @@ namespace CG
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, Textures[mtlname].texture);
 
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				glGenerateMipmap(GL_TEXTURE_2D);
@@ -204,9 +199,6 @@ namespace CG
 				GLuint tex0Uni = glGetUniformLocation(program, "tex0");
 				glUseProgram(program);  // Use program before setting uniform
 				glUniform1i(tex0Uni, 0);
-			}
-			else {
-				Textures[mtlname].hasTexture = false;
 			}
 		}
 

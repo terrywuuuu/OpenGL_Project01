@@ -49,13 +49,17 @@ namespace CG
 	auto MainScene::Initialize() -> bool
 	{
 		isActionChange = true;
-		scene.Initialize();
+		scene = new Scene();
+		skyBox = new SkyBox();
+		
+		scene->Initialize();
+		skyBox->Initialize();
 		return LoadScene();
 	}
 
 	void MainScene::Update(double dt)
 	{
-		//UpdateAction(dt);
+		UpdateAction(dt);
 		UpdateModel();
 	}
 
@@ -159,7 +163,8 @@ namespace CG
 
 		}//end for loop for updating and drawing model
 
-		scene.Render(camX, camY, camZ, aspect, mode);
+		scene->Render(camX, camY, camZ, aspect, mode);
+		skyBox->Render(camX, camY, camZ, aspect, mode);
 		glFlush();
 	}
 
@@ -206,10 +211,12 @@ namespace CG
 				break;
 			case 4:
 				eyedistance -= 2.0;
+				printf("eyedistance:%f\n", eyedistance);
 				break;
 
 			case 5:
 				eyedistance += 2.0;
+				printf("eyedistance:%f\n", eyedistance);
 				break;
 		}
 		/*
@@ -528,7 +535,7 @@ namespace CG
 
 		glm::mat4 Translation[PARTSNUM];
 
-		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
+		Translation[Body::body] = translate(position[Axis::x], 18.5f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
 		Translation[Body::head] = translate(0, 12.0f, 0);

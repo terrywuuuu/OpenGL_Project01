@@ -25,7 +25,6 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void Update(double dt);
 		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
 
 	private:

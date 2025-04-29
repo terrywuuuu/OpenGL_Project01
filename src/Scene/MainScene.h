@@ -13,6 +13,7 @@
 #include "../Utilty/JsonIO.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "SkyBox.h"
 
 constexpr auto PARTSNUM = 11;
 //new
@@ -56,7 +57,8 @@ namespace CG
 		
 	private:
 		Camera camera;
-		Scene scene;
+		Scene *scene;
+		SkyBox *skyBox;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -75,7 +77,7 @@ namespace CG
 		float eyeX = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
-		float eyedistance = 25.0;
+		float eyedistance = 65.0;
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
