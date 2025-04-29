@@ -209,10 +209,11 @@ namespace CG
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			int effectNum = 1;
-			std::vector<std::string> effectName = { "Vague" };
+			int effectNum = 2;
+			std::vector<std::string> effectName = { "Vague", "Quantization"};
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
+			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f} };
 
 			for (int i = 0; i < effectNum; i++) {
 				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
@@ -220,7 +221,7 @@ namespace CG
 				ImGui::SetNextItemWidth(100);
 				if (isActive[effectName[i]])
 				{
-					ImGui::SliderFloat("Strength", &num[effectName[i]], 0, 3.0f, "%.3f");
+					ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
 					targetScene->SetEffect(num[effectName[i]], i, true);
 				}
 				else 

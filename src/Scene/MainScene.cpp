@@ -168,7 +168,12 @@ namespace CG
 		}//end for loop for updating and drawing model
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Texture_Render();
 
+		glFlush();
+	}
+
+	void MainScene::Texture_Render() {
 		// 顯示渲染結果並應用模糊
 		glUseProgram(Post_Process);  // 使用另一個 program
 		glBindVertexArray(screenQuadVAO);  // 綁定四邊形 VAO
@@ -181,12 +186,18 @@ namespace CG
 		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // 傳遞紋理到 shader
 		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // 傳遞紋理大小到 shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
+		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
 
 		// 渲染屏幕四邊形顯示結果
 		glDrawArrays(GL_TRIANGLES, 0, 6);  // 渲染四邊形*/
+<<<<<<< HEAD
 		glEnable(GL_DEPTH_TEST); // 重新啟用深度測試
 		glFlush();
+=======
+		glEnable(GL_DEPTH_TEST);
+>>>>>>> main
 	}
 
 	void MainScene::OnResize(int width, int height)
@@ -201,6 +212,7 @@ namespace CG
 
 		screenWidth = width;
 		screenHeight = height;
+		SetTexture();
 
 		// calc aspect and update camera
 		float aspect = static_cast<float>(width) / static_cast<float>(height);
@@ -323,6 +335,10 @@ namespace CG
 		case 0:
 			enableBlur = isActive;
 			blurStrength = num;
+			break;
+		case 1:
+			enableQuan = isActive;
+			quanStrength = num;
 			break;
 		}
 	}
