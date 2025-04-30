@@ -95,11 +95,11 @@ namespace CG
 		);
 		*/
 
-		controlWindow = new ControlWindow();
-		controlWindow->Initialize();
-
 		mainScene = new MainScene();
 		mainScene->Initialize();
+
+		controlWindow = new ControlWindow();
+		controlWindow->Initialize();
 
 		controlWindow->SetTargetScene(mainScene);
 

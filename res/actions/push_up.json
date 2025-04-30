@@ -1,4 +1,6 @@
-[
+{"name":"push up",
+  "speed":1.0,
+  "action":[
   {
     "frame": 0,
     "isKeyFrame": 0,
@@ -531,3 +533,4 @@
     }
   }
 ]
+}

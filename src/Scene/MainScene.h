@@ -40,21 +40,32 @@ namespace CG
 		void SetAction(int action);
 
 		void SetMode(int mode);
-		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
-		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
+
+		void SetEdit(bool isEdit);
+		void SetFrame(int frame);
 		void SetSpeed(float speed);
+		
+		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
+		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
+		void SaveAction(std::string fileName);
+
+		JsonIO::FrameData GetFrameData();
+		JsonIO::Action GetAction();
+		std::vector<std::string> GetActionNames();
 
 	private:
 		auto LoadScene() -> bool;
 
 		void LoadModel();
 		void Load2Buffer(const char* obj, int i);
+		void LoadAction();
 
 		void UpdateAction(double dt);
 		void UpdateModel();
 		glm::mat4 bodyRotateMatrix(int body);
-		
+
+		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
 	private:
 		Camera camera;
 		Scene *scene;
@@ -71,7 +82,7 @@ namespace CG
 		std::array<GLuint, PARTSNUM> nVBOs;
 		GLuint program;
 
-		int action = -1; // idle
+		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
 
 		float eyeX = 0.0;
@@ -106,13 +117,11 @@ namespace CG
 		float betas[PARTSNUM];
 		float gammas[PARTSNUM];
 		float position[3];
-		bool isActionChange;
+		bool isEdit = false;
+		std::vector<JsonIO::Action> actionDatas;
+		JsonIO::Action curAction;
 		
-		//control speed
-		float speed = 1;
-
-		// Six Action
-		void HandleAction(std::vector<JsonIO::FrameData>&,double, double);
+		double frame;
 
 		enum Body
 		{
@@ -126,17 +135,6 @@ namespace CG
 			left_foot,
 			right_leg,
 			right_foot
-		};
-
-		enum Action
-		{
-			idle = 0,
-			walk,
-			sit_up,
-			push_up,
-			multiple,
-			hopak_dance,
-			apt
 		};
 
 		enum Axis {

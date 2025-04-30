@@ -1,12 +1,13 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
 #include <../src/Utilty/JsonIO.h>
+#include <io.h>
 
 #include "MainScene.h"
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,«hx,y,z=0®É¤]¯àtranslate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,å‰‡x,y,z=0æ™‚ä¹Ÿèƒ½translate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -70,10 +71,10 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
-		float theta = glm::radians(eyeAngley); // ¥ª¥k
-		float phi = glm::radians(angle);   // ¤W¤U
+		float theta = glm::radians(eyeAngley); // å·¦å³
+		float phi = glm::radians(angle);   // ä¸Šä¸‹
 
 		float camX = eyedistance * cos(phi) * sin(theta);
 		float camY = eyedistance * sin(phi);
@@ -107,7 +108,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,buffer point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -119,7 +120,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec2,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -131,12 +132,12 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
 			std::string mtlname;//material name
-			
+
 			for (int j = 0; j < mtls[i].size(); j++)
 			{
 				mtlname = mtls[i][j];
@@ -219,22 +220,14 @@ namespace CG
 				printf("eyedistance:%f\n", eyedistance);
 				break;
 		}
-		/*
-			
-		*/
 	}
 
 	void MainScene::SetAction(int action)
 	{
-		this->action = action;
-		isActionChange = true;
+		curAction = actionDatas[action];
+		this->actionIndex = action;
 		instancedNum = 1;
-		for (int i = 0; i < PARTSNUM; i++) //reset model pos
-		{
-			alphas[i] = 0.0f;
-			betas[i] = 0.0f;
-			gammas[i] = 0.0f;
-		}
+		frame = 0.0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -251,23 +244,6 @@ namespace CG
 			this->mode = GL_FILL;
 			break;
 		}
-	}
-
-	void MainScene::SetSpeed(float speed)
-	{
-		this->speed = speed;
-	}
-
-	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
-	{
-		alphas[bodyPart] = alpha;
-		betas[bodyPart] = beta;
-		gammas[bodyPart] = gamma;
-	}
-
-	void MainScene::SetPosition(int axis, float position)
-	{
-		this->position[axis] = position;
 	}
 
 	void MainScene::SetMtl(int partsNum, std::string material)
@@ -303,6 +279,60 @@ namespace CG
 		}
 	}
 
+	void MainScene::SetEdit(bool isEdit) {
+		this->isEdit = isEdit;
+	}
+
+	void MainScene::SetFrame(int frame) {
+		this->frame = frame;
+	}
+
+	void MainScene::SetSpeed(float speed)
+	{
+		curAction.speed = speed;
+	}
+
+	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
+	{
+		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
+		this->frame = frame;
+		for (int i = frame + 1; i < curAction.FDs.size(); i++)
+		{
+			curAction.FDs[i].frame = i;
+		}
+	}
+
+	void MainScene::SetCurFrameData(JsonIO::FrameData curFD, int frame)
+	{
+		this->curAction.FDs[frame] = curFD;
+	}
+
+	void MainScene::SaveAction(std::string fileName) {
+		curAction.name = fileName;
+		JsonIO::SaveAction("../../res/actions/" + fileName, curAction);
+		LoadAction();
+	}
+
+	JsonIO::Action MainScene::GetAction()
+	{
+		return curAction;
+	}
+
+	JsonIO::FrameData MainScene::GetFrameData()
+	{
+		return curAction.FDs[frame];
+	}
+
+	std::vector<std::string> MainScene::GetActionNames()
+	{
+		std::vector<std::string> actionNames;
+		for (int i = 0; i < actionDatas.size(); i++)
+		{
+			actionNames.push_back(actionDatas[i].name);
+		}
+		return actionNames;
+	}
+
 	auto MainScene::LoadScene() -> bool
 	{
 		glEnable(GL_DEPTH_TEST);
@@ -317,9 +347,9 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //è®€å–shader
 
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -342,7 +372,10 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
-		return true;
+    
+		LoadAction();
+		
+    return true;
 	}
 
 	void MainScene::LoadModel()
@@ -359,7 +392,7 @@ namespace CG
 			KDs[mtlname] = Kds[i];
 		}
 
-		// ¥[¸ü¦U³¡¥ó
+		// åŠ è¼‰å„éƒ¨ä»¶
 		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
 		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
 		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
@@ -381,7 +414,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ¥Í¦¨ VBO
+		// ç”Ÿæˆ VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -397,31 +430,31 @@ namespace CG
 
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			// ½Æ»s³»ÂI¸ê®Æ
+			// è¤‡è£½é ‚é»è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(VBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»s UV ¸ê®Æ
+			// è¤‡è£½ UV è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(uVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»sªk½u¸ê®Æ
+			// è¤‡è£½æ³•ç·šè³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(nVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
@@ -453,70 +486,51 @@ namespace CG
 		normals_size[i] = normals.size();
 	}
 
+	void MainScene::LoadAction()
+	{
+		const std::string actionsDir = "../../res/actions/";
+		const std::string pattern = actionsDir + "*.json"; // find all json files
+		actionDatas.clear();
+
+		struct _finddata_t fd;
+		intptr_t handle = _findfirst(pattern.c_str(), &fd);
+		if (handle != -1) {
+			do {
+				JsonIO::Action actionData;
+				std::string filePath = actionsDir + fd.name;
+				if (JsonIO::LoadAction(filePath, actionData)) {
+					if (actionData.name == "idle") // let idle be first action
+						actionDatas.insert(actionDatas.begin(), actionData);
+					else
+						actionDatas.push_back(actionData);
+				}
+			} while (_findnext(handle, &fd) == 0);
+			_findclose(handle);
+		}
+		SetAction(0);
+	}
+
 	void MainScene::UpdateAction(double dt)
 	{
-		static double _frame = 0.0;
-		static short isMultiple = 0;
-		std::vector<JsonIO::FrameData> frameData;
-		int end = 0;
-		if (isActionChange) {
-			isActionChange = false;
-			_frame = 0;
+		const size_t end = curAction.FDs.size();
+
+		dt *= isEdit ? 0.0 : curAction.speed;
+
+		if (curAction.name == "multiple")
+		{
+			if (frame >= end - 1)
+				instancedNum = 100;
+		}
+		else
+			instancedNum = 1;
+		if (instancedNum == 1) {
+			HandleAction(curAction.FDs, frame, dt);
 		}
 
-		dt *= speed;
-
-		if (action == Action::idle)
-		{
-			if (JsonIO::LoadFrames("../../res/actions/idle.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
+		frame += dt;
+		if (frame > end) {
+			frame = 0.0;
 		}
-		else if (action == Action::walk)
-		{
-			if (JsonIO::LoadFrames("../../res/actions/walk.json", frameData))
-			{
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::sit_up) {
-			if (JsonIO::LoadFrames("../../res/actions/sit_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::push_up) {
-			if (JsonIO::LoadFrames("../../res/actions/push_up.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::multiple) {
-			if (instancedNum == 1 && JsonIO::LoadFrames("../../res/actions/multiple.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-			if (_frame >= end-1) {
-				instancedNum = 50;
-			}
-		}
-		else if (action == Action::hopak_dance) {
-			if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		else if (action == Action::apt) {
-			if (JsonIO::LoadFrames("../../res/actions/apt.json", frameData)) {
-				end = frameData.size();
-				HandleAction(frameData, _frame, dt);
-			}
-		}
-		_frame += dt;
-		if (_frame > end)
-			_frame = 0;
 	}
 
 	glm::mat4 MainScene::bodyRotateMatrix(int body)
@@ -567,9 +581,9 @@ namespace CG
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
 	}
 
-	void MainScene::HandleAction(std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
-		JsonIO::FrameData curFD = frameDatas[frame], perFD;
-		if (frame == 0) {
+	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
+		JsonIO::FrameData curFD = curAction.FDs[frame], perFD;
+		if (frame == 0 || isEdit) {
 			for (int i = 0; i < 3; ++i) {
 				position[i] = curFD.position[i];
 			}
