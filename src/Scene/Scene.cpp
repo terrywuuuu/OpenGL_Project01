@@ -46,7 +46,8 @@ namespace CG
 		M_KaID = glGetUniformLocation(program, "Material.Ka");
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
-		BackGround = glGetUniformLocation(program, "isInstanced");
+		IsInstanced = glGetUniformLocation(program, "isInstanced");
+		MultipleMode = glGetUniformLocation(program, "MultipleMode");
 
 		// Camera matrix
 
@@ -90,7 +91,6 @@ namespace CG
 		GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
 		for (int i = 0; i < SCENESUM; i++)
 		{
-
 			glUniformMatrix4fv(ModelID, 1, GL_FALSE, &Models[i][0][0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -144,7 +144,15 @@ namespace CG
 				{
 					glBindTexture(GL_TEXTURE_2D, Textures[mtlname].texture);
 				}
-				glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				if (instancedNum == 1) {
+					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+				}
+				else {
+					glUniform1i(IsInstanced, 1);
+					glUniform1i(MultipleMode, multipleMode);
+
+					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
+				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
 				vertexIDoffset += faces[i][j + 1] * 3;//glVertexID's base offset is face count*3
 			}//end for loop for draw one part of the robot	
@@ -285,5 +293,10 @@ namespace CG
 		glBindBuffer(GL_ARRAY_BUFFER, nVBOs[i]);
 		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 		normals_size[i] = normals.size();
+	}
+
+	void Scene::SetInstance(int instancedNum, int multipleMode) {
+		this->instancedNum = instancedNum;
+		this->multipleMode = multipleMode;
 	}
 }

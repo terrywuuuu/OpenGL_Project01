@@ -26,7 +26,7 @@ namespace CG
 	public:
 		auto Initialize() -> bool;
 		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
-
+		void SetInstance(int instancedNum, int multipleMode);
 	private:
 		auto LoadScene() -> bool;
 
@@ -57,7 +57,11 @@ namespace CG
 		GLuint M_KaID;
 		GLuint M_KdID;
 		GLuint M_KsID;
-		GLuint BackGround;
+		GLuint IsInstanced;
+		GLuint MultipleMode;
+
+		int multipleMode = 0;
+		int instancedNum = 1;
 
 
 		std::vector<std::string> mtls[SCENESUM];//use material

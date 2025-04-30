@@ -156,6 +156,7 @@ namespace CG
 						glUniform1i(BackGround, 1);
 					}
 
+					glUniform1i(MultipleMode, multipleMode);
 					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
 				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
@@ -226,7 +227,13 @@ namespace CG
 	{
 		curAction = actionDatas[action];
 		this->actionIndex = action;
-		instancedNum = 1;
+
+		if (!this->keepMultipleActive)
+		{
+			instancedNum = 1;
+		}
+		scene->SetInstance(instancedNum, multipleMode);
+
 		frame = 0.0;
 	}
 
@@ -357,6 +364,7 @@ namespace CG
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 		BackGround = glGetUniformLocation(program, "isInstanced");
+		MultipleMode = glGetUniformLocation(program, "MultipleMode");
 
 		// Camera matrix
 
@@ -518,12 +526,19 @@ namespace CG
 
 		if (curAction.name == "multiple")
 		{
-			if (frame >= end - 1)
+			if (frame >= end - 1) 
+			{
 				instancedNum = 100;
+				scene->SetInstance(instancedNum, multipleMode);
+			}
 		}
 		else
-			instancedNum = 1;
-		if (instancedNum == 1) {
+			if (!this->keepMultipleActive)
+			{
+				instancedNum = 1;
+			}
+			scene->SetInstance(instancedNum, multipleMode);
+		if (instancedNum == 1 || (instancedNum != 1 && instancedNum && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);
 		}
 
@@ -605,4 +620,14 @@ namespace CG
 			}
 		}
 	}
+
+	void MainScene::SetkeepMultipleActive(bool keepMultipleActive) {
+		this->keepMultipleActive = keepMultipleActive;
+	}
+
+
+	void MainScene::SetMultipleMode(int multipleMode) {
+		this->multipleMode = multipleMode;
+	}
 }
+

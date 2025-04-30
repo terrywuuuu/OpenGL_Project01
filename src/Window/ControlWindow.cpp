@@ -10,6 +10,8 @@ namespace CG
 	{
 		showDemoWindow = false;
 		showMtlWindow = false;
+		keepMultipleActive = false;
+		previousKeepMultipleActive = keepMultipleActive;
 	}
 
 	auto ControlWindow::Initialize() -> bool
@@ -52,7 +54,38 @@ namespace CG
 				}
 				ImGui::EndCombo();
 			}
+
+			static int multipleModesIndex = 0;
+			std::vector<std::string> multipleModes = { "Triangle Edge Only" ,"Triangular Grid", "Circular Spread"};
+			ImGui::Text("Multiple Setting: ");
+			ImGui::Checkbox("Keep Multiple Active", &keepMultipleActive);
+			ImGui::Text("Multiple Mode: ");
+			if (ImGui::BeginCombo("##MultipleMode", multipleModes[multipleModesIndex].c_str()))
+			{
+				for (int n = 0; n < multipleModes.size(); n++)
+				{
+					const bool is_selected = (multipleModesIndex == n);
+					if (ImGui::Selectable(multipleModes[n].c_str(), is_selected))
+					{
+						multipleModesIndex = n;
+						std::cout << "Set Multiple Mode " << multipleModesIndex << std::endl;
+						targetScene->SetMultipleMode(n);
+					}
+
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
 		}
+		if (keepMultipleActive != previousKeepMultipleActive)
+		{
+			targetScene->SetkeepMultipleActive(keepMultipleActive);
+			previousKeepMultipleActive = keepMultipleActive;
+		}
+
 		ImVec2 controlPos = ImGui::GetWindowPos();
 		ImVec2 controlSize = ImGui::GetWindowSize();
 		ImGui::End();

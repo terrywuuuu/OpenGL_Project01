@@ -54,6 +54,9 @@ namespace CG
 		JsonIO::Action GetAction();
 		std::vector<std::string> GetActionNames();
 
+		void SetkeepMultipleActive(bool keepMultipleActive);
+		void SetMultipleMode(int multipleMode);
+
 	private:
 		auto LoadScene() -> bool;
 
@@ -93,6 +96,9 @@ namespace CG
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
+
+		bool keepMultipleActive = false;
+		int multipleMode = 0;
 		int instancedNum = 1;  // How many robot
 
 		int vertices_size[PARTSNUM];
@@ -104,6 +110,7 @@ namespace CG
 		GLuint M_KdID;
 		GLuint M_KsID;
 		GLuint BackGround;
+		GLuint MultipleMode;
 
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count
@@ -122,6 +129,8 @@ namespace CG
 		JsonIO::Action curAction;
 		
 		double frame;
+
+		bool isActionChange;
 
 		enum Body
 		{

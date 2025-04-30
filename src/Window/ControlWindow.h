@@ -24,6 +24,8 @@ namespace CG
 		bool showDemoWindow;
 		bool showMtlWindow;
 		bool isKeyboardEnable = 1;
+		bool keepMultipleActive;
+		bool previousKeepMultipleActive;
 		//JsonIO::Action actionData;
 		JsonIO::FrameData frameData;
 		

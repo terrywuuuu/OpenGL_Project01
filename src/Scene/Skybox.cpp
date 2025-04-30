@@ -8,7 +8,7 @@
 const unsigned int width = 800;
 const unsigned int height = 800;
 
-float size = 100.0f;
+float size = 500.0f;
 
 float skyboxVertices[] =
 {
