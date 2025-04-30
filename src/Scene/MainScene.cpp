@@ -7,7 +7,7 @@
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,«hx,y,z=0®É¤]¯àtranslate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,å‰‡x,y,z=0æ™‚ä¹Ÿèƒ½translate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -49,6 +49,12 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
+		isActionChange = true;
+		scene = new Scene();
+		skyBox = new SkyBox();
+		
+		scene->Initialize();
+		skyBox->Initialize();
 		return LoadScene();
 	}
 
@@ -65,20 +71,10 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ýuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
-
-		/*
-		float eyey = glm::radians(eyeAngley);
-		camera.LookAt(
-			glm::vec3(eyedistance * sin(eyey), 2, eyedistance * cos(eyey)), // Camera is at (0,0,20), in World Space
-			glm::vec3(0, 0, 0), // and looks at the origin
-			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-		*/
-
-		float theta = glm::radians(eyeAngley); // ¥ª¥k
-		float phi = glm::radians(angle);   // ¤W¤U
+		float theta = glm::radians(eyeAngley); // å·¦å³
+		float phi = glm::radians(angle);   // ä¸Šä¸‹
 
 		float camX = eyedistance * cos(phi) * sin(theta);
 		float camY = eyedistance * sin(phi);
@@ -112,7 +108,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,buffer point)
+			//(location,vec3,type,å›ºå®šé»ž,é€£çºŒé»žçš„åç§»é‡,buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -124,7 +120,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec2,type,å›ºå®šé»ž,é€£çºŒé»žçš„åç§»é‡,point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -136,7 +132,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec3,type,å›ºå®šé»ž,é€£çºŒé»žçš„åç§»é‡,point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
@@ -167,6 +163,9 @@ namespace CG
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
+
+		scene->Render(camX, camY, camZ, aspect, mode);
+		skyBox->Render(camX, camY, camZ, aspect, mode);
 		glFlush();
 	}
 
@@ -195,28 +194,31 @@ namespace CG
 		//5: Mouse wheel down
 		switch (key)
 		{
-		case 0:
-			eyeAngley -= 10;
-			break;
-		case 1:
-			eyeAngley += 10;
-			break;
-		case 2:
-			angle += 3;
-			if (angle >= 90) angle = 89;
-			printf("beta:%f\n", angle);
-			break;
-		case 3:
-			angle -= 3;
-			if (angle <= -90) angle = -89;
-			printf("beta:%f\n", angle);
-			break;
-		case 4:
-			eyedistance -= 2.0;
-			break;
-		case 5:
-			eyedistance += 2.0;
-			break;
+			case 0:
+				eyeAngley -= 10;
+				break;
+			case 1:
+				eyeAngley += 10;
+				break;
+			case 2:
+				angle += 3;
+				if (angle >= 90) angle = 89;
+				printf("beta:%f\n", angle);
+				break;
+			case 3:
+				angle -= 3;
+				if (angle <= -90) angle = -89;
+				printf("beta:%f\n", angle);
+				break;
+			case 4:
+				eyedistance -= 2.0;
+				printf("eyedistance:%f\n", eyedistance);
+				break;
+
+			case 5:
+				eyedistance += 2.0;
+				printf("eyedistance:%f\n", eyedistance);
+				break;
 		}
 	}
 
@@ -345,9 +347,9 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //è®€å–shader
 
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ýuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -357,7 +359,6 @@ namespace CG
 		BackGround = glGetUniformLocation(program, "isInstanced");
 
 		// Camera matrix
-		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		LoadModel();
 
@@ -371,10 +372,10 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
-
+    
 		LoadAction();
-
-		return true;
+		
+    return true;
 	}
 
 	void MainScene::LoadModel()
@@ -383,7 +384,7 @@ namespace CG
 		std::vector<glm::vec3> Kas;
 		std::vector<glm::vec3> Kss;
 		std::vector<std::string> Materials; // mtl-name
-		std::string texture;
+		std::vector<std::string> texture;
 		LoadMTL("../../res/Parts/material.mtl", Kds, Kas, Kss, Materials, texture);
 		for (int i = 0; i < Materials.size(); i++)
 		{
@@ -391,7 +392,7 @@ namespace CG
 			KDs[mtlname] = Kds[i];
 		}
 
-		// ¥[¸ü¦U³¡¥ó
+		// åŠ è¼‰å„éƒ¨ä»¶
 		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
 		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
 		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
@@ -413,7 +414,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ¥Í¦¨ VBO
+		// ç”Ÿæˆ VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -429,31 +430,31 @@ namespace CG
 
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			// ½Æ»s³»ÂI¸ê®Æ
+			// è¤‡è£½é ‚é»žè³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(VBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»s UV ¸ê®Æ
+			// è¤‡è£½ UV è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(uVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»sªk½u¸ê®Æ
+			// è¤‡è£½æ³•ç·šè³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(nVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
@@ -548,7 +549,7 @@ namespace CG
 
 		glm::mat4 Translation[PARTSNUM];
 
-		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
+		Translation[Body::body] = translate(position[Axis::x], 18.5f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
 		Translation[Body::head] = translate(0, 12.0f, 0);
