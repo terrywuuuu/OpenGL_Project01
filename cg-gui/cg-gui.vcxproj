@@ -184,6 +184,8 @@
     <None Include="..\res\shaders\Scene_Material.vp" />
     <None Include="..\res\shaders\SkyBox_Material.fp" />
     <None Include="..\res\shaders\SkyBox_Material.vp" />
+    <None Include="..\res\shaders\Post-Process.fp" />
+    <None Include="..\res\shaders\Post-Process.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

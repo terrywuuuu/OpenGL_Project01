@@ -66,13 +66,14 @@ namespace CG
 
 	void MainScene::Render(float aspect)
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
 		glUseProgram(program);//uniform參數數值前必須先use shader
-
+    
 		float theta = glm::radians(eyeAngley); // 左右
 		float phi = glm::radians(angle);   // 上下
 
@@ -164,10 +165,36 @@ namespace CG
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
-
+    
 		scene->Render(camX, camY, camZ, aspect, mode);
 		skyBox->Render(camX, camY, camZ, aspect, mode);
+    
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Texture_Render();
+    
 		glFlush();
+	}
+
+	void MainScene::Texture_Render() {
+		// 顯示渲染結果並應用模糊
+		glUseProgram(Post_Process);  // 使用另一個 program
+		glBindVertexArray(screenQuadVAO);  // 綁定四邊形 VAO
+		glClear(GL_COLOR_BUFFER_BIT); // 這裡只清 color，不清 depth
+		glDisable(GL_DEPTH_TEST); // 關掉深度測試
+
+		// 傳遞 FBO 渲染結果的紋理和紋理大小
+		glActiveTexture(GL_TEXTURE0);  // 激活紋理單元
+		glBindTexture(GL_TEXTURE_2D, texture);  // 綁定場景渲染的紋理
+		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // 傳遞紋理到 shader
+		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // 傳遞紋理大小到 shader
+		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
+		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
+
+		// 渲染屏幕四邊形顯示結果
+		glDrawArrays(GL_TRIANGLES, 0, 6);  // 渲染四邊形*/
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void MainScene::OnResize(int width, int height)
@@ -180,9 +207,14 @@ namespace CG
 		// set new view port
 		glViewport(0, 0, width, height);
 
+		screenWidth = width;
+		screenHeight = height;
+		SetTexture();
+
 		// calc aspect and update camera
 		float aspect = static_cast<float>(width) / static_cast<float>(height);
 		camera.SetAspect(aspect);
+		SetTexture();
 	}
 
 	void MainScene::OnKeyboard(int key)
@@ -286,7 +318,49 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetEdit(bool isEdit) {
+
+	void MainScene::SetEffect(float num, int effect, bool isActive) {
+		switch (effect) {
+		case 0:
+			enableBlur = isActive;
+			blurStrength = num;
+			break;
+		case 1:
+			enableQuan = isActive;
+			quanStrength = num;
+			break;
+		}
+	}
+
+	void MainScene::SetTexture() {
+		glGenFramebuffers(1, &FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+		glGenTextures(1, &depth_texture);
+		glBindTexture(GL_TEXTURE_2D, depth_texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			std::cerr << "Framebuffer not complete!" << std::endl;
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void MainScene::SetEdit(bool isEdit,int mode) {
 		this->isEdit = isEdit;
 	}
 
@@ -356,6 +430,12 @@ namespace CG
 			{ GL_NONE, NULL } };
 		program = LoadShaders(shaders); //讀取shader
 
+		ShaderInfo shader[] = {
+			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
+			{ GL_NONE, NULL } };
+		Post_Process = LoadShaders(shader); //讀取shader
+    
 		glUseProgram(program);//uniform參數數值前必須先use shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
@@ -382,8 +462,10 @@ namespace CG
 		glUniformBlockBinding(program, MatricesIdx, 0);
     
 		LoadAction();
-		
-    return true;
+		SetTexture();
+		CreateScreenQuad();
+
+		return true;
 	}
 
 	void MainScene::LoadModel()
@@ -411,7 +493,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -629,5 +711,30 @@ namespace CG
 	void MainScene::SetMultipleMode(int multipleMode) {
 		this->multipleMode = multipleMode;
 	}
-}
+  
+	void MainScene::CreateScreenQuad()
+	{
+		GLfloat quadVertices[] = {
+			-1.0f,  1.0f,  0.0f, 1.0f, // 左上
+			-1.0f, -1.0f,  0.0f, 0.0f, // 左下
+			1.0f, -1.0f,  1.0f, 0.0f, // 右下
 
+			-1.0f,  1.0f,  0.0f, 1.0f, // 左上
+			1.0f, -1.0f,  1.0f, 0.0f, // 右下
+			1.0f,  1.0f,  1.0f, 1.0f  // 右上
+		};
+
+		glGenVertexArrays(1, &screenQuadVAO);
+		glGenBuffers(1, &screenQuadVBO);
+		glBindVertexArray(screenQuadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, screenQuadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+		// position attribute
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		// texcoord attribute
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+}

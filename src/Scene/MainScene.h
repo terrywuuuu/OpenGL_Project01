@@ -33,6 +33,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void Render(float aspect);
+		void Texture_Render();
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
@@ -41,10 +42,15 @@ namespace CG
 
 		void SetMode(int mode);
 		void SetMtl(int partsNum, std::string material);
+		void SetSpeed(float speed);
+		void SetEffect(float num, int effect, bool isActive);
 
 		void SetEdit(bool isEdit);
 		void SetFrame(int frame);
-		void SetSpeed(float speed);
+
+		// Initialize texture and framebuffer
+		void SetTexture();
+		void CreateScreenQuad();
 		
 		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
 		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
@@ -83,7 +89,12 @@ namespace CG
 		std::array<GLuint, PARTSNUM> VBOs;
 		std::array<GLuint, PARTSNUM> uVBOs;
 		std::array<GLuint, PARTSNUM> nVBOs;
+		GLuint screenQuadVAO, screenQuadVBO;
+		GLuint FBO;
+		GLuint texture;
+		GLuint depth_texture;
 		GLuint program;
+		GLuint Post_Process;		// ¯S®ÄªºProgram
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -131,6 +142,14 @@ namespace CG
 		double frame;
 
 		bool isActionChange;
+    
+		int screenWidth = 1280;
+		int screenHeight = 720;
+
+		bool enableBlur = false;
+		bool enableQuan = false;
+		float blurStrength;
+		float quanStrength;
 
 		enum Body
 		{

@@ -12,6 +12,7 @@ namespace CG
 		showMtlWindow = false;
 		keepMultipleActive = false;
 		previousKeepMultipleActive = keepMultipleActive;
+		showEffectWindow = false;
 	}
 
 	auto ControlWindow::Initialize() -> bool
@@ -22,11 +23,14 @@ namespace CG
 	void ControlWindow::Display()
 	{
 		static JsonIO::Action actionData;
+
+		ImGui::SetNextWindowSize(ImVec2(300, 200));
 		ImGui::Begin("Control");
 		{
 			ToggleInput(0, 0);
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
+			ImGui::Checkbox("Special Effects Setting Window", &showEffectWindow);
 
 			ImGui::SetNextItemWidth(150);
 
@@ -96,12 +100,16 @@ namespace CG
 			ImGui::ShowDemoWindow(&showDemoWindow);
 		if (showMtlWindow)
 			DisplayMtl();
+    if (showEffectWindow)
+			DisplayEffect();
+    
 		DisplayEditor(controlPos, controlSize);
+		
 		HandleInput();
 	}
 
 	void ControlWindow::DisplayMtl() {
-		ImGui::Begin("My Custom Window");
+		ImGui::Begin("Material");
 		{
 			static std::vector<int> partsIndex;
 			partsIndex.resize(10, 0);
@@ -133,6 +141,34 @@ namespace CG
 						}
 					}
 					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::End();
+		}
+	}
+
+	void ControlWindow::DisplayEffect() {
+		ImGui::Begin("Special Effect");
+		{
+			int effectNum = 2;
+			std::vector<std::string> effectName = { "Vague", "Quantization"};
+			static std::map<std::string, bool> isActive;
+			static std::map<std::string, float> num;
+			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f} };
+
+			for (int i = 0; i < effectNum; i++) {
+				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
+
+				ImGui::SetNextItemWidth(100);
+				if (isActive[effectName[i]])
+				{
+					ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
+					targetScene->SetEffect(num[effectName[i]], i, true);
+				}
+				else 
+				{
+					targetScene->SetEffect(num[effectName[i]], i, false);
 				}
 			}
 
