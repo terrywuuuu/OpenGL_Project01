@@ -360,7 +360,7 @@ namespace CG
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void MainScene::SetEdit(bool isEdit,int mode) {
+	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
 	}
 
@@ -493,7 +493,7 @@ namespace CG
 		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
 		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
 		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
