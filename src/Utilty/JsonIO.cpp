@@ -64,10 +64,6 @@ bool JsonIO::LoadAction(const std::string& filename, Action& out) {
 bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
     json j;
 
-	j["name"] = action.name;
-	j["speed"] = action.speed;
-    j["musicName"] = action.musicName;
-
     for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;
         frameJson["frame"] = f.frame;
@@ -87,6 +83,9 @@ bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
         }
 
         j["action"].push_back(frameJson);
+        j["name"] = action.name;
+        j["speed"] = action.speed;
+        j["musicName"] = action.musicName;
     }
 
     std::ofstream ofs(filename + ".json");

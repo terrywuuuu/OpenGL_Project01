@@ -258,20 +258,7 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetAction(int action)
-	{
-		curAction = actionDatas[action];
-		this->actionIndex = action;
-
-		if (!this->keepMultipleActive)
-		{
-			curInstancedNum = 1;
-		}
-		scene->SetInstance(curInstancedNum, multipleMode);
-
-		frame = 0.0;
-
-		//Set Music Player
+	void MainScene::PlayMusic() {
 		musicPlayer->Play("../../res/Music/" + curAction.musicName);
 		if (isEdit || curAction.name == "idle") {
 			musicPlayer->Stop();
@@ -285,6 +272,21 @@ namespace CG
 				musicPlayer->SetLooping(true);
 			}
 		}
+	}
+
+	void MainScene::SetAction(int action)
+	{
+		curAction = actionDatas[action];
+		this->actionIndex = action;
+
+		if (curAction.name == "multiple" || !this->keepMultipleActive)
+		{
+			curInstancedNum = 1;
+		}
+		scene->SetInstance(curInstancedNum, multipleMode);
+
+		frame = 0.0;
+		PlayMusic();
 	}
 
 	void MainScene::SetMode(int mode)
@@ -391,6 +393,7 @@ namespace CG
 
 	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
+		PlayMusic();
 	}
 
 	void MainScene::SetFrame(int frame) {
@@ -406,7 +409,7 @@ namespace CG
 	{
 		if (isAdd) {
 			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
-			this->frame = frame+1;
+			this->frame = frame + 1;
 		}
 		else {
 			if (curAction.FDs.size() <= 1) {
@@ -650,7 +653,6 @@ namespace CG
 			if (frame >= end - 1)
 			{
 				curInstancedNum = instancedNum;
-				scene->SetInstance(curInstancedNum, multipleMode);
 			}
 		}
 		else
@@ -659,7 +661,7 @@ namespace CG
 				curInstancedNum = 1;
 			}
 		scene->SetInstance(curInstancedNum, multipleMode);
-		if (curInstancedNum == 1 || (curInstancedNum != 1 && curInstancedNum && curAction.name != "multiple")) {
+		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);
 		}
 

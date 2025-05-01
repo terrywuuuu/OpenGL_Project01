@@ -196,16 +196,16 @@ namespace CG
 			curFrame = (int)curFD.frame;
 
 			//draw editor window
-			DisplayActionSelector();
+			DisplayActionSelector(-1,isEdit);
 			DisplayEditorItem(isEdit, curFrame, curFD, actionData);
 			DisplayModleControl(isEdit, curFrame, curFD);
 		}
 		ImGui::End();
 	}
 
-	void ControlWindow::DisplayActionSelector(int actionIndex) {
+	void ControlWindow::DisplayActionSelector(int actionIndex, bool& isEdit) {
 		static int _actionIndex = 0;
-		_actionIndex = actionIndex == -1 ? _actionIndex : actionIndex;
+		_actionIndex = actionIndex < 0 ? _actionIndex : actionIndex;
 
 		std::vector<std::string> actionNames = targetScene->GetActionNames();
 		ImGui::Text("Action: ");
@@ -222,6 +222,8 @@ namespace CG
 					_actionIndex = n;
 					std::cout << "Set Action " << _actionIndex << std::endl;
 					targetScene->SetAction(n);
+					targetScene->SetEdit(0);
+					isEdit = false;
 				}
 
 				if (is_selected)
@@ -285,7 +287,7 @@ namespace CG
 					ImGui::CloseCurrentPopup();  // Close the success popup when "OK" is clicked
 				}
 				ImGui::EndPopup();
-				DisplayActionSelector(0);
+				DisplayActionSelector(0, isEdit);
 			}
 		}
 	}

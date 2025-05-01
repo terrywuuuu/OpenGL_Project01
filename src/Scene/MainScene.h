@@ -39,6 +39,8 @@ namespace CG
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
 
+		void PlayMusic();
+
 		// Control panel functions
 		void SetMode(int mode);
 		void SetMultipleNumber(int num);
