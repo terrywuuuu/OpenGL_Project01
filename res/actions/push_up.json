@@ -1,10 +1,12 @@
-[
+{"name":"push up",
+  "speed":1.0,
+  "action":[
   {
     "frame": 0,
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": 0.0,
+      "y": -8.0,
       "z": 0.0
     },
     "body": {
@@ -63,7 +65,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -0.5,
+      "y": -8.5,
       "z": 0.0
     },
     "body": {
@@ -122,7 +124,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -1.0,
+      "y": -9.0,
       "z": 0.0
     },
     "body": {
@@ -181,7 +183,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -1.5,
+      "y": -9.5,
       "z": 0.0
     },
     "body": {
@@ -240,7 +242,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -2.0,
+      "y": -10.0,
       "z": 0.0
     },
     "body": {
@@ -299,7 +301,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -1.5,
+      "y": -9.5,
       "z": 0.0
     },
     "body": {
@@ -358,7 +360,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -1.0,
+      "y": -9.0,
       "z": 0.0
     },
     "body": {
@@ -417,7 +419,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": -0.5,
+      "y": -8.5,
       "z": 0.0
     },
     "body": {
@@ -476,7 +478,7 @@
     "isKeyFrame": 0,
     "position": {
       "x": 0.0,
-      "y": 0.0,
+      "y": -8.0,
       "z": 0.0
     },
     "body": {
@@ -531,3 +533,4 @@
     }
   }
 ]
+}

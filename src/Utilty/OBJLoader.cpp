@@ -132,7 +132,7 @@ bool LoadMTL(const char* path,
 	std::vector<vec3>& Ka,
 	std::vector<vec3>& Ks,
 	std::vector<std::string>& out_name,
-	std::string& texture
+	std::vector<std::string>& textures
 )
 {
 	FILE* file = fopen(path, "r");
@@ -152,25 +152,38 @@ bool LoadMTL(const char* path,
 			char material[50];
 			fscanf(file, "%s", material);
 			out_name.push_back(material);
+			Kd.push_back(glm::vec3(1.0f));
+			Ka.push_back(glm::vec3(0.0f));
+			Ks.push_back(glm::vec3(0.0f));
+			textures.push_back("");
 		}
 		else if (strcmp(lineHeader, "Kd") == 0) {
 			vec3 diffuse;
 			fscanf(file, "%f %f %f\n", &diffuse.x, &diffuse.y, &diffuse.z);
-			Kd.push_back(diffuse);
+			Kd[Kd.size() - 1] = diffuse;
 		}
 		else if (strcmp(lineHeader, "Ka") == 0) {
 			vec3 ambient;
 			fscanf(file, "%f %f %f\n", &ambient.x, &ambient.y, &ambient.z);
-			Ka.push_back(ambient);
+			Ka[Ka.size() - 1] = ambient;
 		}
 		else if (strcmp(lineHeader, "Ks") == 0) {
 			vec3 specular;
 			fscanf(file, "%f %f %f\n", &specular.x, &specular.y, &specular.z);
-			Ks.push_back(specular);
+			Ks[Ks.size() - 1] = specular;
 		}
 		else if (strcmp(lineHeader, "map_Kd") == 0) {
-			fscanf(file, "%s\n", texture);
 
+			char texture[128];
+			fscanf(file, "%s", texture);
+			textures[textures.size() - 1] = texture;
+
+			/*
+			char texture[128];
+			fgets(texture, sizeof(texture), file);
+			texture[strcspn(texture, "\n")] = 0;
+			textures[textures.size() - 1] = std::string(texture);
+			*/
 		}
 		else {
 			// Probably a comment, eat up the rest of the line
