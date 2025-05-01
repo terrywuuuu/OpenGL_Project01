@@ -21,13 +21,13 @@ public:
 	{
 		std::string name;
 		float speed;
+		std::string musicName;
 		std::vector<FrameData> FDs;
 
-		Action():FDs(),speed(0.0),name("") {}
-		Action(std::string name, float speed, std::vector<FrameData> fd) :name(name),speed(speed), FDs(fd) {}
-		/*Action(const Action& other) {
-			FDs = other.FDs;
-		}*/
+		Action():FDs(),speed(0.0),name(""), musicName("Default.mp3") {}
+		Action(std::string name, float speed, std::string musicName, std::vector<FrameData> fd) :name(name),speed(speed), FDs(fd), musicName(musicName) {
+			
+		}
 	};
 
 	// Load frames from JSON file

@@ -50,11 +50,16 @@ namespace CG
 	auto MainScene::Initialize() -> bool
 	{
 		isActionChange = true;
+		//Initialize Scene, SkyBox
 		scene = new Scene();
 		skyBox = new SkyBox();
 		
 		scene->Initialize();
 		skyBox->Initialize();
+
+		//Initialize MusicPlayer
+		musicPlayer = new MusicPlayer();
+
 		return LoadScene();
 	}
 
@@ -267,6 +272,20 @@ namespace CG
 		scene->SetInstance(instancedNum, multipleMode);
 
 		frame = 0.0;
+
+		//Set Music Player
+		musicPlayer->Play("../../res/Music/" + curAction.musicName);
+		if (curAction.name == "multiple")
+		{
+			musicPlayer->SetLooping(false);
+		}
+		else {
+			musicPlayer->SetLooping(true);
+		}
+
+		if (curAction.name == "idle") {
+			musicPlayer->Stop();
+		}
 	}
 
 	void MainScene::SetMode(int mode)
@@ -603,6 +622,7 @@ namespace CG
 	void MainScene::UpdateAction(double dt)
 	{
 		const size_t end = curAction.FDs.size();
+
 
 		dt *= isEdit ? 0.0 : curAction.speed;
 

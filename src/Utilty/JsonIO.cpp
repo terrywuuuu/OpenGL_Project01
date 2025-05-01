@@ -35,6 +35,11 @@ bool JsonIO::LoadAction(const std::string& filename, Action& out) {
 
     out.name = j.at("name").get<std::string>();
     out.speed = j.at("speed").get<float>();
+    out.musicName = j.at("musicName").get<std::string>();
+    if (out.musicName == "")
+    {
+        out.musicName = "Default.mp3";
+    }
     
     for (auto& frameJson : j.at("action")) {
         FrameData ofd;

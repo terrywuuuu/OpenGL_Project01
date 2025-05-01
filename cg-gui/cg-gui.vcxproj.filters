@@ -53,6 +53,12 @@
     <ClCompile Include="..\src\Scene\Skybox.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene\MusicPlayer.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\miniaudio.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -122,6 +128,12 @@
     </ClInclude>
     <ClInclude Include="..\src\Scene\SkyBox.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\MusicPlayer.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\miniaudio.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
