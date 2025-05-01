@@ -21,13 +21,12 @@ namespace CG
 		void SetActionData();
     
 		void HandleInput();
-		void ToggleInput(bool isKeyboardEnable, bool isMouseEnable);
 
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
 
-		bool isKeyboardEnable = 1;
+		bool isKeyboardEnable;
 		bool keepMultipleActive;
 		bool previousKeepMultipleActive;
 

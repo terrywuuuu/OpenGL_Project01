@@ -66,6 +66,7 @@ bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
 
 	j["name"] = action.name;
 	j["speed"] = action.speed;
+    j["musicName"] = action.musicName;
 
     for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;

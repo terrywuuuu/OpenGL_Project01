@@ -39,30 +39,31 @@ namespace CG
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
 
-		void SetAction(int action);
-
+		// Control panel functions
 		void SetMode(int mode);
-		void SetMtl(int partsNum, std::string material);
-		void SetSpeed(float speed);
-		void SetEffect(float num, int effect, bool isActive);
+		void SetMultipleNumber(int num);
+		void SetkeepMultipleActive(bool keepMultipleActive);
+		void SetMultipleMode(int multipleMode);
 
+		// Action editor panel functions
+		void SetAction(int action);
+		void SetSpeed(float speed);
 		void SetEdit(bool isEdit);
 		void SetFrame(int frame);
-
-		// Initialize texture and framebuffer
-		void SetTexture();
-		void CreateScreenQuad();
-		
-		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
-		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
+		void SetCurFrameData(JsonIO::FrameData curFD, int frame); // update curAction
+		void SetNewFrameData(JsonIO::FrameData frameData, int frame, bool isAdd); // add a new frame to curAction
 		void SaveAction(std::string fileName);
-
+		// send to ControlWindow
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
 		std::vector<std::string> GetActionNames();
 
-		void SetkeepMultipleActive(bool keepMultipleActive);
-		void SetMultipleMode(int multipleMode);
+		// Effect panel functions
+		void SetEffect(float num, int effect, bool isActive);
+		void SetMtl(int partsNum, std::string material);
+		// Initialize texture and framebuffer
+		void SetTexture();
+		void CreateScreenQuad();
 
 	private:
 		auto LoadScene() -> bool;
@@ -112,7 +113,8 @@ namespace CG
 
 		bool keepMultipleActive = false;
 		int multipleMode = 0;
-		int instancedNum = 1;  // How many robot
+		int curInstancedNum = 1;
+		int instancedNum = 100;
 
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
@@ -138,12 +140,11 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isEdit = false;
+
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
 		
 		double frame;
-
-		bool isActionChange;
     
 		int screenWidth = 1280;
 		int screenHeight = 720;

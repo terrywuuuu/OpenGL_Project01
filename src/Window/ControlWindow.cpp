@@ -27,7 +27,6 @@ namespace CG
 		ImGui::SetNextWindowSize(ImVec2(300, 200));
 		ImGui::Begin("Control");
 		{
-			ToggleInput(0, 0);
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
 			ImGui::Checkbox("Special Effects Setting Window", &showEffectWindow);
@@ -59,8 +58,13 @@ namespace CG
 				ImGui::EndCombo();
 			}
 
-			static int multipleModesIndex = 0;
-			std::vector<std::string> multipleModes = { "Triangle Edge Only" ,"Triangular Grid", "Circular Spread"};
+			static int multipleModesIndex = 0, multipleNumber = 100;
+			std::vector<std::string> multipleModes = { "Triangle Edge Only" ,"Triangular Grid", "Circular Spread" };
+			ImGui::Text("Multiple Number: ");
+			if (ImGui::InputInt("multipleNumber##", &multipleNumber, 10.0f)) {
+				multipleNumber = multipleNumber < 1 ? 1 : multipleNumber;
+				targetScene->SetMultipleNumber(multipleNumber);
+			}
 			ImGui::Text("Multiple Setting: ");
 			ImGui::Checkbox("Keep Multiple Active", &keepMultipleActive);
 			ImGui::Text("Multiple Mode: ");
@@ -100,11 +104,10 @@ namespace CG
 			ImGui::ShowDemoWindow(&showDemoWindow);
 		if (showMtlWindow)
 			DisplayMtl();
-    if (showEffectWindow)
+		if (showEffectWindow)
 			DisplayEffect();
-    
 		DisplayEditor(controlPos, controlSize);
-		
+		//ToggleInput(0, 0);
 		HandleInput();
 	}
 
@@ -152,7 +155,7 @@ namespace CG
 		ImGui::Begin("Special Effect");
 		{
 			int effectNum = 2;
-			std::vector<std::string> effectName = { "Vague", "Quantization"};
+			std::vector<std::string> effectName = { "Vague", "Quantization" };
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
 			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f} };
@@ -166,7 +169,7 @@ namespace CG
 					ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
 					targetScene->SetEffect(num[effectName[i]], i, true);
 				}
-				else 
+				else
 				{
 					targetScene->SetEffect(num[effectName[i]], i, false);
 				}
@@ -181,7 +184,7 @@ namespace CG
 		ImGui::SetWindowSize(ImVec2(postSize.x, 400));
 		ImGui::Begin("Editor");
 		{
-			ToggleInput(0, 0);
+			//ToggleInput(0, 0);
 			static float curFrame = 0.0f;
 			static bool isSave = false;
 			static bool isEdit = false;
@@ -248,7 +251,11 @@ namespace CG
 		if (isEdit) {
 			targetScene->SetFrame((int)curFrame);
 			if (ImGui::Button("Add Frame")) { // copy current frame
-				targetScene->SetNewFrameData(curFD, (int)curFrame);
+				targetScene->SetNewFrameData(curFD, (int)curFrame,1);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Frame")) { // copy current frame
+				targetScene->SetNewFrameData(curFD, (int)curFrame,0);
 			}
 			if (ImGui::Button("Save")) {
 				targetScene->SaveAction(actionData.name);
@@ -329,10 +336,9 @@ namespace CG
 		static float lastPressTime = 0.0f;  // last keydown time
 		float triggerInterval = 0.05f;
 
-		if (!isKeyboardEnable)
-		{
+		if (io.WantCaptureKeyboard)
 			return;
-		}
+
 		//Key event A, D control eyes Angley
 		if (ImGui::IsKeyDown(ImGuiKey_A)) {
 			lastPressTime += io.DeltaTime;
@@ -377,7 +383,7 @@ namespace CG
 		}
 
 		//Mouse wheel control eyes distance
-		if (io.MouseWheel != 0.0f) {
+		if (io.MouseWheel != 0.0f && !io.WantCaptureMouse) {
 			{
 				if (io.MouseWheel > 0)
 					//Mouse wheel up
@@ -386,21 +392,6 @@ namespace CG
 					//Mouse wheel down
 					targetScene->OnKeyboard(5);
 			}
-		}
-	}
-
-	void ControlWindow::ToggleInput(bool isKeyboardEnable, bool isMouseEnable) {
-		ImGuiIO& io = ImGui::GetIO();
-
-		// disable mouse wheel input when the window is hovered
-		if (!isMouseEnable && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows)) {
-			io.MouseWheel = 0.0f;
-		}
-		if (!isMouseEnable && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
-			this->isKeyboardEnable = 0;
-		}
-		else {
-			this->isKeyboardEnable = 1;
 		}
 	}
 }

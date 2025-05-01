@@ -1,4 +1,7 @@
 {
+  "name": "APT",
+  "speed": 2.5,
+  "musicName" : "apt.mp3",
   "action": [
     {
       "body": {
@@ -232,7 +235,5 @@
         "gamma": 20.0
       }
     }
-  ],
-  "name": "APT",
-  "speed": 2.5
+  ]
 }

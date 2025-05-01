@@ -1,5 +1,7 @@
-{"name":"multiple",
-  "speed":2.0,
+{
+  "name":"multiple",
+  "speed": 1.8,
+  "musicName" : "multiple.mp3",
   "action":[
   {
     "frame": 0,
