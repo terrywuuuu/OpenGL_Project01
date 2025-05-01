@@ -41,6 +41,18 @@
     <ClCompile Include="..\src\Utilty\JsonIO.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\LoadShaders.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\stb_image.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\Skybox.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -84,9 +96,6 @@
     <ClInclude Include="..\include\imgui\backends\imgui_impl_opengl3_loader.h">
       <Filter>ImGUI\backends</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Utilty\LoadShaders.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Utilty\OBJLoader.hpp">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -102,10 +111,26 @@
     <ClInclude Include="..\src\Utilty\JsonIO.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\LoadShaders.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\stb_image.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\SkyBox.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Scene_Material.fp" />
+    <None Include="..\res\shaders\Scene_Material.vp" />
+    <None Include="..\res\shaders\SkyBox_Material.fp" />
+    <None Include="..\res\shaders\SkyBox_Material.vp" />
     <None Include="..\res\shaders\Post-Process.fp" />
     <None Include="..\res\shaders\Post-Process.vp" />
   </ItemGroup>

@@ -1,0 +1,712 @@
+{
+  "name":"hopak",
+  "speed":2.9,
+  "action":[
+  {
+    "frame": 0,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 1,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 2,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 3,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 4,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 5,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 6,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 7,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 8,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 9,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 10,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -30,
+      "gamma": 30
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": 10,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 30,
+      "gamma": -30
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": -10,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 70,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 150,
+      "beta": 0,
+      "gamma": 0
+    }
+  },
+  {
+    "frame": 11,
+    "isKeyFrame": 0,
+    "position": {
+      "x": 0.0,
+      "y": 0.8,
+      "z": 0.0
+    },
+    "body": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "head": {
+      "alpha": 0,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_arm": {
+      "alpha": 0,
+      "beta": -100,
+      "gamma": 0
+    },
+    "left_hand": {
+      "alpha": 0,
+      "beta": -80,
+      "gamma": 0
+    },
+    "right_arm": {
+      "alpha": 0,
+      "beta": 100,
+      "gamma": 0
+    },
+    "right_hand": {
+      "alpha": 0,
+      "beta": 80,
+      "gamma": 0
+    },
+    "left_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "left_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_leg": {
+      "alpha": -130,
+      "beta": 0,
+      "gamma": 0
+    },
+    "right_foot": {
+      "alpha": 110,
+      "beta": 0,
+      "gamma": 0
+    }}]
+  }

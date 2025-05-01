@@ -95,11 +95,11 @@ namespace CG
 		);
 		*/
 
-		controlWindow = new ControlWindow();
-		controlWindow->Initialize();
-
 		mainScene = new MainScene();
 		mainScene->Initialize();
+
+		controlWindow = new ControlWindow();
+		controlWindow->Initialize();
 
 		controlWindow->SetTargetScene(mainScene);
 
@@ -181,8 +181,11 @@ namespace CG
 		glViewport(0, 0, display_w, display_h);
 
 		// calc aspect 
-		float aspect = static_cast<float>(display_w) / static_cast<float>(display_h);
-		if (aspect <= std::numeric_limits<float>::epsilon()) {
+		float aspect;
+		if (display_h > 0) {
+			aspect = static_cast<float>(display_w) / static_cast<float>(display_h);
+		}
+		else {
 			aspect = 1.0f;
 		}
 

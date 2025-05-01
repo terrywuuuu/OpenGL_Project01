@@ -1,12 +1,13 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
 #include <../src/Utilty/JsonIO.h>
+#include <io.h>
 
 #include "MainScene.h"
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,«hx,y,z=0®É¤]¯àtranslate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?‡x,y,z=0?‚ä??½translate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -48,6 +49,12 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
+		isActionChange = true;
+		scene = new Scene();
+		skyBox = new SkyBox();
+		
+		scene->Initialize();
+		skyBox->Initialize();
 		return LoadScene();
 	}
 
@@ -65,19 +72,10 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ýuse shader
-
-		/*
-		float eyey = glm::radians(eyeAngley);
-		camera.LookAt(
-			glm::vec3(eyedistance * sin(eyey), 2, eyedistance * cos(eyey)), // Camera is at (0,0,20), in World Space
-			glm::vec3(0, 0, 0), // and looks at the origin
-			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-		*/
-
-		float theta = glm::radians(eyeAngley); // ¥ª¥k
-		float phi = glm::radians(angle);   // ¤W¤U
+		glUseProgram(program);//uniform?ƒæ•¸?¸å€¼å?å¿…é??ˆuse shader
+    
+		float theta = glm::radians(eyeAngley); // å·¦å³
+		float phi = glm::radians(angle);   // ä¸Šä?
 
 		float camX = eyedistance * cos(phi) * sin(theta);
 		float camY = eyedistance * sin(phi);
@@ -111,7 +109,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,buffer point)
+			//(location,vec3,type,?ºå?é»????é»žç??ç§»??buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -123,7 +121,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec2,type,?ºå?é»????é»žç??ç§»??point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -135,7 +133,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec3,type,?ºå?é»????é»žç??ç§»??point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
@@ -159,6 +157,7 @@ namespace CG
 						glUniform1i(BackGround, 1);
 					}
 
+					glUniform1i(MultipleMode, multipleMode);
 					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
 				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
@@ -166,25 +165,28 @@ namespace CG
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
-		
+    
+		scene->Render(camX, camY, camZ, aspect, mode);
+		skyBox->Render(camX, camY, camZ, aspect, mode);
+    
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Texture_Render();
-
+    
 		glFlush();
 	}
 
 	void MainScene::Texture_Render() {
-		// Åã¥Ü´è¬Vµ²ªG¨ÃÀ³¥Î¼Ò½k
-		glUseProgram(Post_Process);  // ¨Ï¥Î¥t¤@­Ó program
-		glBindVertexArray(screenQuadVAO);  // ¸j©w¥|Ãä§Î VAO
-		glClear(GL_COLOR_BUFFER_BIT); // ³o¸Ì¥u²M color¡A¤£²M depth
-		glDisable(GL_DEPTH_TEST); // Ãö±¼²`«×´ú¸Õ
+		// é¡¯ç¤ºæ¸²æ?çµæ?ä¸¦æ??¨æ¨¡ç³?
+		glUseProgram(Post_Process);  // ä½¿ç”¨?¦ä???program
+		glBindVertexArray(screenQuadVAO);  // ç¶å??›é?å½?VAO
+		glClear(GL_COLOR_BUFFER_BIT); // ?™è£¡?ªæ? colorï¼Œä?æ¸?depth
+		glDisable(GL_DEPTH_TEST); // ?œæ?æ·±åº¦æ¸¬è©¦
 
-		// ¶Ç»¼ FBO ´è¬Vµ²ªGªº¯¾²z©M¯¾²z¤j¤p
-		glActiveTexture(GL_TEXTURE0);  // ¿E¬¡¯¾²z³æ¤¸
-		glBindTexture(GL_TEXTURE_2D, texture);  // ¸j©w³õ´º´è¬Vªº¯¾²z
-		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ¶Ç»¼¯¾²z¨ì shader
-		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ¶Ç»¼¯¾²z¤j¤p¨ì shader
+		// ?³é? FBO æ¸²æ?çµæ??„ç??†å?ç´‹ç?å¤§å?
+		glActiveTexture(GL_TEXTURE0);  // æ¿€æ´»ç??†å–®??
+		glBindTexture(GL_TEXTURE_2D, texture);  // ç¶å??´æ™¯æ¸²æ??„ç???
+		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ?³é?ç´‹ç???shader
+		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ?³é?ç´‹ç?å¤§å???shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
@@ -225,28 +227,31 @@ namespace CG
 		//5: Mouse wheel down
 		switch (key)
 		{
-		case 0:
-			eyeAngley -= 10;
-			break;
-		case 1:
-			eyeAngley += 10;
-			break;
-		case 2:
-			angle += 3;
-			if (angle >= 90) angle = 89;
-			printf("beta:%f\n", angle);
-			break;
-		case 3:
-			angle -= 3;
-			if (angle <= -90) angle = -89;
-			printf("beta:%f\n", angle);
-			break;
-		case 4:
-			eyedistance -= 2.0;
-			break;
-		case 5:
-			eyedistance += 2.0;
-			break;
+			case 0:
+				eyeAngley -= 10;
+				break;
+			case 1:
+				eyeAngley += 10;
+				break;
+			case 2:
+				angle += 3;
+				if (angle >= 90) angle = 89;
+				printf("beta:%f\n", angle);
+				break;
+			case 3:
+				angle -= 3;
+				if (angle <= -90) angle = -89;
+				printf("beta:%f\n", angle);
+				break;
+			case 4:
+				eyedistance -= 2.0;
+				printf("eyedistance:%f\n", eyedistance);
+				break;
+
+			case 5:
+				eyedistance += 2.0;
+				printf("eyedistance:%f\n", eyedistance);
+				break;
 		}
 	}
 
@@ -254,8 +259,14 @@ namespace CG
 	{
 		curAction = actionDatas[action];
 		this->actionIndex = action;
-		instancedNum = 1;
-		frame = 0;
+
+		if (!this->keepMultipleActive)
+		{
+			instancedNum = 1;
+		}
+		scene->SetInstance(instancedNum, multipleMode);
+
+		frame = 0.0;
 	}
 
 	void MainScene::SetMode(int mode)
@@ -272,24 +283,6 @@ namespace CG
 			this->mode = GL_FILL;
 			break;
 		}
-	}
-
-	void MainScene::SetSpeed(float speed)
-	{
-		this->speed = speed;
-	}
-
-	void MainScene::SetRotate(int bodyPart, float alpha, float beta, float gamma)
-	{
-		curAction.FDs[frame].partRotations[bodyPart].alpha = alpha;
-		curAction.FDs[frame].partRotations[bodyPart].beta = beta;
-		curAction.FDs[frame].partRotations[bodyPart].gamma = gamma;
-	}
-
-	//todo delete this func
-	void MainScene::SetPosition(int axis, float position)
-	{
-		curAction.FDs[frame].position[axis] = position;
 	}
 
 	void MainScene::SetMtl(int partsNum, std::string material)
@@ -324,6 +317,7 @@ namespace CG
 			}
 		}
 	}
+
 
 	void MainScene::SetEffect(float num, int effect, bool isActive) {
 		switch (effect) {
@@ -366,31 +360,38 @@ namespace CG
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void MainScene::SetEdit(bool isEdit,int mode) {
+	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
-		if (mode == 0) {//edit cur action
-
-		}
-		else {// new action
-
-		}
 	}
 
 	void MainScene::SetFrame(int frame) {
 		this->frame = frame;
 	}
 
-	void MainScene::SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD=0)
+	void MainScene::SetSpeed(float speed)
 	{
-		if (isNewFD) {
-			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
-		}
-		else {
-			actionDatas[actionIndex] = curAction;
-			JsonIO::SaveFrames("../../res/actions/action.json", actionDatas[actionIndex]);
-		}
+		curAction.speed = speed;
+	}
+
+	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
+	{
+		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
 		this->frame = frame;
-		curAction.FDs[frame] = frameData;
+		for (int i = frame + 1; i < curAction.FDs.size(); i++)
+		{
+			curAction.FDs[i].frame = i;
+		}
+	}
+
+	void MainScene::SetCurFrameData(JsonIO::FrameData curFD, int frame)
+	{
+		this->curAction.FDs[frame] = curFD;
+	}
+
+	void MainScene::SaveAction(std::string fileName) {
+		curAction.name = fileName;
+		JsonIO::SaveAction("../../res/actions/" + fileName, curAction);
+		LoadAction();
 	}
 
 	JsonIO::Action MainScene::GetAction()
@@ -400,18 +401,17 @@ namespace CG
 
 	JsonIO::FrameData MainScene::GetFrameData()
 	{
-		JsonIO::FrameData fd;
-		fd.frame = frame;
-		fd.isKeyFrame = curAction.FDs[frame].isKeyFrame;
-		for (int i = 0; i < 3; ++i) {
-			fd.position[i] = curAction.FDs[frame].position[i];
+		return curAction.FDs[frame];
+	}
+
+	std::vector<std::string> MainScene::GetActionNames()
+	{
+		std::vector<std::string> actionNames;
+		for (int i = 0; i < actionDatas.size(); i++)
+		{
+			actionNames.push_back(actionDatas[i].name);
 		}
-		for (int i = 0; i < PARTSNUM-1/*without tree*/ ; i++) {
-			fd.partRotations[i].alpha = curAction.FDs[frame].partRotations[i].alpha;
-			fd.partRotations[i].beta = curAction.FDs[frame].partRotations[i].beta;
-			fd.partRotations[i].gamma = curAction.FDs[frame].partRotations[i].gamma;
-		}
-		return fd;
+		return actionNames;
 	}
 
 	auto MainScene::LoadScene() -> bool
@@ -428,15 +428,15 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //è®€?–shader
 
 		ShaderInfo shader[] = {
 			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		Post_Process = LoadShaders(shader); //Åª¨úshader
-
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ýuse shader
+		Post_Process = LoadShaders(shader); //è®€?–shader
+    
+		glUseProgram(program);//uniform?ƒæ•¸?¸å€¼å?å¿…é??ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -444,9 +444,9 @@ namespace CG
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 		BackGround = glGetUniformLocation(program, "isInstanced");
+		MultipleMode = glGetUniformLocation(program, "MultipleMode");
 
 		// Camera matrix
-		//camera.LookAt(glm::vec3(0, 10, 25), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		LoadModel();
 
@@ -460,7 +460,7 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
-
+    
 		LoadAction();
 		SetTexture();
 		CreateScreenQuad();
@@ -474,7 +474,7 @@ namespace CG
 		std::vector<glm::vec3> Kas;
 		std::vector<glm::vec3> Kss;
 		std::vector<std::string> Materials; // mtl-name
-		std::string texture;
+		std::vector<std::string> texture;
 		LoadMTL("../../res/Parts/material.mtl", Kds, Kas, Kss, Materials, texture);
 		for (int i = 0; i < Materials.size(); i++)
 		{
@@ -482,7 +482,7 @@ namespace CG
 			KDs[mtlname] = Kds[i];
 		}
 
-		// ¥[¸ü¦U³¡¥ó
+		// ? è??„éƒ¨ä»?
 		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
 		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
 		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
@@ -504,7 +504,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ¥Í¦¨ VBO
+		// ?Ÿæ? VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -520,31 +520,31 @@ namespace CG
 
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			// ½Æ»s³»ÂI¸ê®Æ
+			// è¤‡è£½?‚é?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(VBOs[i]); // ?‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»s UV ¸ê®Æ
+			// è¤‡è£½ UV è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(uVBOs[i]); // ?‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»sªk½u¸ê®Æ
+			// è¤‡è£½æ³•ç?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(nVBOs[i]); // ?‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
@@ -578,50 +578,50 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		JsonIO::Action actionData;
-		if (JsonIO::LoadFrames("../../res/actions/idle.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
+		const std::string actionsDir = "../../res/actions/";
+		const std::string pattern = actionsDir + "*.json"; // find all json files
+		actionDatas.clear();
+
+		struct _finddata_t fd;
+		intptr_t handle = _findfirst(pattern.c_str(), &fd);
+		if (handle != -1) {
+			do {
+				JsonIO::Action actionData;
+				std::string filePath = actionsDir + fd.name;
+				if (JsonIO::LoadAction(filePath, actionData)) {
+					if (actionData.name == "idle") // let idle be first action
+						actionDatas.insert(actionDatas.begin(), actionData);
+					else
+						actionDatas.push_back(actionData);
+				}
+			} while (_findnext(handle, &fd) == 0);
+			_findclose(handle);
 		}
-		if (JsonIO::LoadFrames("../../res/actions/walk.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/sit_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/push_up.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/multiple.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/hopak_dance.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		if (JsonIO::LoadFrames("../../res/actions/apt.json", actionData)) {
-			actionDatas.push_back(JsonIO::Action(actionData));
-		}
-		SetAction(Action::idle);
+		SetAction(0);
 	}
 
 	void MainScene::UpdateAction(double dt)
 	{
-		const JsonIO::Action& act = curAction;
-		const size_t end = act.FDs.size();
+		const size_t end = curAction.FDs.size();
 
-		dt *= isEdit ? 0.0 : speed;//todo act.speed
+		dt *= isEdit ? 0.0 : curAction.speed;
 
-		if (isActionChange) {
-			isActionChange = false;
-		}
-		if (actionIndex == Action::multiple)
+		if (curAction.name == "multiple")
 		{
-			if (frame >= end - 1)
+			if (frame >= end - 1) 
+			{
 				instancedNum = 100;
+				scene->SetInstance(instancedNum, multipleMode);
+			}
 		}
 		else
-			instancedNum = 1;
-		if (instancedNum == 1) {
-			HandleAction(act.FDs, frame, dt);
+			if (!this->keepMultipleActive)
+			{
+				instancedNum = 1;
+			}
+			scene->SetInstance(instancedNum, multipleMode);
+		if (instancedNum == 1 || (instancedNum != 1 && instancedNum && curAction.name != "multiple")) {
+			HandleAction(curAction.FDs, frame, dt);
 		}
 
 		frame += dt;
@@ -646,7 +646,7 @@ namespace CG
 
 		glm::mat4 Translation[PARTSNUM];
 
-		Translation[Body::body] = translate(position[Axis::x], -2.9f + position[Axis::y], position[Axis::z]);
+		Translation[Body::body] = translate(position[Axis::x], 18.5f + position[Axis::y], position[Axis::z]);
 		Models[Body::body] = Translation[Body::body] * bodyRotateMatrix(Body::body);
 
 		Translation[Body::head] = translate(0, 12.0f, 0);
@@ -679,7 +679,7 @@ namespace CG
 	}
 
 	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {
-		JsonIO::FrameData curFD = frameDatas[frame], perFD;
+		JsonIO::FrameData curFD = curAction.FDs[frame], perFD;
 		if (frame == 0 || isEdit) {
 			for (int i = 0; i < 3; ++i) {
 				position[i] = curFD.position[i];
@@ -703,16 +703,25 @@ namespace CG
 		}
 	}
 
+	void MainScene::SetkeepMultipleActive(bool keepMultipleActive) {
+		this->keepMultipleActive = keepMultipleActive;
+	}
+
+
+	void MainScene::SetMultipleMode(int multipleMode) {
+		this->multipleMode = multipleMode;
+	}
+  
 	void MainScene::CreateScreenQuad()
 	{
 		GLfloat quadVertices[] = {
-			-1.0f,  1.0f,  0.0f, 1.0f, // ¥ª¤W
-			-1.0f, -1.0f,  0.0f, 0.0f, // ¥ª¤U
-			1.0f, -1.0f,  1.0f, 0.0f, // ¥k¤U
+			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä?
+			-1.0f, -1.0f,  0.0f, 0.0f, // å·¦ä?
+			1.0f, -1.0f,  1.0f, 0.0f, // ?³ä?
 
-			-1.0f,  1.0f,  0.0f, 1.0f, // ¥ª¤W
-			1.0f, -1.0f,  1.0f, 0.0f, // ¥k¤U
-			1.0f,  1.0f,  1.0f, 1.0f  // ¥k¤W
+			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä?
+			1.0f, -1.0f,  1.0f, 0.0f, // ?³ä?
+			1.0f,  1.0f,  1.0f, 1.0f  // ?³ä?
 		};
 
 		glGenVertexArrays(1, &screenQuadVAO);

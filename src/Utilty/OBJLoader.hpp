@@ -19,7 +19,7 @@ bool LoadMTL(const char * path,
 			 std::vector<glm::vec3> &Ka,
 			 std::vector<glm::vec3> &Ks,
 			 std::vector<std::string> &out_name,
-			 std::string &texture
+			 std::vector<std::string> &texture
 			 );
 
 bool LoadAssImp(

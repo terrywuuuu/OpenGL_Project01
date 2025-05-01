@@ -12,6 +12,9 @@
 
 #include "../Utilty/JsonIO.h"
 #include "Camera.h"
+#include "Scene.h"
+#include "SkyBox.h"
+
 constexpr auto PARTSNUM = 11;
 //new
 // 0:body	1:ulefthand	2:dlefthand	3:head
@@ -38,25 +41,27 @@ namespace CG
 		void SetAction(int action);
 
 		void SetMode(int mode);
-		void SetRotate(int bodyPart,float alpha, float beta, float gamma);
-		void SetPosition(int axis, float position);
 		void SetMtl(int partsNum, std::string material);
 		void SetSpeed(float speed);
 		void SetEffect(float num, int effect, bool isActive);
 
-		void SetEdit(bool isEdit,int mode);
+		void SetEdit(bool isEdit);
 		void SetFrame(int frame);
 
 		// Initialize texture and framebuffer
 		void SetTexture();
 		void CreateScreenQuad();
 		
-		//void SaveAction();
-		void SetFrameData(JsonIO::FrameData frameData, int frame,bool isNewFD);
+		void SetCurFrameData(JsonIO::FrameData curFD, int frame);
+		void SetNewFrameData(JsonIO::FrameData frameData, int frame);
+		void SaveAction(std::string fileName);
 
 		JsonIO::FrameData GetFrameData();
 		JsonIO::Action GetAction();
-		double GetFrame() { return frame; }
+		std::vector<std::string> GetActionNames();
+
+		void SetkeepMultipleActive(bool keepMultipleActive);
+		void SetMultipleMode(int multipleMode);
 
 	private:
 		auto LoadScene() -> bool;
@@ -72,6 +77,8 @@ namespace CG
 		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
 	private:
 		Camera camera;
+		Scene *scene;
+		SkyBox *skyBox;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -87,7 +94,7 @@ namespace CG
 		GLuint texture;
 		GLuint depth_texture;
 		GLuint program;
-		GLuint Post_Process;		// �S�Ī�Program
+		GLuint Post_Process;		// ¯S®ÄªºProgram
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -95,12 +102,14 @@ namespace CG
 		float eyeX = 0.0;
 		float angle = 0.0;
 		float eyeAngley = 0.0;
-		float eyedistance = 25.0;
+		float eyedistance = 65.0;
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLuint ModelID;
 
+		bool keepMultipleActive = false;
+		int multipleMode = 0;
 		int instancedNum = 1;  // How many robot
 
 		int vertices_size[PARTSNUM];
@@ -112,6 +121,7 @@ namespace CG
 		GLuint M_KdID;
 		GLuint M_KsID;
 		GLuint BackGround;
+		GLuint MultipleMode;
 
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count
@@ -125,15 +135,14 @@ namespace CG
 		float betas[PARTSNUM];
 		float gammas[PARTSNUM];
 		float position[3];
-		bool isActionChange;
 		bool isEdit = false;
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
 		
-		//control speed
-		float speed = 1;
 		double frame;
 
+		bool isActionChange;
+    
 		int screenWidth = 1280;
 		int screenHeight = 720;
 
@@ -154,17 +163,6 @@ namespace CG
 			left_foot,
 			right_leg,
 			right_foot
-		};
-
-		enum Action
-		{
-			idle = 0,
-			walk,
-			sit_up,
-			push_up,
-			multiple,
-			hopak_dance,
-			apt
 		};
 
 		enum Axis {
