@@ -151,7 +151,6 @@
     <ClCompile Include="..\src\Scene\Camera.cpp" />
     <ClCompile Include="..\src\Scene\MainScene.cpp" />
     <ClCompile Include="..\src\Scene\MusicPlayer.cpp" />
-    <ClCompile Include="..\src\Scene\Particles.cpp" />
     <ClCompile Include="..\src\Scene\Scene.cpp" />
     <ClCompile Include="..\src\Scene\Skybox.cpp" />
     <ClCompile Include="..\src\Utilty\JsonIO.cpp" />
@@ -173,7 +172,6 @@
     <ClInclude Include="..\src\Scene\Camera.h" />
     <ClInclude Include="..\src\Scene\MainScene.h" />
     <ClInclude Include="..\src\Scene\MusicPlayer.h" />
-    <ClInclude Include="..\src\Scene\Particles.h" />
     <ClInclude Include="..\src\Scene\Scene.h" />
     <ClInclude Include="..\src\Scene\SkyBox.h" />
     <ClInclude Include="..\src\Utilty\JsonIO.h" />
@@ -186,8 +184,6 @@
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
-    <None Include="..\res\shaders\Particle.fp" />
-    <None Include="..\res\shaders\Particle.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />
     <None Include="..\res\shaders\Scene_Material.vp" />
     <None Include="..\res\shaders\Post-Process.fp" />
