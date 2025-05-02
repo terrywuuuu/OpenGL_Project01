@@ -11,3 +11,6 @@ obj/
 build/Debugx64/cg-gui.exe
 build/Debugx64/cg-gui.pdb
 build/Debugx64/imgui.ini
+
+/cg-gui/*.vcxproj
+/cg-gui/*.vcxproj.filters
