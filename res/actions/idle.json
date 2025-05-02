@@ -13,7 +13,7 @@
         "gamma": 0.0
       },
       "left_arm": {
-        "alpha": -160.0,
+        "alpha": 0.0,
         "beta": 0.0,
         "gamma": -70.0
       },
