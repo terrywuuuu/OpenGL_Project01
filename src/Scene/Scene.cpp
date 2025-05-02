@@ -12,8 +12,7 @@ static glm::mat4 scale(float x, float y, float z)
 	glm::vec4 c3 = glm::vec4(0, 0, z, 0);
 	glm::vec4 c4 = glm::vec4(0, 0, 0, 1);
 	glm::mat4 M = glm::mat4(c1, c2, c3, c4);
-	return M;
-}
+	return M;}
 
 namespace CG
 {

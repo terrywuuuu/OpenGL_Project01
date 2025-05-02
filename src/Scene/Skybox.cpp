@@ -5,10 +5,8 @@
 #include "SkyBox.h"
 #include "Camera.h"
 
-const unsigned int width = 800;
-const unsigned int height = 800;
 
-float size = 500.0f;
+float size = 1.0f;
 
 float skyboxVertices[] =
 {
@@ -59,8 +57,8 @@ namespace CG
 		glEnable(GL_CULL_FACE);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "../../res/shaders/SkyBox_Material.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "../../res/shaders/SkyBox_Material.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "../../res/shaders/SkyBox.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/SkyBox.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 
 		program = LoadShaders(shaders); //Åª¨úshader
