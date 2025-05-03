@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\src\App\App.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui.cpp">
+      <Filter>ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_demo.cpp">
+      <Filter>ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_draw.cpp">
+      <Filter>ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_tables.cpp">
+      <Filter>ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
+      <Filter>ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>ImGUI\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>ImGUI\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\OBJLoader.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Window\ControlWindow.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\MainScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\Camera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\JsonIO.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\LoadShaders.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\stb_image.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\Skybox.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene\MusicPlayer.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Utilty\miniaudio.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="App">
+      <UniqueIdentifier>{14c3de85-933d-4426-88f1-3f11ba6e494c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGUI">
+      <UniqueIdentifier>{38940e0d-a62b-4d27-adc6-30fa85a47742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGUI\backends">
+      <UniqueIdentifier>{481e81f8-69ee-4b09-a57d-cde1e63407ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{81d06d86-e32c-403f-8af1-d06f762a7a50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{187d3d12-3803-44fb-b99a-fb667b621b04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{e341a3e5-cdcc-4216-b5fc-da9c07bd2fab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\App\App.h">
+      <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\imconfig.h">
+      <Filter>ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\imgui.h">
+      <Filter>ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\imgui_internal.h">
+      <Filter>ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\backends\imgui_impl_glfw.h">
+      <Filter>ImGUI\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>ImGUI\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\imgui\backends\imgui_impl_opengl3_loader.h">
+      <Filter>ImGUI\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\OBJLoader.hpp">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Window\ControlWindow.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\MainScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\Camera.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\JsonIO.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\LoadShaders.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\stb_image.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\SkyBox.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene\MusicPlayer.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Utilty\miniaudio.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\shaders\DSPhong_Material.fp" />
+    <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Scene_Material.fp" />
+    <None Include="..\res\shaders\Scene_Material.vp" />
+    <None Include="..\res\shaders\Post-Process.fp" />
+    <None Include="..\res\shaders\Post-Process.vp" />
+    <None Include="..\res\shaders\SkyBox.fp" />
+    <None Include="..\res\shaders\SkyBox.vp" />
+  </ItemGroup>
+</Project>
