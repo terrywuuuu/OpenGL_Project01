@@ -1,6 +1,5 @@
 #include <Utilty/LoadShaders.h>
 #include <Utilty/OBJLoader.hpp>
-#include <../src/Utilty/JsonIO.h>
 #include <io.h>
 
 #include "MainScene.h"
@@ -49,14 +48,24 @@ namespace CG
 
 	auto MainScene::Initialize() -> bool
 	{
-		isActionChange = true;
+		//Initialize Scene, SkyBox
 		scene = new Scene();
 		skyBox = new SkyBox();
+<<<<<<< HEAD
 		effect = new Effects();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
+=======
+
+		scene->Initialize();
+		skyBox->Initialize();
+
+		//Initialize MusicPlayer
+		musicPlayer = new MusicPlayer();
+
+>>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 		return LoadScene();
 	}
 
@@ -74,8 +83,13 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
+<<<<<<< HEAD
 		glUseProgram(program);//uniform?�數?�值�?必�??�use shader
     
+=======
+		glUseProgram(program);//uniform參數數值前必須先use shader
+
+>>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 		float theta = glm::radians(eyeAngley); // 左右
 		float phi = glm::radians(angle);   // 上�?
 
@@ -148,7 +162,7 @@ namespace CG
 				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
 				glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
 				//          (primitive   , glVertexID base , vertex count    )
-				if (instancedNum == 1) {
+				if (curInstancedNum == 1) {
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
 				}
 				else {
@@ -160,25 +174,28 @@ namespace CG
 					}
 
 					glUniform1i(MultipleMode, multipleMode);
-					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
+					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, curInstancedNum);
 				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
 				vertexIDoffset += faces[i][j + 1] * 3;//glVertexID's base offset is face count*3
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
-    
+
 		scene->Render(camX, camY, camZ, aspect, mode);
 		skyBox->Render(camX, camY, camZ, aspect, mode);
 
+<<<<<<< HEAD
 		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"]);
 			effectTime["smoke"]--;
 		}
     
+=======
+>>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Texture_Render();
-    
+
 		glFlush();
 	}
 
@@ -234,31 +251,47 @@ namespace CG
 		//5: Mouse wheel down
 		switch (key)
 		{
-			case 0:
-				eyeAngley -= 10;
-				break;
-			case 1:
-				eyeAngley += 10;
-				break;
-			case 2:
-				angle += 3;
-				if (angle >= 90) angle = 89;
-				printf("beta:%f\n", angle);
-				break;
-			case 3:
-				angle -= 3;
-				if (angle <= -90) angle = -89;
-				printf("beta:%f\n", angle);
-				break;
-			case 4:
-				eyedistance -= 2.0;
-				printf("eyedistance:%f\n", eyedistance);
-				break;
+		case 0:
+			eyeAngley -= 10;
+			break;
+		case 1:
+			eyeAngley += 10;
+			break;
+		case 2:
+			angle += 3;
+			if (angle >= 90) angle = 89;
+			printf("beta:%f\n", angle);
+			break;
+		case 3:
+			angle -= 3;
+			if (angle <= -90) angle = -89;
+			printf("beta:%f\n", angle);
+			break;
+		case 4:
+			eyedistance -= 2.0;
+			printf("eyedistance:%f\n", eyedistance);
+			break;
 
-			case 5:
-				eyedistance += 2.0;
-				printf("eyedistance:%f\n", eyedistance);
-				break;
+		case 5:
+			eyedistance += 2.0;
+			printf("eyedistance:%f\n", eyedistance);
+			break;
+		}
+	}
+
+	void MainScene::PlayMusic() {
+		musicPlayer->Play("../../res/Music/" + curAction.musicName);
+		if (isEdit || curAction.name == "idle") {
+			musicPlayer->Stop();
+		}
+		else {
+			if (curAction.name == "multiple")
+			{
+				musicPlayer->SetLooping(false);
+			}
+			else {
+				musicPlayer->SetLooping(true);
+			}
 		}
 	}
 
@@ -267,13 +300,14 @@ namespace CG
 		curAction = actionDatas[action];
 		this->actionIndex = action;
 
-		if (!this->keepMultipleActive)
+		if (curAction.name == "multiple" || !this->keepMultipleActive)
 		{
-			instancedNum = 1;
+			curInstancedNum = 1;
 		}
-		scene->SetInstance(instancedNum, multipleMode);
+		scene->SetInstance(curInstancedNum, multipleMode);
 
 		frame = 0.0;
+		PlayMusic();
 	}
 
 	void MainScene::SetMode(int mode)
@@ -325,7 +359,6 @@ namespace CG
 		}
 	}
 
-
 	void MainScene::SetEffect(float num, int effect, bool isActive) {
 		switch (effect) {
 		case 0:
@@ -367,8 +400,21 @@ namespace CG
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void MainScene::SetMultipleNumber(int num) {
+		this->instancedNum = num;
+	}
+
+	void MainScene::SetkeepMultipleActive(bool keepMultipleActive) {
+		this->keepMultipleActive = keepMultipleActive;
+	}
+
+	void MainScene::SetMultipleMode(int multipleMode) {
+		this->multipleMode = multipleMode;
+	}
+
 	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
+		PlayMusic();
 	}
 
 	void MainScene::SetFrame(int frame) {
@@ -380,12 +426,22 @@ namespace CG
 		curAction.speed = speed;
 	}
 
-	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame)
+	void MainScene::SetNewFrameData(JsonIO::FrameData frameData, int frame, bool isAdd)
 	{
-		curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
-		this->frame = frame;
-		for (int i = frame + 1; i < curAction.FDs.size(); i++)
-		{
+		if (isAdd) {
+			curAction.FDs.insert(curAction.FDs.begin() + frame, frameData);
+			this->frame = frame + 1;
+		}
+		else {
+			if (curAction.FDs.size() <= 1) {
+				std::cout << "Cannot delete the last frame!" << std::endl;
+				return;
+			}
+			curAction.FDs.erase(curAction.FDs.begin() + frame);
+			this->frame = this->frame <= 0 ? 0 : this->frame - 1;
+		}
+
+		for (int i = this->frame; i < curAction.FDs.size(); ++i) {
 			curAction.FDs[i].frame = i;
 		}
 	}
@@ -441,11 +497,17 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
+<<<<<<< HEAD
 		Post_Process = LoadShaders(shader); //讀?�shader
 
 		effect->setProgram(Post_Process);
     
 		glUseProgram(program);//uniform?�數?�值�?必�??�use shader
+=======
+		Post_Process = LoadShaders(shader); //讀取shader
+
+		glUseProgram(program);//uniform參數數值前必須先use shader
+>>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -469,7 +531,7 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
-    
+
 		LoadAction();
 		SetTexture();
 		CreateScreenQuad();
@@ -619,20 +681,24 @@ namespace CG
 
 		if (curAction.name == "multiple")
 		{
-			if (frame >= end - 1) 
+			if (frame >= end - 1)
 			{
+<<<<<<< HEAD
 				instancedNum = 100;
 				scene->SetInstance(instancedNum, multipleMode);
 				effectTime["smoke"] = 5.0f;
+=======
+				curInstancedNum = instancedNum;
+>>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 			}
 		}
 		else
 			if (!this->keepMultipleActive)
 			{
-				instancedNum = 1;
+				curInstancedNum = 1;
 			}
-			scene->SetInstance(instancedNum, multipleMode);
-		if (instancedNum == 1 || (instancedNum != 1 && instancedNum && curAction.name != "multiple")) {
+		scene->SetInstance(curInstancedNum, multipleMode);
+		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);
 		}
 
@@ -715,15 +781,6 @@ namespace CG
 		}
 	}
 
-	void MainScene::SetkeepMultipleActive(bool keepMultipleActive) {
-		this->keepMultipleActive = keepMultipleActive;
-	}
-
-
-	void MainScene::SetMultipleMode(int multipleMode) {
-		this->multipleMode = multipleMode;
-	}
-  
 	void MainScene::CreateScreenQuad()
 	{
 		GLfloat quadVertices[] = {

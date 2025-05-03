@@ -41,7 +41,7 @@ void main(void)
     float spec = max(0.0, dot(normalize(vVaryingNormal), vReflection));
     if(diff != 0) {
 		spec = pow(spec, Shininess);
-		vFragColor += specularColor*vec4(Material.Ka,1)*spec;
+		vFragColor += specularColor*vec4(Material.Ks,1)*spec;
     }
 }
 	

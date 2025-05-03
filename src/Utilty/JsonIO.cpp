@@ -35,6 +35,11 @@ bool JsonIO::LoadAction(const std::string& filename, Action& out) {
 
     out.name = j.at("name").get<std::string>();
     out.speed = j.at("speed").get<float>();
+    out.musicName = j.at("musicName").get<std::string>();
+    if (out.musicName == "")
+    {
+        out.musicName = "Default.mp3";
+    }
     
     for (auto& frameJson : j.at("action")) {
         FrameData ofd;
@@ -59,9 +64,6 @@ bool JsonIO::LoadAction(const std::string& filename, Action& out) {
 bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
     json j;
 
-	j["name"] = action.name;
-	j["speed"] = action.speed;
-
     for (auto& f : action.FDs) {  // Iterate through Action's FDs
         json frameJson;
         frameJson["frame"] = f.frame;
@@ -81,6 +83,9 @@ bool JsonIO::SaveAction(const std::string& filename, const Action& action) {
         }
 
         j["action"].push_back(frameJson);
+        j["name"] = action.name;
+        j["speed"] = action.speed;
+        j["musicName"] = action.musicName;
     }
 
     std::ofstream ofs(filename + ".json");

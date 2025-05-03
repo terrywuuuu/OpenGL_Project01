@@ -14,7 +14,10 @@ uniform MatVP{
 	mat4 View;
 	mat4 Projection;
 };
+
 uniform mat4 Model;
+uniform bool isInstanced;
+uniform int MultipleMode;
 
 // Color to fragment program
 out vec3 vVaryingNormal;
@@ -23,16 +26,119 @@ out vec2 UV;
 
 void main(void) 
 { 
-	// 根據 gl_InstanceID 計算每個實例的平移
-    float offset = float(gl_InstanceID);
-    vec3 instancePosition = vec3(-60.0 + offset * 15.0, 0.0, 0.0);  // 每個實例的偏移
+    mat4 newModel;
 
-    // 創建平移矩陣
-    mat4 translationMatrix = mat4(1.0);  // 單位矩陣，表示沒有縮放或旋轉
-    translationMatrix[3] = vec4(instancePosition, 1.0);  // 設定平移部分
+    if(isInstanced){
+        if(MultipleMode == 0) {
+            int id = gl_InstanceID;
 
-    // 將平移矩陣和原始模型矩陣相乘，得到最終的模型矩陣
-    mat4 newModel = translationMatrix * Model;  // 這樣保持了 Model 的部位相對位置不變
+            // 計算層數（row）
+            int row = int(floor((sqrt(8.0 * float(id) + 1.0) - 1.0) / 2.0));
+            int rowStart = row * (row + 1) / 2;  // 計算該層的起始 ID
+            int col = id - rowStart;  // 計算此實例在該層的位置
+
+            // 每層的物體數量：只在兩邊各有一個物體
+            int pointsPerRing = 2;
+
+            // 計算此層的物體應該在哪兩個位置
+            float spacing = 50.0;
+            float offsetx = 0.0;
+            float offsetz = 0.0;
+
+            // 只有兩個邊上的物體，第一個在左邊，第二個在右邊
+            if (col == 0) {
+                offsetx = -float(row) * spacing;  // 左邊邊緣
+            } else {
+                offsetx = float(row) * spacing;  // 右邊邊緣
+            }
+
+            offsetz = -float(row) * 10.0;  // 每層在 z 軸上的偏移
+
+            // 計算實例的最終位置
+            vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
+
+            // 創建平移矩陣
+            mat4 translationMatrix = mat4(1.0);
+            translationMatrix[3] = vec4(instancePosition, 1.0);
+
+            // 最終模型矩陣
+            newModel = translationMatrix * Model;
+        }else if(MultipleMode == 1) {
+            int id = gl_InstanceID;
+
+            // 計算此實例在第幾層（第幾行）
+            int row = int(floor((sqrt(8.0 * float(id) + 1.0) - 1.0) / 2.0));
+            int rowStart = row * (row + 1) / 2;  // 此行的起始 ID
+            int col = id - rowStart;  // 在這行中第幾個（從左到右）
+
+            // 每層中點的水平總寬度（以單位間距 10 為例）
+            float spacing = 100.0;
+            float totalWidth = float(row) * spacing;
+    
+            // x 方向偏移，使得整行居中
+            float offsetx = float(col) * spacing - totalWidth / 2.0;
+
+            // z 軸（或 y 軸）下移排成金字塔
+            float offsetz = float(-row) * 40.0;
+
+            vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
+
+            mat4 translationMatrix = mat4(1.0);
+            translationMatrix[3] = vec4(instancePosition, 1.0);
+            newModel = translationMatrix * Model;
+        }else {
+            int id = gl_InstanceID;
+            if (id == 0) {
+                // 中心點
+                vec3 instancePosition = vec3(0.0, 0.0, 0.0);
+                mat4 translationMatrix = mat4(1.0);
+                translationMatrix[3] = vec4(instancePosition, 1.0);
+                newModel = translationMatrix * Model;
+            }
+            else {
+                // 每圈多 6 個點（六邊形樣式擴散），你也可以改成更密集
+                int pointsPerRing = 6;
+                int layer = 1;
+                int count = 1; // 從 ID 1 開始
+
+                // 找出當前 ID 屬於第幾圈（哪一層 radius）
+                while (count + layer * pointsPerRing <= id) {
+                    count += layer * pointsPerRing;
+                    layer++;
+                }
+
+                int indexInRing = id - count; // 該圈中第幾個點
+                int pointsThisRing = layer * pointsPerRing;
+
+                float radius = float(layer) * 70.0;  // 每圈半徑增加 60
+                float angle = float(indexInRing) / float(pointsThisRing) * 6.2831853; // 2π radians
+
+                float offsetx = cos(angle) * radius;
+                float offsetz = sin(angle) * radius;
+
+                vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
+
+                mat4 translationMatrix = mat4(1.0);
+                translationMatrix[3] = vec4(instancePosition, 1.0);
+
+                vec3 toCenter = normalize(-instancePosition);  // 指向中心的方向
+                float RotateAngle = atan(toCenter.x, toCenter.z);    // Y 軸旋轉角（注意 X 和 Z 的順序）
+                mat4 rotationY = mat4(
+                    cos(RotateAngle), 0.0, -sin(RotateAngle), 0.0,
+                    0.0,        1.0,  0.0,        0.0,
+                    sin(RotateAngle), 0.0,  cos(RotateAngle), 0.0,
+                    0.0,        0.0,  0.0,        1.0
+                );
+
+                newModel = translationMatrix * rotationY * Model;
+            }
+        }
+
+    }
+    else{
+        // 不使用 instance 偏移
+        newModel = Model;
+    }
 
 	mat4 MVP = Projection*View*newModel;
 	mat4 MV = View * newModel;  

@@ -1,5 +1,7 @@
-{"name":"push up",
-  "speed":1.0,
+{
+  "name":"push_up",
+  "speed": 5.3,
+  "musicName" : "pushup.mp3",
   "action":[
   {
     "frame": 0,

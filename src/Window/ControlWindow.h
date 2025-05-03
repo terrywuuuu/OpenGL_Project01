@@ -14,20 +14,19 @@ namespace CG
 		void Display();
 		void DisplayMtl();
 		void DisplayEditor(ImVec2 postPos,ImVec2 postSize);
-		void DisplayActionSelector(int actionIndex = -1);
+		void DisplayActionSelector(int actionIndex, bool& isEdit);
 		void DisplayEditorItem(bool& isEdit, float curFrame, JsonIO::FrameData& curFD, JsonIO::Action& actionData);
 		void DisplayModleControl(bool& isEdit, float curFrame, JsonIO::FrameData& curFD);
 		void DisplayEffect();
 		void SetActionData();
     
 		void HandleInput();
-		void ToggleInput(bool isKeyboardEnable, bool isMouseEnable);
 
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
 
-		bool isKeyboardEnable = 1;
+		bool isKeyboardEnable;
 		bool keepMultipleActive;
 		bool previousKeepMultipleActive;
 
