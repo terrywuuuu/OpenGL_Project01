@@ -52,9 +52,11 @@ namespace CG
 		isActionChange = true;
 		scene = new Scene();
 		skyBox = new SkyBox();
+		effect = new Effects();
 		
 		scene->Initialize();
 		skyBox->Initialize();
+		effect->Initialize();
 		return LoadScene();
 	}
 
@@ -168,6 +170,11 @@ namespace CG
     
 		scene->Render(camX, camY, camZ, aspect, mode);
 		skyBox->Render(camX, camY, camZ, aspect, mode);
+
+		if (effectTime["smoke"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"]);
+			effectTime["smoke"]--;
+		}
     
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Texture_Render();
@@ -185,6 +192,7 @@ namespace CG
 		// ?≥È? FBO Ê∏≤Ê?ÁµêÊ??ÑÁ??ÜÂ?Á¥ãÁ?Â§ßÂ?
 		glActiveTexture(GL_TEXTURE0);  // ÊøÄÊ¥ªÁ??ÜÂñÆ??
 		glBindTexture(GL_TEXTURE_2D, texture);  // Á∂ÅÂ??¥ÊôØÊ∏≤Ê??ÑÁ???
+		glUniform1i(glGetUniformLocation(Post_Process, "useMVP"), false);
 		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ?≥È?Á¥ãÁ???shader
 		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ?≥È?Á¥ãÁ?Â§ßÂ???shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
@@ -209,7 +217,6 @@ namespace CG
 
 		screenWidth = width;
 		screenHeight = height;
-		SetTexture();
 
 		// calc aspect and update camera
 		float aspect = static_cast<float>(width) / static_cast<float>(height);
@@ -435,6 +442,8 @@ namespace CG
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		Post_Process = LoadShaders(shader); //ËÆÄ?ñshader
+
+		effect->setProgram(Post_Process);
     
 		glUseProgram(program);//uniform?ÉÊï∏?∏ÂÄºÂ?ÂøÖÈ??àuse shader
 
@@ -464,6 +473,8 @@ namespace CG
 		LoadAction();
 		SetTexture();
 		CreateScreenQuad();
+
+		effectTime["smoke"] = 0;
 
 		return true;
 	}
@@ -612,6 +623,7 @@ namespace CG
 			{
 				instancedNum = 100;
 				scene->SetInstance(instancedNum, multipleMode);
+				effectTime["smoke"] = 5.0f;
 			}
 		}
 		else

@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "SkyBox.h"
+#include "Effects/Effects.h"
 
 constexpr auto PARTSNUM = 11;
 //new
@@ -79,6 +80,7 @@ namespace CG
 		Camera camera;
 		Scene *scene;
 		SkyBox *skyBox;
+		Effects* effect;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -150,6 +152,7 @@ namespace CG
 		bool enableQuan = false;
 		float blurStrength;
 		float quanStrength;
+		std::map<std::string, float> effectTime;
 
 		enum Body
 		{
