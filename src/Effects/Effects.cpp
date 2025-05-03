@@ -190,7 +190,7 @@ namespace CG
 		EffectInforms[0].alpha -= 1.0f / times[0];
 		EffectInforms[0].trans.y += 1.0f / times[0];
 
-		if (EffectInforms[0].alpha <= 0.0f) {
+		if (EffectInforms[0].alpha <= 0.0f || Time <= 1) {
 			EffectInforms[0].trans = glm::vec3(0);
 			EffectInforms[0].alpha = 1.0f;
 		}

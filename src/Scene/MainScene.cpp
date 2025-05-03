@@ -663,14 +663,19 @@ namespace CG
 			if (frame >= end - 1)
 			{
 				curInstancedNum = instancedNum;
-				effectTime["smoke"] = 5.0f;
+
+				if (isFirstAppear) 
+				{
+					effectTime["smoke"] = 10.0f;
+					isFirstAppear = false;
+				}
 			}
 		}
-		else
-			if (!this->keepMultipleActive)
-			{
-				curInstancedNum = 1;
-			}
+		else if (!this->keepMultipleActive)
+		{
+			curInstancedNum = 1;
+			isFirstAppear = true;
+		}
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);

@@ -158,6 +158,7 @@ namespace CG
 		float blurStrength;
 		float quanStrength;
 		std::map<std::string, float> effectTime;
+		bool isFirstAppear = true;
 
 		enum Body
 		{

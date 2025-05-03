@@ -151,10 +151,12 @@
     <ClCompile Include="..\src\Effects\Effects.cpp" />
     <ClCompile Include="..\src\Scene\Camera.cpp" />
     <ClCompile Include="..\src\Scene\MainScene.cpp" />
+    <ClCompile Include="..\src\Scene\MusicPlayer.cpp" />
     <ClCompile Include="..\src\Scene\Scene.cpp" />
     <ClCompile Include="..\src\Scene\Skybox.cpp" />
     <ClCompile Include="..\src\Utilty\JsonIO.cpp" />
     <ClCompile Include="..\src\Utilty\LoadShaders.cpp" />
+    <ClCompile Include="..\src\Utilty\miniaudio.cpp" />
     <ClCompile Include="..\src\Utilty\OBJLoader.cpp" />
     <ClCompile Include="..\src\Utilty\stb_image.cpp" />
     <ClCompile Include="..\src\Window\ControlWindow.cpp" />
@@ -171,10 +173,12 @@
     <ClInclude Include="..\src\Effects\Effects.h" />
     <ClInclude Include="..\src\Scene\Camera.h" />
     <ClInclude Include="..\src\Scene\MainScene.h" />
+    <ClInclude Include="..\src\Scene\MusicPlayer.h" />
     <ClInclude Include="..\src\Scene\Scene.h" />
     <ClInclude Include="..\src\Scene\SkyBox.h" />
     <ClInclude Include="..\src\Utilty\JsonIO.h" />
     <ClInclude Include="..\src\Utilty\LoadShaders.h" />
+    <ClInclude Include="..\src\Utilty\miniaudio.h" />
     <ClInclude Include="..\src\Utilty\OBJLoader.hpp" />
     <ClInclude Include="..\src\Utilty\stb_image.h" />
     <ClInclude Include="..\src\Window\ControlWindow.h" />
