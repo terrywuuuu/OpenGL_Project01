@@ -14,11 +14,8 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "SkyBox.h"
-<<<<<<< HEAD
 #include "Effects/Effects.h"
-=======
 #include "MusicPlayer.h"
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 
 constexpr auto PARTSNUM = 11;
 //new
@@ -87,11 +84,8 @@ namespace CG
 		Camera camera;
 		Scene *scene;
 		SkyBox *skyBox;
-<<<<<<< HEAD
 		Effects* effect;
-=======
 		MusicPlayer* musicPlayer;
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 
 		GLuint VAO;
 		GLuint VBO;

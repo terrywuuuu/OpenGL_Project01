@@ -51,21 +51,14 @@ namespace CG
 		//Initialize Scene, SkyBox
 		scene = new Scene();
 		skyBox = new SkyBox();
-<<<<<<< HEAD
 		effect = new Effects();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
-=======
-
-		scene->Initialize();
-		skyBox->Initialize();
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
-
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 		return LoadScene();
 	}
 
@@ -83,13 +76,8 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-<<<<<<< HEAD
-		glUseProgram(program);//uniform?�數?�值�?必�??�use shader
-    
-=======
-		glUseProgram(program);//uniform參數數值前必須先use shader
+		glUseProgram(program);
 
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 		float theta = glm::radians(eyeAngley); // 左右
 		float phi = glm::radians(angle);   // 上�?
 
@@ -185,14 +173,11 @@ namespace CG
 		scene->Render(camX, camY, camZ, aspect, mode);
 		skyBox->Render(camX, camY, camZ, aspect, mode);
 
-<<<<<<< HEAD
 		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"]);
 			effectTime["smoke"]--;
 		}
-    
-=======
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Texture_Render();
 
@@ -497,17 +482,11 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-<<<<<<< HEAD
 		Post_Process = LoadShaders(shader); //讀?�shader
 
 		effect->setProgram(Post_Process);
     
 		glUseProgram(program);//uniform?�數?�值�?必�??�use shader
-=======
-		Post_Process = LoadShaders(shader); //讀取shader
-
-		glUseProgram(program);//uniform參數數值前必須先use shader
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -683,13 +662,8 @@ namespace CG
 		{
 			if (frame >= end - 1)
 			{
-<<<<<<< HEAD
-				instancedNum = 100;
-				scene->SetInstance(instancedNum, multipleMode);
-				effectTime["smoke"] = 5.0f;
-=======
 				curInstancedNum = instancedNum;
->>>>>>> db8ed3d3e6a82772d969f0b5a2e54d05426c23d4
+				effectTime["smoke"] = 5.0f;
 			}
 		}
 		else
