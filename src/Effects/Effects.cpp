@@ -24,6 +24,19 @@ static glm::mat4 scale(float x, float y, float z)
 	return M;
 }
 
+static glm::mat4 rotate(float angle, float x, float y, float z)
+{
+	float r = glm::radians(angle);
+	glm::mat4 M = glm::mat4(1);
+
+	glm::vec4 c1 = glm::vec4(cos(r) + (1 - cos(r)) * x * x, (1 - cos(r)) * y * x + sin(r) * z, (1 - cos(r)) * z * x - sin(r) * y, 0);
+	glm::vec4 c2 = glm::vec4((1 - cos(r)) * y * x - sin(r) * z, cos(r) + (1 - cos(r)) * y * y, (1 - cos(r)) * z * y + sin(r) * x, 0);
+	glm::vec4 c3 = glm::vec4((1 - cos(r)) * z * x + sin(r) * y, (1 - cos(r)) * z * y - sin(r) * x, cos(r) + (1 - cos(r)) * z * z, 0);
+	glm::vec4 c4 = glm::vec4(0, 0, 0, 1);
+	M = glm::mat4(c1, c2, c3, c4);
+	return M;
+}
+
 float smokePosition[] = {
 	// 位置					// UV 座標
 	 -25.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左下角
@@ -77,14 +90,12 @@ namespace CG
 				std::cout << "Failed to load texture: " << effectsTex[i] << std::endl;
 			}
 
-			EffectInforms.push_back({ glm::vec3(0), 1.0f});
-
 			std::vector<glm::mat4> E;
 			for (int j = 0; j < 10; j++) {
 				glm::mat4 M = glm::mat4(1.0);
 				E.push_back(M);
 			}
-			effects_Model.push_back(E);
+			EffectInforms.push_back({ E, glm::vec3(0), 1.0f, 15.0, true });
 		}
 
 		setupMesh();
@@ -126,9 +137,21 @@ namespace CG
 		this->program = program;
 	}
 
+	void Effects::setAngle(std::string effect, float angle) {
+		if (effect == "smoke") {
+			for (int i = 0; i < EffectInforms[0].effect_Model.size(); i++) {
+				EffectInforms[0].effect_Model[i] *= rotate(angle, 0, 1, 0);
+			}
+		}
+	}
+
 	void Effects::renderEffects(bool enable, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time) 
 	{
-		if (enable == false) {
+		if (!enable) {
+			for (int i = 0; i < effectsNum; i++) {
+				EffectInforms[i].firstAppear = true;
+			}
+
 			return;
 		}
 
@@ -182,23 +205,25 @@ namespace CG
 		glBindBuffer(GL_ARRAY_BUFFER, modelVBO);  // 綁定先前建好的 VBO
 
 		// 假設 effects_Model[num] 是 std::vector<glm::mat4>
-		glBufferSubData(GL_ARRAY_BUFFER, 0, effects_Model[num].size() * sizeof(glm::mat4), effects_Model[num].data());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, EffectInforms[num].effect_Model.size() * sizeof(glm::mat4), EffectInforms[num].effect_Model.data());
 	}
 
 	void Effects::updateSmoke(float Time)
 	{
-		EffectInforms[0].alpha -= 1.0f / times[0];
-		EffectInforms[0].trans.y += 1.0f / times[0];
+		EffectInforms[0].alpha -= 1.0f / EffectInforms[0].time;
+		EffectInforms[0].trans.y += 1.0f / EffectInforms[0].time;
 
-		if (EffectInforms[0].alpha <= 0.0f || Time <= 1) {
+		if (EffectInforms[0].alpha < 0.0f || Time <= 1) {
 			EffectInforms[0].trans = glm::vec3(0);
 			EffectInforms[0].alpha = 1.0f;
 		}
 
-		for (int i = 0; i < effects_Model[0].size(); i++) {
-			glm::mat4 base = glm::mat4(1.0);
-			base *= translate(-250.0 + i * 50.0, EffectInforms[0].trans.y, 0);
-			effects_Model[0][i] = base;
+		if (EffectInforms[0].firstAppear) {
+			for (int i = 0; i < EffectInforms[0].effect_Model.size(); i++) {
+				EffectInforms[0].effect_Model[i] *= translate(-250.0 + i * 50.0, EffectInforms[0].trans.y, 0);
+			}
+
+			EffectInforms[0].firstAppear = false;
 		}
 	}
 }

@@ -22,6 +22,7 @@ namespace CG
 		void renderEffects(bool, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time);
 		void setupMesh();
 		void setProgram(GLuint program);
+		void setAngle(std::string effect, float angle);
 
 	private:
 		auto LoadTexture() -> bool;
@@ -38,17 +39,18 @@ namespace CG
 
 		GLuint Effect_Texture[1];
 		GLuint program;
-		std::vector<std::vector<glm::mat4>> effects_Model;
-		int effectsNum = 1;
+		int effectsNum = 1;	// 特效數
 		std::vector<std::string> enableEffects = { "enableSmoke" };
 
 		struct EffectInform {
-			glm::vec3 trans;
-			float alpha;
+			std::vector<glm::mat4> effect_Model;		// 每個特效的 model matrix
+			glm::vec3 trans;										// 位移量
+			float alpha;												// 透明度
+			float time;													// 持續時間
+			bool firstAppear;
 		};
 
 		std::vector<EffectInform> EffectInforms;
-		float times[1] = { 20.0f };
 
 		enum Enable
 		{

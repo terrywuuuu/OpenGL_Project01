@@ -155,8 +155,10 @@ namespace CG
 
 		bool enableBlur = false;
 		bool enableQuan = false;
+		bool enableMosaic = false;
 		float blurStrength;
 		float quanStrength;
+		float mosaicStrength;
 		std::map<std::string, float> effectTime;
 		bool isFirstAppear = true;
 

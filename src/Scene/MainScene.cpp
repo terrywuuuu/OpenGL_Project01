@@ -199,8 +199,11 @@ namespace CG
 		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ?³é?ç´‹ç?å¤§å???shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
+		glUniform1f(glGetUniformLocation(Post_Process, "mosaicSize"), mosaicStrength);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableMosaic"), enableMosaic);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableShadow"), 1);
 
 		// ´è¬V«Ì¹õ¥|Ãä§ÎÅã¥Üµ²ªG
 		glDrawArrays(GL_TRIANGLES, 0, 6);  // ´è¬V¥|Ãä§Î*/
@@ -238,9 +241,11 @@ namespace CG
 		{
 		case 0:
 			eyeAngley -= 10;
+			effect->setAngle("smoke", -10);
 			break;
 		case 1:
 			eyeAngley += 10;
+			effect->setAngle("smoke", 10);
 			break;
 		case 2:
 			angle += 3;
@@ -353,6 +358,10 @@ namespace CG
 		case 1:
 			enableQuan = isActive;
 			quanStrength = num;
+			break;
+		case 2:
+			enableMosaic = isActive;
+			mosaicStrength = num;
 			break;
 		}
 	}
@@ -763,13 +772,14 @@ namespace CG
 	void MainScene::CreateScreenQuad()
 	{
 		GLfloat quadVertices[] = {
-			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä?
-			-1.0f, -1.0f,  0.0f, 0.0f, // å·¦ä?
-			1.0f, -1.0f,  1.0f, 0.0f, // ?³ä?
-
-			-1.0f,  1.0f,  0.0f, 1.0f, // å·¦ä?
-			1.0f, -1.0f,  1.0f, 0.0f, // ?³ä?
-			1.0f,  1.0f,  1.0f, 1.0f  // ?³ä?
+			// ¿Ã¹õ®y¼Ð  // UV
+			-1.0f,  1.0f,  0.0f, 1.0f, 
+			-1.0f, -1.0f,  0.0f, 0.0f, 
+			1.0f, -1.0f,  1.0f, 0.0f, 
+			
+			-1.0f,  1.0f,  0.0f, 1.0f, 
+			1.0f, -1.0f,  1.0f, 0.0f, 
+			1.0f,  1.0f,  1.0f, 1.0f  
 		};
 
 		glGenVertexArrays(1, &screenQuadVAO);

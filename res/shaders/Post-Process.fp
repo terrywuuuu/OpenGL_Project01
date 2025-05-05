@@ -10,12 +10,14 @@ out vec4 FragColor;
 uniform bool enableBlur;    // 用來控制是否啟用模糊
 uniform bool enableQuan;    // 用來控制是否啟用量化
 uniform bool enableSmoke;    // 用來控制是否啟用煙霧
+uniform bool enableMosaic;     // 控制是否啟用馬賽克
 
 uniform sampler2D sceneTexture;  // 用來存儲渲染結果的紋理
 uniform vec2 texSize;            // 紋理的大小，用於計算偏移量
 
 uniform float blurStrength;     // 模糊程度
 uniform float quanStrength;     // 量化程度
+uniform float mosaicSize;      // 馬賽克每格的像素大小 (程度)
 
 uniform sampler2D effectTexture;
 uniform float alpha;
@@ -38,6 +40,12 @@ vec3 applyBlur() {
     return result;
 }
 
+vec3 applyMosaic() {
+    vec2 blockSize = vec2(mosaicSize) / texSize;
+    vec2 mosaicUV = floor(TexCoords / blockSize) * blockSize + blockSize * 0.5;
+    return texture(sceneTexture, mosaicUV).rgb;
+}
+
 void main(void)
 { 
     // 如果啟用了模糊效果，則進行模糊處理
@@ -51,7 +59,11 @@ void main(void)
         float r = floor(tex_color.r * nbins) / nbins;
         float g = floor(tex_color.g * nbins) / nbins;
         float b = floor(tex_color.b * nbins) / nbins;
-        FragColor = vec4(r,g,b,tex_color.a);
+        FragColor = vec4(r,g,b,tex_color.a);           // 量化效果
+    }
+    else if(enableMosaic){
+        vec3 results = applyMosaic();
+        FragColor = vec4(results, 1.0);           // 應用馬賽克效果
     }
     else{
         if(enableSmoke){

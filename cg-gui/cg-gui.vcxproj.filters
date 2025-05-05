@@ -150,9 +150,9 @@
     <None Include="..\res\shaders\DSPhong_Material.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />
     <None Include="..\res\shaders\Scene_Material.vp" />
-    <None Include="..\res\shaders\SkyBox_Material.fp" />
-    <None Include="..\res\shaders\SkyBox_Material.vp" />
     <None Include="..\res\shaders\Post-Process.fp" />
     <None Include="..\res\shaders\Post-Process.vp" />
+    <None Include="..\res\shaders\SkyBox.fp" />
+    <None Include="..\res\shaders\SkyBox.vp" />
   </ItemGroup>
 </Project>
