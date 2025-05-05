@@ -1,5 +1,7 @@
-{"name":"walk",
-  "speed":2.0,
+{
+  "name": "walk",
+  "speed": 8.3,
+  "musicName" : "walk.mp3",
   "action":[
   {
     "frame": 0,

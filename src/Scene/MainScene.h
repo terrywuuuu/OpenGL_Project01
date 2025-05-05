@@ -43,6 +43,7 @@ namespace CG
 
 		// Control panel functions
 		void SetMode(int mode);
+		void SetCameraMode(int mode);
 		void SetMultipleNumber(int num);
 		void SetkeepMultipleActive(bool keepMultipleActive);
 		void SetMultipleMode(int multipleMode);
@@ -76,6 +77,7 @@ namespace CG
 
 		void UpdateAction(double dt);
 		void UpdateModel();
+		void UpdateCamera(double dt);
 		glm::mat4 bodyRotateMatrix(int body);
 
 		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
@@ -106,6 +108,7 @@ namespace CG
 
 		float eyeX = 0.0;
 		float angle = 0.0;
+		float lastEyeAngle = 0.0;
 		float eyeAngley = 0.0;
 		float eyedistance = 65.0;
 		float size = 1;
@@ -113,6 +116,7 @@ namespace CG
 		GLint MatricesIdx;
 		GLuint ModelID;
 
+		int cameraMode = 0;
 		bool keepMultipleActive = false;
 		int multipleMode = 0;
 		int curInstancedNum = 1;

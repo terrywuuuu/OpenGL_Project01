@@ -33,8 +33,8 @@ namespace CG
 		glBindVertexArray(VAO);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "../../res/shaders/Scene_Material.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "../../res/shaders/Scene_Material.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "./res/shaders/Scene_Material.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "./res/shaders/Scene_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		program = LoadShaders(shaders); //讀取shader
 
@@ -167,7 +167,7 @@ namespace CG
 		std::vector<glm::vec3> Kss;
 		std::vector<std::string> Materials; // mtl-name
 		std::vector<std::string> textures;
-		LoadMTL("../../res/Scene/Scene.mtl", Kds, Kas, Kss, Materials, textures);
+		LoadMTL("./res/Scene/Scene.mtl", Kds, Kas, Kss, Materials, textures);
 		for (int i = 0; i < Materials.size(); i++)
 		{
 			std::string mtlname = Materials[i];
@@ -180,7 +180,7 @@ namespace CG
 			if (!textures[i].empty())
 			{
 				int width, height, channels;
-				std::string textuePath = "../../res/Scene/" + textures[i];
+				std::string textuePath = "./res/Scene/" + textures[i];
 				printf("Load Textures: %s\n", textuePath.c_str());
 				unsigned char* data = stbi_load(textuePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 				
@@ -210,7 +210,7 @@ namespace CG
 		}
 
 		// 加載各部件
-		Load2Buffer("../../res/Scene/Scene.obj", Type::Building);           // body
+		Load2Buffer("./res/Scene/Scene.obj", Type::Building);           // body
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };

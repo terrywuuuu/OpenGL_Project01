@@ -58,11 +58,34 @@ namespace CG
 				ImGui::EndCombo();
 			}
 
+			static int cameraModesIndex = 0;
+			std::vector<std::string> cameraModes = { "No Move" ,"Circle", "Sine"};
+			ImGui::Text("Camera Mode: ");
+			if (ImGui::BeginCombo("##CameraMode", cameraModes[cameraModesIndex].c_str()))
+			{
+				for (int n = 0; n < cameraModes.size(); n++)
+				{
+					const bool is_selected = (cameraModesIndex == n);
+					if (ImGui::Selectable(cameraModes[n].c_str(), is_selected))
+					{
+						cameraModesIndex = n;
+						std::cout << "Set Camera Mode " << cameraModesIndex << std::endl;
+						targetScene->SetCameraMode(n);
+					}
+
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
 			static int multipleModesIndex = 0, multipleNumber = 100;
 			std::vector<std::string> multipleModes = { "Triangle Edge Only" ,"Triangular Grid", "Circular Spread" };
 			ImGui::Text("Multiple Number: ");
-			if (ImGui::InputInt("multipleNumber##", &multipleNumber, 10.0f)) {
-				multipleNumber = multipleNumber < 1 ? 1 : multipleNumber;
+			if (ImGui::InputInt("", &multipleNumber, 10.0f)) {
+				multipleNumber = multipleNumber < 2 ? 2 : multipleNumber;
 				targetScene->SetMultipleNumber(multipleNumber);
 			}
 			ImGui::Text("Multiple Setting: ");

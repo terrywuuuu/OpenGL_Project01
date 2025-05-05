@@ -57,8 +57,8 @@ namespace CG
 		glEnable(GL_CULL_FACE);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "../../res/shaders/SkyBox.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "../../res/shaders/SkyBox.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "./res/shaders/SkyBox.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "./res/shaders/SkyBox.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 
 		program = LoadShaders(shaders); //Åª¨úshader
@@ -118,7 +118,7 @@ namespace CG
 
 	void SkyBox::LoadModel()
 	{
-		std::string parentDir = "../../res/SkyBox/";
+		std::string parentDir = "./res/SkyBox/";
 		std::string facesCubemap[6] =
 		{
 			parentDir + "px.png",

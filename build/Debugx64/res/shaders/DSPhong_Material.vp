@@ -29,100 +29,84 @@ void main(void)
     mat4 newModel;
 
     if(isInstanced){
-        if(MultipleMode == 0) {
-            int id = gl_InstanceID;
+        int id = gl_InstanceID;
+        if(MultipleMode == 0 && id != 0) {
+            // calc row
+            int row = (id - 1) / 2 + 1;
 
-            // 計算層數（row）
-            int row = int(floor((sqrt(8.0 * float(id) + 1.0) - 1.0) / 2.0));
-            int rowStart = row * (row + 1) / 2;  // 計算該層的起始 ID
-            int col = id - rowStart;  // 計算此實例在該層的位置
-
-            // 每層的物體數量：只在兩邊各有一個物體
-            int pointsPerRing = 2;
-
-            // 計算此層的物體應該在哪兩個位置
             float spacing = 50.0;
             float offsetx = 0.0;
-            float offsetz = 0.0;
+            float offsetz = -float(row) * 10.0;
 
-            // 只有兩個邊上的物體，第一個在左邊，第二個在右邊
-            if (col == 0) {
-                offsetx = -float(row) * spacing;  // 左邊邊緣
+            // calc left or right
+            if (id % 2 == 0) {
+                offsetx = -float(row) * spacing;  // left
             } else {
-                offsetx = float(row) * spacing;  // 右邊邊緣
+                offsetx = float(row) * spacing;  // right
             }
 
-            offsetz = -float(row) * 10.0;  // 每層在 z 軸上的偏移
-
-            // 計算實例的最終位置
+            // final translation 
             vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
 
-            // 創建平移矩陣
             mat4 translationMatrix = mat4(1.0);
             translationMatrix[3] = vec4(instancePosition, 1.0);
 
-            // 最終模型矩陣
             newModel = translationMatrix * Model;
         }else if(MultipleMode == 1) {
-            int id = gl_InstanceID;
-
-            // 計算此實例在第幾層（第幾行）
+            // calc row & row start id & col
             int row = int(floor((sqrt(8.0 * float(id) + 1.0) - 1.0) / 2.0));
-            int rowStart = row * (row + 1) / 2;  // 此行的起始 ID
-            int col = id - rowStart;  // 在這行中第幾個（從左到右）
+            int rowStart = row * (row + 1) / 2;
+            int col = id - rowStart;
 
-            // 每層中點的水平總寬度（以單位間距 10 為例）
             float spacing = 100.0;
+
             float totalWidth = float(row) * spacing;
-    
-            // x 方向偏移，使得整行居中
             float offsetx = float(col) * spacing - totalWidth / 2.0;
 
-            // z 軸（或 y 軸）下移排成金字塔
             float offsetz = float(-row) * 40.0;
-
+            
+            // final translation 
             vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
 
             mat4 translationMatrix = mat4(1.0);
             translationMatrix[3] = vec4(instancePosition, 1.0);
             newModel = translationMatrix * Model;
         }else {
-            int id = gl_InstanceID;
             if (id == 0) {
-                // 中心點
-                vec3 instancePosition = vec3(0.0, 0.0, 0.0);
-                mat4 translationMatrix = mat4(1.0);
-                translationMatrix[3] = vec4(instancePosition, 1.0);
-                newModel = translationMatrix * Model;
+                newModel = Model;
             }
             else {
-                // 每圈多 6 個點（六邊形樣式擴散），你也可以改成更密集
+                // per layer add 6 * layer robot
                 int pointsPerRing = 6;
-                int layer = 1;
-                int count = 1; // 從 ID 1 開始
 
-                // 找出當前 ID 屬於第幾圈（哪一層 radius）
+                // calc layer
+                int layer = 1;
+                int count = 1;
                 while (count + layer * pointsPerRing <= id) {
                     count += layer * pointsPerRing;
                     layer++;
                 }
 
-                int indexInRing = id - count; // 該圈中第幾個點
-                int pointsThisRing = layer * pointsPerRing;
+                int index = id - count;
+                int totalPoints = layer * pointsPerRing;
 
-                float radius = float(layer) * 70.0;  // 每圈半徑增加 60
-                float angle = float(indexInRing) / float(pointsThisRing) * 6.2831853; // 2π radians
+                float radius = float(layer) * 70.0;
+                // angle = index / totalPoints * 2π(360 deg)
+                float angle = float(index) / float(totalPoints) * 6.2831853;
 
                 float offsetx = cos(angle) * radius;
                 float offsetz = sin(angle) * radius;
-
+                
+                // final translation 
                 vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
 
                 mat4 translationMatrix = mat4(1.0);
                 translationMatrix[3] = vec4(instancePosition, 1.0);
 
-                vec3 toCenter = normalize(-instancePosition);  // 指向中心的方向
-                float RotateAngle = atan(toCenter.x, toCenter.z);    // Y 軸旋轉角（注意 X 和 Z 的順序）
+                vec3 toCenter = normalize(-instancePosition);
+                float RotateAngle = atan(toCenter.x, toCenter.z);
+                
+                // final rotation, rotating around the Y-axis
                 mat4 rotationY = mat4(
                     cos(RotateAngle), 0.0, -sin(RotateAngle), 0.0,
                     0.0,        1.0,  0.0,        0.0,
@@ -136,7 +120,6 @@ void main(void)
 
     }
     else{
-        // 不使用 instance 偏移
         newModel = Model;
     }
 

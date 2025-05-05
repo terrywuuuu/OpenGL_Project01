@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\NTUST\cg-gui\build\Releasex64\cg-gui.exe</FullPath>
+      <FullPath>C:\code\OpenGL_p1\OpenGL_Project01\build\Releasex64\cg-gui.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

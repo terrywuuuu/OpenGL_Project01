@@ -65,6 +65,7 @@ namespace CG
 	{
 		UpdateAction(dt);
 		UpdateModel();
+		UpdateCamera(dt);
 	}
 
 	void MainScene::Render(float aspect)
@@ -259,7 +260,7 @@ namespace CG
 	}
 
 	void MainScene::PlayMusic() {
-		musicPlayer->Play("../../res/Music/" + curAction.musicName);
+		musicPlayer->Play("./res/Music/" + curAction.musicName);
 		if (isEdit || curAction.name == "idle") {
 			musicPlayer->Stop();
 		}
@@ -379,12 +380,25 @@ namespace CG
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void MainScene::SetCameraMode(int mode) {
+		cameraMode = mode;
+		lastEyeAngle = eyeAngley;
+	}
+
 	void MainScene::SetMultipleNumber(int num) {
 		this->instancedNum = num;
+		if (keepMultipleActive) {
+			curInstancedNum = num;
+			scene->SetInstance(num, multipleMode);
+		}
 	}
 
 	void MainScene::SetkeepMultipleActive(bool keepMultipleActive) {
 		this->keepMultipleActive = keepMultipleActive;
+		if (keepMultipleActive) {
+			curInstancedNum = instancedNum;
+			scene->SetInstance(instancedNum, multipleMode);
+		}
 	}
 
 	void MainScene::SetMultipleMode(int multipleMode) {
@@ -393,6 +407,7 @@ namespace CG
 
 	void MainScene::SetEdit(bool isEdit) {
 		this->isEdit = isEdit;
+		frame = 0;
 		PlayMusic();
 	}
 
@@ -432,7 +447,7 @@ namespace CG
 
 	void MainScene::SaveAction(std::string fileName) {
 		curAction.name = fileName;
-		JsonIO::SaveAction("../../res/actions/" + fileName, curAction);
+		JsonIO::SaveAction("./res/actions/" + fileName, curAction);
 		LoadAction();
 	}
 
@@ -467,14 +482,14 @@ namespace CG
 		glBindVertexArray(VAO);
 
 		ShaderInfo shaders[] = {
-			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "./res/shaders/DSPhong_Material.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "./res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		program = LoadShaders(shaders); //讀取shader
 
 		ShaderInfo shader[] = {
-			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
-			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
+			{ GL_VERTEX_SHADER, "./res/shaders/Post-Process.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "./res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		Post_Process = LoadShaders(shader); //讀取shader
 
@@ -517,7 +532,7 @@ namespace CG
 		std::vector<glm::vec3> Kss;
 		std::vector<std::string> Materials; // mtl-name
 		std::vector<std::string> texture;
-		LoadMTL("../../res/Parts/material.mtl", Kds, Kas, Kss, Materials, texture);
+		LoadMTL("./res/Parts/material.mtl", Kds, Kas, Kss, Materials, texture);
 		for (int i = 0; i < Materials.size(); i++)
 		{
 			std::string mtlname = Materials[i];
@@ -525,17 +540,17 @@ namespace CG
 		}
 
 		// 加載各部件
-		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
-		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
-		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
-		Load2Buffer("../../res/Parts/head.obj", Body::head);           // head
-		Load2Buffer("../../res/Parts/right_arm.obj", Body::right_arm);      // upper right arm
-		Load2Buffer("../../res/Parts/right_hand.obj", Body::right_hand);      // down right arm
-		Load2Buffer("../../res/Parts/left_leg.obj", Body::left_leg);        // upperleftleg
-		Load2Buffer("../../res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
-		Load2Buffer("../../res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
-		Load2Buffer("../../res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
-		//Load2Buffer("../../res/Parts/Tree.obj", 10);		// BackGround
+		Load2Buffer("./res/Parts/body.obj", Body::body);           // body
+		Load2Buffer("./res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
+		Load2Buffer("./res/Parts/left_hand.obj", Body::left_hand);       // down left arm
+		Load2Buffer("./res/Parts/head.obj", Body::head);           // head
+		Load2Buffer("./res/Parts/right_arm.obj", Body::right_arm);      // upper right arm
+		Load2Buffer("./res/Parts/right_hand.obj", Body::right_hand);      // down right arm
+		Load2Buffer("./res/Parts/left_leg.obj", Body::left_leg);        // upperleftleg
+		Load2Buffer("./res/Parts/left_foot.obj", Body::left_foot);       // downleftleg
+		Load2Buffer("./res/Parts/right_leg.obj", Body::right_leg);       // uprightleg
+		Load2Buffer("./res/Parts/right_foot.obj", Body::right_foot);      // downrightleg
+		//Load2Buffer("./res/Parts/Tree.obj", 10);		// BackGround
 
 		GLuint totalSize[3] = { 0, 0, 0 };
 		GLuint offset[3] = { 0, 0, 0 };
@@ -620,7 +635,7 @@ namespace CG
 
 	void MainScene::LoadAction()
 	{
-		const std::string actionsDir = "../../res/actions/";
+		const std::string actionsDir = "./res/actions/";
 		const std::string pattern = actionsDir + "*.json"; // find all json files
 		actionDatas.clear();
 
@@ -664,6 +679,7 @@ namespace CG
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);
 		}
+		std::cout << "curInstancedNum" << curInstancedNum << std::endl;
 
 		frame += dt;
 		if (frame > end) {
@@ -741,6 +757,23 @@ namespace CG
 				betas[i] += (perFD.partRotations[i].beta - curFD.partRotations[i].beta) * dt;
 				gammas[i] += (perFD.partRotations[i].gamma - curFD.partRotations[i].gamma) * dt;
 			}
+		}
+	}
+
+	void MainScene::UpdateCamera(double dt) {
+		switch (cameraMode)
+		{
+		case 1:
+			eyeAngley = fmod(eyeAngley + 0.07, 360);
+			angle = 20;
+			break;
+		case 2:
+			eyeAngley = fmod(eyeAngley + 0.07, 360);
+			angle = sin(glm::radians(eyeAngley - lastEyeAngle)) * 25.0f;
+			std::cout << "angle: " << angle << std::endl;
+			break;
+		default:
+			break;
 		}
 	}
 
