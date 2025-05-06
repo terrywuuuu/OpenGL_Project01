@@ -8,7 +8,8 @@ layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec2 vertexUV;
 layout(location = 2) in vec3 vertexNormal;
 
-vec3 vLightPosition = vec3(0,10,50);
+//vec3 vLightPosition = vec3(0,10,50);
+uniform vec3 vLightPosition;
 
 uniform MatVP{
 	mat4 View;
@@ -18,6 +19,7 @@ uniform MatVP{
 uniform mat4 Model;
 uniform bool isInstanced;
 uniform int MultipleMode;
+uniform bool lightCube;
 
 // Color to fragment program
 out vec3 vVaryingNormal;
@@ -26,6 +28,11 @@ out vec2 UV;
 
 void main(void) 
 { 
+    if(lightCube){
+        gl_Position = Projection* View * Model * vec4(vPosition,1);
+        return;
+    }
+
     mat4 newModel;
 
     if(isInstanced){

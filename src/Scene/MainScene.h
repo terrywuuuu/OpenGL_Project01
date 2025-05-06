@@ -64,9 +64,6 @@ namespace CG
 		// Effect panel functions
 		void SetEffect(float num, int effect, bool isActive);
 		void SetMtl(int partsNum, std::string material);
-		// Initialize texture and framebuffer
-		void SetTexture();
-		void CreateScreenQuad();
 
 	private:
 		auto LoadScene() -> bool;
@@ -80,6 +77,12 @@ namespace CG
 		glm::mat4 bodyRotateMatrix(int body);
 
 		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
+
+		// Initialize texture and framebuffer
+		void SetTexture();
+		void CreateScreenQuad();
+
+		void setLightCube();
 	private:
 		Camera camera;
 		Scene *scene;
@@ -93,6 +96,9 @@ namespace CG
 		GLuint nVBO;
 		GLuint mVBO;
 		GLuint UBO;
+		GLuint EBO;
+		GLuint lightVAO, lightVBO;
+		glm::mat4 lightModel = glm::mat4(1.0);
 		std::array<GLuint, PARTSNUM> VBOs;
 		std::array<GLuint, PARTSNUM> uVBOs;
 		std::array<GLuint, PARTSNUM> nVBOs;
@@ -161,6 +167,8 @@ namespace CG
 		float mosaicStrength;
 		std::map<std::string, float> effectTime;
 		bool isFirstAppear = true;
+
+		glm::vec3 LightPos = glm::vec3(0, 10, 50);
 
 		enum Body
 		{

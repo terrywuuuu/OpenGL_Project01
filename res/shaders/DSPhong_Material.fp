@@ -22,8 +22,15 @@ in vec3 vVaryingLightDir;
 in vec2 UV;
 float Shininess = 128.0;//for material specular
 
+uniform bool isLightCube;
+
 void main(void)
 { 
+    if(isLightCube){
+        vFragColor = vec4(1.0); // 白色    
+        return;
+    }
+
     // Dot product gives us diffuse intensity
     float diff = max(0.0, dot(normalize(vVaryingNormal),
 					normalize(vVaryingLightDir)));

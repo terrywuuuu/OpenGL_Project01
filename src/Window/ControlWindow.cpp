@@ -384,6 +384,46 @@ namespace CG
 			}
 		}
 
+		if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(6);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_DownArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(7);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(8);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_RightArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(9);
+				lastPressTime = 0.0f;
+			}
+		}
+
 		//Mouse wheel control eyes distance
 		if (io.MouseWheel != 0.0f && !io.WantCaptureMouse) {
 			{

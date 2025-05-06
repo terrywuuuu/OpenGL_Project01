@@ -9,7 +9,6 @@ out vec4 FragColor;
 
 uniform bool enableBlur;    // 用來控制是否啟用模糊
 uniform bool enableQuan;    // 用來控制是否啟用量化
-uniform bool enableSmoke;    // 用來控制是否啟用煙霧
 uniform bool enableMosaic;     // 控制是否啟用馬賽克
 
 uniform sampler2D sceneTexture;  // 用來存儲渲染結果的紋理
@@ -18,9 +17,6 @@ uniform vec2 texSize;            // 紋理的大小，用於計算偏移量
 uniform float blurStrength;     // 模糊程度
 uniform float quanStrength;     // 量化程度
 uniform float mosaicSize;      // 馬賽克每格的像素大小 (程度)
-
-uniform sampler2D effectTexture;
-uniform float alpha;
 
 // 計算模糊效果
 vec3 applyBlur() {
@@ -66,12 +62,6 @@ void main(void)
         FragColor = vec4(results, 1.0);           // 應用馬賽克效果
     }
     else{
-        if(enableSmoke){
-            FragColor = texture(effectTexture, TexCoords);
-            FragColor.a *= alpha;
-        }
-        else{
-            FragColor = texture(sceneTexture, TexCoords);   
-        }
+        FragColor = texture(sceneTexture, TexCoords);   
     }
 }

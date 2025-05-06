@@ -74,9 +74,10 @@ namespace CG
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
+		glDisable(GL_CULL_FACE);
 
-		glBindVertexArray(VAO);
 		glUseProgram(program);
+		glBindVertexArray(lightVAO);
 
 		float theta = glm::radians(eyeAngley); // Â∑¶Âè≥
 		float phi = glm::radians(angle);   // ‰∏ä‰?
@@ -98,6 +99,18 @@ namespace CG
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		// ---- ¥Ë¨V•˙∑Ω Cube ----
+		glUniformMatrix4fv(ModelID, 1, GL_FALSE, glm::value_ptr(lightModel));
+		glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
+		glUniform1f(glGetUniformLocation(program, "lightCube"), 1);
+		glUniform1f(glGetUniformLocation(program, "isLightCube"), 1);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glUniform1f(glGetUniformLocation(program, "lightCube"), 0);
+		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
+		// ------------------------------
+
+		glBindVertexArray(VAO);
 
 		GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
 		for (int i = 0; i < PARTSNUM; i++)
@@ -174,7 +187,7 @@ namespace CG
 		skyBox->Render(camX, camY, camZ, aspect, mode);
 
 		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"]);
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
 			effectTime["smoke"]--;
 		}
 
@@ -194,7 +207,6 @@ namespace CG
 		// ?≥È? FBO Ê∏≤Ê?ÁµêÊ??ÑÁ??ÜÂ?Á¥ãÁ?Â§ßÂ?
 		glActiveTexture(GL_TEXTURE0);  // ÊøÄÊ¥ªÁ??ÜÂñÆ??
 		glBindTexture(GL_TEXTURE_2D, texture);  // Á∂ÅÂ??¥ÊôØÊ∏≤Ê??ÑÁ???
-		glUniform1i(glGetUniformLocation(Post_Process, "useMVP"), false);
 		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ?≥È?Á¥ãÁ???shader
 		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ?≥È?Á¥ãÁ?Â§ßÂ???shader
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
@@ -203,7 +215,6 @@ namespace CG
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableMosaic"), enableMosaic);
-		glUniform1i(glGetUniformLocation(Post_Process, "enableShadow"), 1);
 
 		// ¥Ë¨V´Ãπı•|√‰ßŒ≈„•‹µ≤™G
 		glDrawArrays(GL_TRIANGLES, 0, 6);  // ¥Ë¨V•|√‰ßŒ*/
@@ -237,6 +248,10 @@ namespace CG
 		//3: key "s" press
 		//4: Mouse wheel up
 		//5: Mouse wheel down
+		//6: Arrow Up
+		//7: Arrow Down
+		//8: Arrow Left
+		//9: Arrow Right
 		switch (key)
 		{
 		case 0:
@@ -261,10 +276,29 @@ namespace CG
 			eyedistance -= 2.0;
 			printf("eyedistance:%f\n", eyedistance);
 			break;
-
 		case 5:
 			eyedistance += 2.0;
 			printf("eyedistance:%f\n", eyedistance);
+			break;
+		case 6:
+			LightPos.y += 2.0;
+			lightModel *= translate(0, 2, 0);
+			printf("Light Position:%f\n", LightPos.y);
+			break;
+		case 7:
+			LightPos.y -= 2.0;
+			lightModel *= translate(0, -2, 0);
+			printf("Light Position:%f\n", LightPos.y);
+			break;
+		case 8:
+			LightPos.x -= 2.0;
+			lightModel *= translate(-2, 0, 0);
+			printf("Light Position:%f\n", LightPos.x);
+			break;
+		case 9:
+			LightPos.x += 2.0;
+			lightModel *= translate(2, 0, 0);
+			printf("Light Position:%f\n", LightPos.x);
 			break;
 		}
 	}
@@ -485,15 +519,15 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/DSPhong_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/DSPhong_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //ËÆÄ?ñshader
+		program = LoadShaders(shaders); 
 
 		ShaderInfo shader[] = {
 			{ GL_VERTEX_SHADER, "../../res/shaders/Post-Process.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Post-Process.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		Post_Process = LoadShaders(shader); //ËÆÄ?ñshader
+		Post_Process = LoadShaders(shader);
 
-		effect->setProgram(Post_Process);
+//		effect->setProgram(Post_Process);
     
 		glUseProgram(program);//uniform?ÉÊï∏?∏ÂÄºÂ?ÂøÖÈ??àuse shader
 
@@ -523,6 +557,7 @@ namespace CG
 		LoadAction();
 		SetTexture();
 		CreateScreenQuad();
+		setLightCube();
 
 		effectTime["smoke"] = 0;
 
@@ -794,5 +829,60 @@ namespace CG
 		// texcoord attribute
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
+	}
+
+	void MainScene::setLightCube() {
+		float vertices[] = {
+			// positions       
+			-2.5f, -2.5f, -2.5f, // 0
+			2.5f, -2.5f, -2.5f, // 1
+			2.5f,  2.5f, -2.5f, // 2
+			-2.5f,  2.5f, -2.5f, // 3
+			-2.5f, -2.5f,  2.5f, // 4
+			2.5f, -2.5f,  2.5f, // 5
+			2.5f,  2.5f,  2.5f, // 6
+			-2.5f,  2.5f,  2.5f  // 7
+		};
+
+		unsigned int indices[] = {
+			// back face
+			0, 1, 2,
+			2, 3, 0,
+			// front face
+			4, 5, 6,
+			6, 7, 4,
+			// left face
+			0, 4, 7,
+			7, 3, 0,
+			// right face
+			1, 5, 6,
+			6, 2, 1,
+			// bottom face
+			0, 1, 5,
+			5, 4, 0,
+			// top face
+			3, 2, 6,
+			6, 7, 3
+		};
+
+		lightModel *= translate(LightPos.x, LightPos.y, LightPos.z);
+		glGenVertexArrays(1, &lightVAO);
+		glGenBuffers(1, &lightVBO);
+		glGenBuffers(1, &EBO);
+		glBindVertexArray(lightVAO);
+
+		// ≥ª¬I∏ÍÆ∆
+		glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		// Ø¡§ﬁ∏ÍÆ∆
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		// vertex attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(0);
 	}
 }

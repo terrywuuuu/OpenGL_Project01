@@ -154,5 +154,7 @@
     <None Include="..\res\shaders\Post-Process.vp" />
     <None Include="..\res\shaders\SkyBox.fp" />
     <None Include="..\res\shaders\SkyBox.vp" />
+    <None Include="..\res\shaders\Part_Effects.fp" />
+    <None Include="..\res\shaders\Part_Effects.vp" />
   </ItemGroup>
 </Project>

@@ -186,6 +186,8 @@
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Part_Effects.fp" />
+    <None Include="..\res\shaders\Part_Effects.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />
     <None Include="..\res\shaders\Scene_Material.vp" />
     <None Include="..\res\shaders\Post-Process.fp" />

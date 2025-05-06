@@ -19,26 +19,26 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void renderEffects(bool, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time);
+		void renderEffects(bool, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time, int index);		// index : 選定該特效的program
 		void setupMesh();
-		void setProgram(GLuint program);
 		void setAngle(std::string effect, float angle);
 
 	private:
 		auto LoadTexture() -> bool;
 
+		void setProgram(std::string vPath, std::string fPath, int index);		// index: 選定該特效的program
 		void updateSmoke(float Time);
 		void updateModel(int);
 	private:
 		Camera camera;
-
+	
 		GLuint VAO;
 		GLuint VBO;
 		GLuint EBO;
 		GLuint modelVBO;
 
 		GLuint Effect_Texture[1];
-		GLuint program;
+		GLuint program[1];
 		int effectsNum = 1;	// 特效數
 		std::vector<std::string> enableEffects = { "enableSmoke" };
 

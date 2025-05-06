@@ -99,6 +99,7 @@ namespace CG
 		}
 
 		setupMesh();
+		setProgram("../../res/shaders/Part_Effects.vp", "../../res/shaders/Part_Effects.fp", 0);
 		return true;
 	}
 
@@ -133,8 +134,13 @@ namespace CG
 		}
 	}
 
-	void Effects::setProgram(GLuint program) {
-		this->program = program;
+	void Effects::setProgram(std::string vPath, std::string fPath, int index) {
+		ShaderInfo shader[] = {
+			{ GL_VERTEX_SHADER, vPath.c_str() },//vertex shader
+			{ GL_FRAGMENT_SHADER, fPath.c_str() },//fragment shader
+			{ GL_NONE, NULL } };
+
+		program[index] = LoadShaders(shader); 
 	}
 
 	void Effects::setAngle(std::string effect, float angle) {
@@ -145,17 +151,17 @@ namespace CG
 		}
 	}
 
-	void Effects::renderEffects(bool enable, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time) 
+	void Effects::renderEffects(bool enable, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time, int index) 
 	{
 		if (!enable) {
 			for (int i = 0; i < effectsNum; i++) {
 				EffectInforms[i].firstAppear = true;
 			}
-
 			return;
 		}
 
-		glUseProgram(program);
+		GLuint Program = program[index];
+		glUseProgram(Program);
 		// 綁定 VAO
 		glBindVertexArray(VAO);
 		glEnable(GL_BLEND);
@@ -173,8 +179,8 @@ namespace CG
 		glm::mat4 view = camera.GetViewMatrix();    // 拿目前主場景的 camera 設定
 		glm::mat4 projection = camera.GetProjectionMatrix();
 
-		GLuint viewLoc = glGetUniformLocation(program, "view");
-		GLuint projLoc = glGetUniformLocation(program, "projection");
+		GLuint viewLoc = glGetUniformLocation(Program, "view");
+		GLuint projLoc = glGetUniformLocation(Program, "projection");
 //		GLuint modelLoc = glGetUniformLocation(program, "model");
 
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -184,14 +190,13 @@ namespace CG
 			updateSmoke(time);
 			updateModel(0);
 //			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(effects_Model[0]));
-			glUniform1f(glGetUniformLocation(program, "alpha"), EffectInforms[0].alpha);
+			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[0].alpha);
 
 			// 綁定 Texture 到 level 0
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); // 假設使用煙霧特效的 Texture
-			glUniform1i(glGetUniformLocation(program, "effectTexture"), 0); // 告訴 Shader 紋理單元位置
-			glUniform1i(glGetUniformLocation(program, enableEffects[0].c_str()), enable);
-			glUniform1i(glGetUniformLocation(program, "useMVP"), enable);
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0); // 告訴 Shader 紋理單元位置
+			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), enable);
 
 			// 繪製矩形（使用索引繪製）
 //			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 繪製兩個三角形形成的矩形
