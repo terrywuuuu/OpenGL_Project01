@@ -151,14 +151,21 @@ namespace CG
 		}
 	}
 
+	int lastEffect = -1;
+	int effectNum = 4;
+	std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "Motion Blur" };
+	static std::map<std::string, bool> isActive;
+	std::vector<float> num = { 0, 2.0f, 1.0f, 1.0f};
+	std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0f,16.0f} };
+
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			int effectNum = 4;
-			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "EnvironmentMap"};
+			int effectNum = 5;
+			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "MotionBlur", "EnvironmentMap"};
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
-			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f} };
+			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0,8.0} };
 
 			for (int i = 0; i < effectNum; i++) {
 				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
@@ -166,7 +173,7 @@ namespace CG
 				ImGui::SetNextItemWidth(100);
 				if (isActive[effectName[i]])
 				{
-					if (i == 3) {
+					if (i == 4) {
 						targetScene->SetEffect(0, i, true);
 					}
 					else {
@@ -176,7 +183,7 @@ namespace CG
 				}
 				else
 				{
-					targetScene->SetEffect(num[effectName[i]], i, false);
+					targetScene->SetEffect(0, i, false);
 				}
 			}
 
@@ -346,47 +353,8 @@ namespace CG
 		if (io.WantCaptureKeyboard)
 			return;
 
-		//Key event A, D control eyes Angley
-		if (ImGui::IsKeyDown(ImGuiKey_A)) {
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(0);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		if (ImGui::IsKeyDown(ImGuiKey_D)) {
-
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(1);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		//Key event W, S control angle
-		if (ImGui::IsKeyDown(ImGuiKey_W)) {
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(2);
-				lastPressTime = 0.0f;
-			}
-		}
-
-		if (ImGui::IsKeyDown(ImGuiKey_S)) {
-			lastPressTime += io.DeltaTime;
-
-			if (lastPressTime > triggerInterval)
-			{
-				targetScene->OnKeyboard(3);
-				lastPressTime = 0.0f;
-			}
+		if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+			targetScene->OnMouseDownAndMove(io.MouseDelta.x, io.MouseDelta.y);
 		}
 
 		if (ImGui::IsKeyDown(ImGuiKey_Q)) {

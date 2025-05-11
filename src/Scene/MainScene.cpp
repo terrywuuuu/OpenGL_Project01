@@ -70,10 +70,18 @@ namespace CG
 
 	void MainScene::Render(float aspect)
 	{
+		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, attachments);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		glDisable(GL_CULL_FACE);
+
+		glm::mat4 PreView = camera.GetViewMatrix();
+		glm::mat4 PreProjection = camera.GetProjectionMatrix();
+
+		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
+		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
 
 		float theta = glm::radians(eyeAngley);
 		float phi = glm::radians(angle);
@@ -158,6 +166,11 @@ namespace CG
 		Texture_Render();
 
 		glFlush();
+
+		for (int i = 0; i < PARTSNUM; i++)
+		{
+			PreModels[i] = Models[i];
+		}
 	}
 
 	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint modelID) {
@@ -167,6 +180,7 @@ namespace CG
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			glUniformMatrix4fv(modelID, 1, GL_FALSE, &Models[i][0][0]);
+			glUniformMatrix4fv(PreModelID, 1, GL_FALSE, &PreModels[i][0][0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			// 1rst attribute buffer : vertices
@@ -251,24 +265,32 @@ namespace CG
 	}
 
 	void MainScene::Texture_Render() {
-		glUseProgram(Post_Process);  
-		glBindVertexArray(screenQuadVAO); 
+		// use post process program
+		glUseProgram(Post_Process); 
+		glBindVertexArray(screenQuadVAO);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST); 
+		glDisable(GL_DEPTH_TEST);
 
-		glActiveTexture(GL_TEXTURE0); 
-		glBindTexture(GL_TEXTURE_2D, texture); 
-		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0); 
-		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 3);
+		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, motionTexture);
+		glUniform1i(glGetUniformLocation(Post_Process, "motionTexture"), 4);
+
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "mosaicSize"), mosaicStrength);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableBlur"), enableBlur);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableQuan"), enableQuan);
 		glUniform1i(glGetUniformLocation(Post_Process, "enableMosaic"), enableMosaic);
+		glUniform1i(glGetUniformLocation(Post_Process, "enableMotionBlur"), enableMotionBlur);
+		glUniform1i(glGetUniformLocation(Post_Process, "motionBlurStrength"), motionBlurStrength);
 
 		// ´è¬V«Ì¹õ¥|Ãä§ÎÅã¥Üµ²ªG
-		glDrawArrays(GL_TRIANGLES, 0, 6);  // ´è¬V¥|Ãä§Î*/
+		glDrawArrays(GL_TRIANGLES, 0, 6);  // ´è¬V¥|Ãä§Î
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -461,6 +483,10 @@ namespace CG
 			mosaicStrength = num;
 			break;
 		case 3:
+			enableMotionBlur = isActive;
+			motionBlurStrength = num;
+			break;
+		case 4:
 			enableEnvironmentMap = isActive;
 			break;
 		}
@@ -470,6 +496,7 @@ namespace CG
 		glGenFramebuffers(1, &FBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
+
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -478,6 +505,16 @@ namespace CG
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+		// Motion Texture
+		glGenTextures(1, &motionTexture);
+		glBindTexture(GL_TEXTURE_2D, motionTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, screenWidth, screenHeight, 0, GL_RG, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, motionTexture, 0);
 
 		glGenTextures(1, &depth_texture);
 		glBindTexture(GL_TEXTURE_2D, depth_texture);
@@ -627,7 +664,10 @@ namespace CG
 		glUseProgram(program);//uniform?ƒæ•¸?¸å€¼å?å¿…é??ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
+		PreViewId = glGetUniformLocation(program, "PreView");
+		PreProjectionId = glGetUniformLocation(program, "PreProjection");
 		ModelID = glGetUniformLocation(program, "Model");
+		PreModelID = glGetUniformLocation(program, "PreModel");
 		M_KaID = glGetUniformLocation(program, "Material.Ka");
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
@@ -836,6 +876,11 @@ namespace CG
 
 	void MainScene::UpdateModel()
 	{
+		for (int i = 0; i < PARTSNUM; ++i)
+		{
+			PreModels[i] = Models[i];
+		}
+
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			Models[i] = glm::mat4(1.0f);
@@ -873,6 +918,7 @@ namespace CG
 
 		Translation[Body::right_foot] = translate(-1.0, -7.0f, 0);
 		Models[Body::right_foot] = Models[Body::right_leg] * Translation[Body::right_foot] * bodyRotateMatrix(Body::right_foot);
+
 	}
 
 	void MainScene::HandleAction(const std::vector<JsonIO::FrameData>& frameDatas, double frame, double dt) {

@@ -40,6 +40,13 @@ namespace CG
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
+		void OnMouseDownAndMove(float deltaX, float deltaY) {
+			eyeAngley -= deltaX * 0.25f;
+			angle += deltaY * 0.25f;
+
+			if (angle >= 90) angle = 89;
+			if (angle <= -90) angle = -89;
+		}
 
 		void PlayMusic();
 
@@ -104,9 +111,11 @@ namespace CG
 		std::array<GLuint, PARTSNUM> VBOs;
 		std::array<GLuint, PARTSNUM> uVBOs;
 		std::array<GLuint, PARTSNUM> nVBOs;
+
 		GLuint screenQuadVAO, screenQuadVBO;
 		GLuint FBO;
 		GLuint texture;
+		GLuint motionTexture;
 		GLuint depth_texture;
 		GLuint depthCubemap;
 		GLuint depthMapFBO;
@@ -127,7 +136,10 @@ namespace CG
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
+		GLint PreViewId;
+		GLint PreProjectionId;
 		GLuint ModelID;
+		GLuint PreModelID;
 
 		bool keepMultipleActive = false;
 		int multipleMode = 0;
@@ -152,6 +164,7 @@ namespace CG
 
 		glm::mat4 Model;
 		glm::mat4 Models[PARTSNUM];
+		glm::mat4 PreModels[PARTSNUM];
 
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];
@@ -171,12 +184,13 @@ namespace CG
 		bool enableQuan = false;
 		bool enableMosaic = false;
 		bool enableEnvironmentMap = false;
+		bool enableMotionBlur = false;
 		float blurStrength;
 		float quanStrength;
 		float mosaicStrength;
+		float motionBlurStrength;
 		std::map<std::string, float> effectTime;
 		bool isFirstAppear = true;
-
 		glm::vec3 LightPos = glm::vec3(0, 10, 50);
 
 		enum Body

@@ -8,9 +8,10 @@ struct MaterialInfo{
 	vec3 Kd;
 	vec3 Ks;
 };
+layout (location = 0) out vec4 vFragColor;
+layout (location = 1) out vec2 MotionVector;
 
 uniform MaterialInfo Material;
-out vec4 vFragColor;
 
 //lighting color
 vec4    ambientColor = vec4(0.1,0.1,0.1,1);
@@ -25,25 +26,14 @@ in vec3 vVaryingLightDir;
 in vec2 UV;
 in vec3 lightPos;
 in vec3 FragPos;
+
+// for motion blur
+in vec4 ClipSpacePos0;
+in vec4 PrevClipSpacePos0;
+
 float Shininess = 128.0;//for material specular
 
 uniform bool isLightCube;
-
-/*float ShadowCalculation(vec3 fragPos)
-{
-    vec3 fragToLight = fragPos - lightPos;
-    float currentDepth = length(fragToLight);
-
-    // normalize direction for cubemap lookup
-    vec3 dir = normalize(fragToLight);
-    float closestDepth = texture(depthCubemap, dir).r * far_plane;
-
-    // bias with surface angle to reduce acne
-    float bias = max(0.15 * (1.0 - dot(normalize(vVaryingNormal), dir)), 0.05);
-    float shadow = currentDepth - bias > closestDepth ? 0.5 : 0.0;
-
-    return shadow;
-}*/
 
 void main(void)
 { 
@@ -51,8 +41,6 @@ void main(void)
         vFragColor = vec4(1.0); // 白色    
         return;
     }
-
-//    float shadow = ShadowCalculation(FragPos);
 
     // Dot product gives us diffuse intensity
     float diff = max(0.0, dot(normalize(vVaryingNormal),
@@ -73,22 +61,10 @@ void main(void)
 		spec = pow(spec, Shininess);
 		vFragColor += specularColor*vec4(Material.Ks,1)*spec;
     }
-
-/*    // Diffuse lighting
-    float diff = max(0.0, dot(normalize(vVaryingNormal), normalize(vVaryingLightDir)));
-    vec4 diffuse = diff * diffuseColor * vec4(Material.Kd, 1.0);
-
-    // Ambient
-    vec4 ambient = ambientColor * vec4(Material.Ka, 1.0);
-
-    // Specular
-    vec3 viewDir = normalize(-FragPos); // 簡單假設 camera 在原點
-    vec3 reflectDir = reflect(-normalize(vVaryingLightDir), normalize(vVaryingNormal));
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), Shininess);
-    vec4 specular = specularColor * vec4(Material.Ks, 1.0) * spec;
-
-    // Combine with shadow factor
-    vFragColor = ambient + (1.0 - shadow) * (diffuse + specular);*/
+    
+    vec3 NDCPos = (ClipSpacePos0 / ClipSpacePos0.w).xyz;
+    vec3 PrevNDCPos = (PrevClipSpacePos0 / PrevClipSpacePos0.w).xyz;
+    MotionVector = (NDCPos - PrevNDCPos).xy;
 }
 	
     
