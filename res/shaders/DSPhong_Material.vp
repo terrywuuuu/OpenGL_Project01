@@ -16,7 +16,11 @@ uniform MatVP{
 	mat4 Projection;
 };
 
+uniform mat4 PreView;
+uniform mat4 PreProjection;
+
 uniform mat4 Model;
+uniform mat4 PreModel;
 uniform bool isInstanced;
 uniform int MultipleMode;
 uniform bool lightCube;
@@ -25,6 +29,10 @@ uniform bool lightCube;
 out vec3 vVaryingNormal;
 out vec3 vVaryingLightDir;
 out vec2 UV;
+
+// for motion blur
+out vec4 ClipSpacePos0;
+out vec4 PrevClipSpacePos0;
 
 void main(void) 
 { 
@@ -162,6 +170,13 @@ void main(void)
     vVaryingLightDir = normalize(vLightPosition - vPosition3);
 
 	UV = vertexUV;
+
     // Don't forget to transform the geometry!
+    
     gl_Position = MVP * vec4(vPosition,1);
+
+    ClipSpacePos0 = gl_Position;
+
+    PrevClipSpacePos0 = PreProjection * PreView * PreModel * vec4(vPosition, 1);
+
 }

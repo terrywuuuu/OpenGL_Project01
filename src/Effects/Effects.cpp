@@ -193,9 +193,9 @@ namespace CG
 			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[0].alpha);
 
 			// 綁定 Texture 到 level 0
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); // 假設使用煙霧特效的 Texture
-			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0); // 告訴 Shader 紋理單元位置
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 1); // 告訴 Shader 紋理單元位置
 			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), enable);
 
 			// 繪製矩形（使用索引繪製）

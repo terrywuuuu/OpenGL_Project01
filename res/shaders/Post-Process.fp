@@ -10,13 +10,16 @@ out vec4 FragColor;
 uniform bool enableBlur;    // 用來控制是否啟用模糊
 uniform bool enableQuan;    // 用來控制是否啟用量化
 uniform bool enableMosaic;     // 控制是否啟用馬賽克
+uniform bool enableMotionBlur;
 
-uniform sampler2D sceneTexture;  // 用來存儲渲染結果的紋理
+uniform sampler2D sceneTexture;
+uniform sampler2D motionTexture;
 uniform vec2 texSize;            // 紋理的大小，用於計算偏移量
 
 uniform float blurStrength;     // 模糊程度
 uniform float quanStrength;     // 量化程度
 uniform float mosaicSize;      // 馬賽克每格的像素大小 (程度)
+uniform float motionBlurStrength;
 
 // 計算模糊效果
 vec3 applyBlur() {
@@ -44,8 +47,23 @@ vec3 applyMosaic() {
 
 void main(void)
 { 
-    // 如果啟用了模糊效果，則進行模糊處理
-    if (enableBlur) {
+    if(enableMotionBlur) {
+        vec2 MotionVector = texture(motionTexture, TexCoords).xy / 3.0;
+
+        vec4 Color = vec4(0.0);
+
+        vec2 TexCoord = TexCoords;
+
+        Color += texture(sceneTexture, TexCoord) * 0.4;
+        TexCoord -= MotionVector;
+        Color += texture(sceneTexture, TexCoord) * 0.3;
+        TexCoord -= MotionVector;
+        Color += texture(sceneTexture, TexCoord) * 0.2;
+        TexCoord -= MotionVector;
+        Color += texture(sceneTexture, TexCoord) * 0.1;
+
+        FragColor = Color;
+    }else if (enableBlur) {
         vec3 results = applyBlur();
         FragColor = vec4(results, 1.0);           // 應用模糊效果
     }

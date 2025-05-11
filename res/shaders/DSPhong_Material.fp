@@ -8,9 +8,10 @@ struct MaterialInfo{
 	vec3 Kd;
 	vec3 Ks;
 };
+layout (location = 0) out vec4 vFragColor;
+layout (location = 1) out vec2 MotionVector;
 
 uniform MaterialInfo Material;
-out vec4 vFragColor;
 
 //lighting color
 vec4    ambientColor = vec4(0.1,0.1,0.1,1);
@@ -20,6 +21,11 @@ vec4    specularColor = vec4(1,1,1,1);
 in vec3 vVaryingNormal;
 in vec3 vVaryingLightDir;
 in vec2 UV;
+
+// for motion blur
+in vec4 ClipSpacePos0;
+in vec4 PrevClipSpacePos0;
+
 float Shininess = 128.0;//for material specular
 
 uniform bool isLightCube;
@@ -50,6 +56,12 @@ void main(void)
 		spec = pow(spec, Shininess);
 		vFragColor += specularColor*vec4(Material.Ks,1)*spec;
     }
+    
+    vec3 NDCPos = (ClipSpacePos0 / ClipSpacePos0.w).xyz;
+    vec3 PrevNDCPos = (PrevClipSpacePos0 / PrevClipSpacePos0.w).xyz;
+    MotionVector = (NDCPos - PrevNDCPos).xy;
+    
+
 }
 	
     
