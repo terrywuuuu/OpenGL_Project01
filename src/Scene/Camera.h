@@ -40,8 +40,12 @@ namespace CG
         void SetClip(float near, float far)
         {
             clipNear = near;
-
+            clipFar = far;
             UpdateProjectionMatrix();
+        }
+
+        float GetFar() {
+            return clipFar;
         }
 
     private:
@@ -54,6 +58,6 @@ namespace CG
         float fov;
         float aspect;
         float clipNear;
-        float clipFar = 500.0f;
+        float clipFar;
     };
 }

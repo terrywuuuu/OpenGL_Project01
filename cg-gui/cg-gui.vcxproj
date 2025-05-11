@@ -184,8 +184,12 @@
     <ClInclude Include="..\src\Window\ControlWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\res\shaders\Ball.fp" />
+    <None Include="..\res\shaders\Ball.vp" />
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Light.fp" />
+    <None Include="..\res\shaders\Light.vp" />
     <None Include="..\res\shaders\Part_Effects.fp" />
     <None Include="..\res\shaders\Part_Effects.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />

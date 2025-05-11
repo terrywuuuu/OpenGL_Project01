@@ -204,6 +204,7 @@ namespace CG
 		}
 		
 		glDisable(GL_BLEND);
+		glUseProgram(0);
 	}
 
 	void Effects::updateModel(int num) {

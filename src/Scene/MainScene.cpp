@@ -70,28 +70,71 @@ namespace CG
 
 	void MainScene::Render(float aspect)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		glDisable(GL_CULL_FACE);
 
-		glUseProgram(program);
-		glBindVertexArray(lightVAO);
-
-		float theta = glm::radians(eyeAngley); // Â∑¶Âè≥
-		float phi = glm::radians(angle);   // ‰∏ä‰?
+		float theta = glm::radians(eyeAngley);
+		float phi = glm::radians(angle);
 
 		float camX = eyedistance * cos(phi) * sin(theta);
 		float camY = eyedistance * sin(phi);
 		float camZ = eyedistance * cos(phi) * cos(theta);
+
+		shadowTransforms.clear();
+		camera.LookAt(LightPos, LightPos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
+		shadowTransforms.push_back(camera.GetViewMatrix()); // +X
+		camera.LookAt(LightPos, LightPos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
+		shadowTransforms.push_back(camera.GetViewMatrix()); // -X
+		camera.LookAt(LightPos, LightPos + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
+		shadowTransforms.push_back(camera.GetViewMatrix());  // +Y
+		camera.LookAt(LightPos, LightPos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+		shadowTransforms.push_back(camera.GetViewMatrix());  // -Y
+		camera.LookAt(LightPos, LightPos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
+		shadowTransforms.push_back(camera.GetViewMatrix());  // +Z
+		camera.LookAt(LightPos, LightPos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
+		shadowTransforms.push_back(camera.GetViewMatrix());  // -Z
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glUseProgram(LightProgram);
+		camera.SetAspect(1.0);
+		camera.SetFov(90.0f);
+
+		for (int i = 0; i < 6; i++) {
+			glFramebufferTexture2D(
+				GL_FRAMEBUFFER,
+				GL_DEPTH_ATTACHMENT,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				depthCubemap,
+				0
+			);
+
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			glUniformMatrix4fv(glGetUniformLocation(LightProgram, "shadowMatrices"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix() * shadowTransforms[i]));
+			GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
+			RenderMainScene(aspect, camX, camY, camZ, true, depthCubemap, modelLoc);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		glClearColor(0.0, 0.0, 0.0, 1); //black screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
+		glDisable(GL_CULL_FACE);
+		glUseProgram(program);
+		glBindVertexArray(lightVAO);
 
 		camera.LookAt(
 			glm::vec3(camX, camY, camZ),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 		);
-
+		camera.SetFov(80.0f);
 		camera.SetAspect(aspect);
 
 		//update data to UBO for MVP
@@ -110,12 +153,20 @@ namespace CG
 		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
 		// ------------------------------
 
+		RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, ModelID);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Texture_Render();
+
+		glFlush();
+	}
+
+	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint modelID) {
 		glBindVertexArray(VAO);
 
-		GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
+		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			glUniformMatrix4fv(ModelID, 1, GL_FALSE, &Models[i][0][0]);
+			glUniformMatrix4fv(modelID, 1, GL_FALSE, &Models[i][0][0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			// 1rst attribute buffer : vertices
@@ -160,21 +211,25 @@ namespace CG
 			{
 				mtlname = mtls[i][j];
 				//find the material diffuse color in map:KDs by material name.
-				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
-				glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
+				if (!isDepth) {
+					glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
+					glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
+				}
 				//          (primitive   , glVertexID base , vertex count    )
 				if (curInstancedNum == 1) {
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
 				}
 				else {
-					if (i == PARTSNUM - 1) {
-						glUniform1i(BackGround, 0);
+					if (!isDepth) {
+						if (i == PARTSNUM - 1) {
+							glUniform1i(BackGround, 0);
+						}
+						else {
+							glUniform1i(BackGround, 1);
+						}
+						glUniform1i(MultipleMode, multipleMode);
 					}
-					else {
-						glUniform1i(BackGround, 1);
-					}
-
-					glUniform1i(MultipleMode, multipleMode);
+					
 					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, curInstancedNum);
 				}
 				//we draw triangles by giving the glVertexID base and vertex count is face count*3
@@ -183,32 +238,28 @@ namespace CG
 
 		}//end for loop for updating and drawing model
 
-		scene->Render(camX, camY, camZ, aspect, mode);
-		skyBox->Render(camX, camY, camZ, aspect, mode);
+		
+		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
+		if (!isDepth) {
+			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
+		}
 
 		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
 			effectTime["smoke"]--;
 		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		Texture_Render();
-
-		glFlush();
 	}
 
 	void MainScene::Texture_Render() {
-		// È°ØÁ§∫Ê∏≤Ê?ÁµêÊ?‰∏¶Ê??®Ê®°Á≥?
-		glUseProgram(Post_Process);  // ‰ΩøÁî®?¶‰???program
-		glBindVertexArray(screenQuadVAO);  // Á∂ÅÂ??õÈ?ÂΩ?VAO
-		glClear(GL_COLOR_BUFFER_BIT); // ?ôË£°?™Ê? colorÔºå‰?Ê∏?depth
-		glDisable(GL_DEPTH_TEST); // ?úÊ?Ê∑±Â∫¶Ê∏¨Ë©¶
+		glUseProgram(Post_Process);  
+		glBindVertexArray(screenQuadVAO); 
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST); 
 
-		// ?≥È? FBO Ê∏≤Ê?ÁµêÊ??ÑÁ??ÜÂ?Á¥ãÁ?Â§ßÂ?
-		glActiveTexture(GL_TEXTURE0);  // ÊøÄÊ¥ªÁ??ÜÂñÆ??
-		glBindTexture(GL_TEXTURE_2D, texture);  // Á∂ÅÂ??¥ÊôØÊ∏≤Ê??ÑÁ???
-		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0);  // ?≥È?Á¥ãÁ???shader
-		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  // ?≥È?Á¥ãÁ?Â§ßÂ???shader
+		glActiveTexture(GL_TEXTURE0); 
+		glBindTexture(GL_TEXTURE_2D, texture); 
+		glUniform1i(glGetUniformLocation(Post_Process, "sceneTexture"), 0); 
+		glUniform2f(glGetUniformLocation(Post_Process, "texSize"), screenWidth, screenHeight);  
 		glUniform1f(glGetUniformLocation(Post_Process, "blurStrength"), blurStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "quanStrength"), quanStrength);
 		glUniform1f(glGetUniformLocation(Post_Process, "mosaicSize"), mosaicStrength);
@@ -252,6 +303,8 @@ namespace CG
 		//7: Arrow Down
 		//8: Arrow Left
 		//9: Arrow Right
+		//10: key "q" press
+		//11: key "e" press
 		switch (key)
 		{
 		case 0:
@@ -283,22 +336,32 @@ namespace CG
 		case 6:
 			LightPos.y += 2.0;
 			lightModel *= translate(0, 2, 0);
-			printf("Light Position:%f\n", LightPos.y);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
 			break;
 		case 7:
 			LightPos.y -= 2.0;
 			lightModel *= translate(0, -2, 0);
-			printf("Light Position:%f\n", LightPos.y);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
 			break;
 		case 8:
 			LightPos.x -= 2.0;
 			lightModel *= translate(-2, 0, 0);
-			printf("Light Position:%f\n", LightPos.x);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
 			break;
 		case 9:
 			LightPos.x += 2.0;
 			lightModel *= translate(2, 0, 0);
-			printf("Light Position:%f\n", LightPos.x);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
+			break;
+		case 10:
+			LightPos.z -= 2.0;
+			lightModel *= translate(0, 0, -2);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
+			break;
+		case 11:
+			LightPos.z += 2.0;
+			lightModel *= translate(0, 0, 2);
+			printf("Light Position:%f, %f, %f\n", LightPos.x, LightPos.y, LightPos.z);
 			break;
 		}
 	}
@@ -397,6 +460,9 @@ namespace CG
 			enableMosaic = isActive;
 			mosaicStrength = num;
 			break;
+		case 3:
+			enableEnvironmentMap = isActive;
+			break;
 		}
 	}
 
@@ -425,6 +491,29 @@ namespace CG
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			std::cerr << "Framebuffer not complete!" << std::endl;
 		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void MainScene::setLightTexture() {
+		glGenTextures(1, &depthCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+		for (unsigned int i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		
+		glGenFramebuffers(1, &depthMapFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+/*		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			std::cerr << "Depth Framebuffer not complete!" << std::endl;
+		}*/
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -527,6 +616,12 @@ namespace CG
 			{ GL_NONE, NULL } };
 		Post_Process = LoadShaders(shader);
 
+		ShaderInfo Shader[] = {
+			{ GL_VERTEX_SHADER, "../../res/shaders/Light.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/Light.fp" },//fragment shader
+			{ GL_NONE, NULL } };
+		LightProgram = LoadShaders(Shader);
+		
 //		effect->setProgram(Post_Process);
     
 		glUseProgram(program);//uniform?ÉÊï∏?∏ÂÄºÂ?ÂøÖÈ??àuse shader
@@ -558,6 +653,7 @@ namespace CG
 		SetTexture();
 		CreateScreenQuad();
 		setLightCube();
+		setLightTexture();
 
 		effectTime["smoke"] = 0;
 

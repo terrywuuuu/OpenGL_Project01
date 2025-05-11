@@ -156,5 +156,9 @@
     <None Include="..\res\shaders\SkyBox.vp" />
     <None Include="..\res\shaders\Part_Effects.fp" />
     <None Include="..\res\shaders\Part_Effects.vp" />
+    <None Include="..\res\shaders\Light.fp" />
+    <None Include="..\res\shaders\Light.vp" />
+    <None Include="..\res\shaders\Ball.fp" />
+    <None Include="..\res\shaders\Ball.vp" />
   </ItemGroup>
 </Project>

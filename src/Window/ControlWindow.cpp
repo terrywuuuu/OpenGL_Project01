@@ -154,8 +154,8 @@ namespace CG
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			int effectNum = 3;
-			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic"};
+			int effectNum = 4;
+			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "EnvironmentMap"};
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
 			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f} };
@@ -166,8 +166,13 @@ namespace CG
 				ImGui::SetNextItemWidth(100);
 				if (isActive[effectName[i]])
 				{
-					ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
-					targetScene->SetEffect(num[effectName[i]], i, true);
+					if (i == 3) {
+						targetScene->SetEffect(0, i, true);
+					}
+					else {
+						ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
+						targetScene->SetEffect(num[effectName[i]], i, true);
+					}
 				}
 				else
 				{
@@ -380,6 +385,26 @@ namespace CG
 			if (lastPressTime > triggerInterval)
 			{
 				targetScene->OnKeyboard(3);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_Q)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(10);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_E)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(11);
 				lastPressTime = 0.0f;
 			}
 		}

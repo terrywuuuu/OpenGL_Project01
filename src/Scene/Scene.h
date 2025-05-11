@@ -25,7 +25,7 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
+		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam);
 		void SetInstance(int instancedNum, int multipleMode);
 	private:
 		auto LoadScene() -> bool;

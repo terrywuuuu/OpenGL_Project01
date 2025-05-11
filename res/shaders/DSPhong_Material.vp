@@ -25,6 +25,8 @@ uniform bool lightCube;
 out vec3 vVaryingNormal;
 out vec3 vVaryingLightDir;
 out vec2 UV;
+out vec3 lightPos;
+out vec3 FragPos;
 
 void main(void) 
 { 
@@ -33,6 +35,7 @@ void main(void)
         return;
     }
 
+    lightPos = vLightPosition;
     mat4 newModel;
 
     if(isInstanced){
@@ -160,6 +163,9 @@ void main(void)
 
     // Get vector to light source
     vVaryingLightDir = normalize(vLightPosition - vPosition3);
+
+    vec4 worldPos = newModel * vec4(vPosition, 1.0);
+    FragPos = worldPos.xyz;
 
 	UV = vertexUV;
     // Don't forget to transform the geometry!

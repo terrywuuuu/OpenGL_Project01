@@ -35,6 +35,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void Render(float aspect);
+		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint);
 		void Texture_Render();
 
 		void OnResize(int width, int height);
@@ -83,6 +84,7 @@ namespace CG
 		void CreateScreenQuad();
 
 		void setLightCube();
+		void setLightTexture();
 	private:
 		Camera camera;
 		Scene *scene;
@@ -106,8 +108,14 @@ namespace CG
 		GLuint FBO;
 		GLuint texture;
 		GLuint depth_texture;
+		GLuint depthCubemap;
+		GLuint depthMapFBO;
+		std::vector<glm::mat4> shadowTransforms;
 		GLuint program;
 		GLuint Post_Process;		// ¯S®ÄªºProgram
+		GLuint LightProgram;
+		GLuint debugCubeProgram;
+		GLuint cubeVAO;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -162,6 +170,7 @@ namespace CG
 		bool enableBlur = false;
 		bool enableQuan = false;
 		bool enableMosaic = false;
+		bool enableEnvironmentMap = false;
 		float blurStrength;
 		float quanStrength;
 		float mosaicStrength;
