@@ -169,8 +169,9 @@ void main(void)
     vec4 vPosition4 = MV * vec4(vPosition,1);
     vec3 vPosition3 = vPosition4.xyz / vPosition4.w;
 
+    vec3 eyePos = (View * vec4(vLightPosition, 1.0)).xyz;
     // Get vector to light source
-    vVaryingLightDir = normalize(vLightPosition - vPosition3);
+    vVaryingLightDir = normalize(eyePos - vPosition3);
 
     vec4 worldPos = newModel * vec4(vPosition, 1.0);
     FragPos = worldPos.xyz;

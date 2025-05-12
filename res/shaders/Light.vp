@@ -21,6 +21,6 @@ out vec4 FragPosLightSpace;  // 傳給 Fragment shader，用來寫入深度
 void main()
 {
     vec4 worldPos = Model * vec4(vPosition, 1.0);
-    FragPosLightSpace = worldPos;
+//    FragPosLightSpace = worldPos;
     gl_Position = shadowMatrices * worldPos;
 }

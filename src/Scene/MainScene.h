@@ -165,6 +165,8 @@ namespace CG
 		glm::mat4 Model;
 		glm::mat4 Models[PARTSNUM];
 		glm::mat4 PreModels[PARTSNUM];
+		glm::mat4 PreView;
+		glm::mat4 PreProjection;
 
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];

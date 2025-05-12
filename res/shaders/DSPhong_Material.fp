@@ -39,6 +39,7 @@ void main(void)
 { 
     if(isLightCube){
         vFragColor = vec4(1.0); // 白色    
+        MotionVector = vec2(0, 0);
         return;
     }
 
@@ -65,6 +66,7 @@ void main(void)
     vec3 NDCPos = (ClipSpacePos0 / ClipSpacePos0.w).xyz;
     vec3 PrevNDCPos = (PrevClipSpacePos0 / PrevClipSpacePos0.w).xyz;
     MotionVector = (NDCPos - PrevNDCPos).xy;
+
 }
 	
     

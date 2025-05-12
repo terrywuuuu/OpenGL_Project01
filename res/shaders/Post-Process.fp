@@ -13,8 +13,8 @@ uniform bool enableMosaic;     // 控制是否啟用馬賽克
 uniform bool enableMotionBlur;
 
 uniform sampler2D sceneTexture;
-uniform sampler2D motionTexture;
 uniform vec2 texSize;            // 紋理的大小，用於計算偏移量
+uniform sampler2D motionTexture;
 
 uniform float blurStrength;     // 模糊程度
 uniform float quanStrength;     // 量化程度

@@ -70,18 +70,14 @@ namespace CG
 
 	void MainScene::Render(float aspect)
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
 		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		glDisable(GL_CULL_FACE);
-
-		glm::mat4 PreView = camera.GetViewMatrix();
-		glm::mat4 PreProjection = camera.GetProjectionMatrix();
-
-		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
-		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
 
 		float theta = glm::radians(eyeAngley);
 		float phi = glm::radians(angle);
@@ -137,6 +133,10 @@ namespace CG
 		glUseProgram(program);
 		glBindVertexArray(lightVAO);
 
+
+		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
+		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
+
 		camera.LookAt(
 			glm::vec3(camX, camY, camZ),
 			glm::vec3(0, 0, 0),
@@ -144,6 +144,9 @@ namespace CG
 		);
 		camera.SetFov(80.0f);
 		camera.SetAspect(aspect);
+
+		PreView = camera.GetViewMatrix();
+		PreProjection = camera.GetProjectionMatrix();
 
 		//update data to UBO for MVP
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
@@ -167,10 +170,6 @@ namespace CG
 
 		glFlush();
 
-		for (int i = 0; i < PARTSNUM; i++)
-		{
-			PreModels[i] = Models[i];
-		}
 	}
 
 	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint modelID) {
@@ -876,11 +875,10 @@ namespace CG
 
 	void MainScene::UpdateModel()
 	{
-		for (int i = 0; i < PARTSNUM; ++i)
+		for (int i = 0; i < PARTSNUM; i++)
 		{
 			PreModels[i] = Models[i];
 		}
-
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			Models[i] = glm::mat4(1.0f);
