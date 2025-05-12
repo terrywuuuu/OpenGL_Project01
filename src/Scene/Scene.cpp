@@ -12,13 +12,39 @@ static glm::mat4 scale(float x, float y, float z)
 	glm::vec4 c3 = glm::vec4(0, 0, z, 0);
 	glm::vec4 c4 = glm::vec4(0, 0, 0, 1);
 	glm::mat4 M = glm::mat4(c1, c2, c3, c4);
-	return M;}
+	return M;
+}
+
+static glm::mat4 translate(float x, float y, float z)
+{
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?噚,y,z=0?備??絫ranslate
+	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
+	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
+	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
+	glm::mat4 M = glm::mat4(c1, c2, c3, t);
+	return M;
+}
+
+static glm::mat4 rotate(float angle, float x, float y, float z)
+{
+	float r = glm::radians(angle);
+	glm::mat4 M = glm::mat4(1);
+
+	glm::vec4 c1 = glm::vec4(cos(r) + (1 - cos(r)) * x * x, (1 - cos(r)) * y * x + sin(r) * z, (1 - cos(r)) * z * x - sin(r) * y, 0);
+	glm::vec4 c2 = glm::vec4((1 - cos(r)) * y * x - sin(r) * z, cos(r) + (1 - cos(r)) * y * y, (1 - cos(r)) * z * y + sin(r) * x, 0);
+	glm::vec4 c3 = glm::vec4((1 - cos(r)) * z * x + sin(r) * y, (1 - cos(r)) * z * y - sin(r) * x, cos(r) + (1 - cos(r)) * z * z, 0);
+	glm::vec4 c4 = glm::vec4(0, 0, 0, 1);
+	M = glm::mat4(c1, c2, c3, c4);
+	return M;
+}
 
 namespace CG
 {
 	auto Scene::Initialize() -> bool
 	{
 		Models[0] *= scale(10, 10, 10);
+//		Models[0] *= rotate(10, 1, 0, 0);
+//		Models[0] *= translate(0, 0, -1);
 		return LoadScene();
 	}
 
@@ -66,31 +92,39 @@ namespace CG
 		return true;
 	}
 
-	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode)
+	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
+		GLuint modelLoc;
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform把计计玡ゲ斗use shader
+		if (isDepth) {
+			modelLoc = glGetUniformLocation(Program, "Model");
+		}
+		else {
+			glUseProgram(program);//uniform把计计玡ゲ斗use shader
+			glUniform1f(glGetUniformLocation(program, "far_plane"), 200.0f);
+			glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+			glUniform1i(glGetUniformLocation(program, "depthCubemap"), 0);
+			modelLoc = ModelID;
+		}
 
-		camera.LookAt(
-			glm::vec3(camX, camY, camZ),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0, 1, 0)
-		);
+		camera = cam;
+		
+		if (!isDepth) {
+			//update data to UBO for MVP
+			glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		}
 
-		camera.SetAspect(aspect);
-
-		//update data to UBO for MVP
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
-		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-		GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
+		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
 		for (int i = 0; i < SCENESUM; i++)
 		{
-			glUniformMatrix4fv(ModelID, 1, GL_FALSE, &Models[i][0][0]);
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &Models[i][0][0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			// 1rst attribute buffer : vertices
@@ -134,12 +168,14 @@ namespace CG
 			for (int j = 0; j < mtls[i].size(); j++)
 			{
 				mtlname = mtls[i][j];
-				//find the material diffuse color in map:KDs by material name.
-				glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
-				glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
-				glUniform3fv(M_KaID, 1, &KAs[mtlname][0]);
+				if (!isDepth) {
+					//find the material diffuse color in map:KDs by material name.
+					glUniform3fv(M_KdID, 1, &KDs[mtlname][0]);
+					glUniform3fv(M_KsID, 1, &KSs[mtlname][0]);
+					glUniform3fv(M_KaID, 1, &KAs[mtlname][0]);
+				}
 				//          (primitive   , glVertexID base , vertex count    )
-				if (Textures[mtlname].hasTexture)
+				if (!isDepth && Textures[mtlname].hasTexture)
 				{
 					glBindTexture(GL_TEXTURE_2D, Textures[mtlname].texture);
 				}
@@ -147,8 +183,10 @@ namespace CG
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
 				}
 				else {
-					glUniform1i(IsInstanced, 1);
-					glUniform1i(MultipleMode, multipleMode);
+					if (!isDepth) {
+						glUniform1i(IsInstanced, 1);
+						glUniform1i(MultipleMode, multipleMode);
+					}
 
 					glDrawArraysInstanced(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3, instancedNum);
 				}
@@ -157,6 +195,7 @@ namespace CG
 			}//end for loop for draw one part of the robot	
 
 		}//end for loop for updating and drawing model
+		glUseProgram(0);
 		glFlush();
 	}
 
@@ -265,7 +304,6 @@ namespace CG
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-
 	}
 
 	void Scene::Load2Buffer(const char* obj, int i)

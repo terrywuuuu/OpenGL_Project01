@@ -53,6 +53,9 @@
     <ClCompile Include="..\src\Scene\Skybox.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Effects\Effects.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Scene\MusicPlayer.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -78,6 +81,9 @@
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{e341a3e5-cdcc-4216-b5fc-da9c07bd2fab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{6b0ccd94-8aff-432d-9bc7-77079063cd24}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +135,9 @@
     <ClInclude Include="..\src\Scene\SkyBox.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Effects\Effects.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Scene\MusicPlayer.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -145,5 +154,13 @@
     <None Include="..\res\shaders\Post-Process.vp" />
     <None Include="..\res\shaders\SkyBox.fp" />
     <None Include="..\res\shaders\SkyBox.vp" />
+    <None Include="..\res\shaders\Part_Effects.fp" />
+    <None Include="..\res\shaders\Part_Effects.vp" />
+    <None Include="..\res\shaders\Light.fp" />
+    <None Include="..\res\shaders\Light.vp" />
+    <None Include="..\res\shaders\Ball.fp" />
+    <None Include="..\res\shaders\Ball.vp" />
+    <None Include="..\res\shaders\Outline.fp" />
+    <None Include="..\res\shaders\Outline.vp" />
   </ItemGroup>
 </Project>

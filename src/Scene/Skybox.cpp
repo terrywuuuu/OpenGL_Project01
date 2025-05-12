@@ -5,6 +5,24 @@
 #include "SkyBox.h"
 #include "Camera.h"
 
+static glm::mat4 translate(float x, float y, float z)
+{
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?‡x,y,z=0?‚ä??½translate
+	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
+	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
+	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
+	glm::mat4 M = glm::mat4(c1, c2, c3, t);
+	return M;
+}
+static glm::mat4 scale(float x, float y, float z)
+{
+	glm::vec4 c1 = glm::vec4(x, 0, 0, 0);
+	glm::vec4 c2 = glm::vec4(0, y, 0, 0);
+	glm::vec4 c3 = glm::vec4(0, 0, z, 0);
+	glm::vec4 c4 = glm::vec4(0, 0, 0, 1);
+	glm::mat4 M = glm::mat4(c1, c2, c3, c4);
+	return M;
+}
 
 float size = 1.0f;
 
@@ -47,6 +65,9 @@ namespace CG
 {
 	auto SkyBox::Initialize() -> bool
 	{
+		Model = glm::mat4(1.0);
+		Model *= translate(80, 20, -50);
+		Model *= scale(20, 20, 20);
 		return LoadScene();
 	}
 
@@ -62,6 +83,13 @@ namespace CG
 			{ GL_NONE, NULL } };
 
 		program = LoadShaders(shaders); //Åª¨úshader
+
+		ShaderInfo Shaders[] = {
+			{ GL_VERTEX_SHADER, "../../res/shaders/Ball.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/Ball.fp" },//fragment shader
+			{ GL_NONE, NULL } };
+
+		Ball_program = LoadShaders(Shaders); //Åª¨úshader
 
 		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ýuse shader
 
@@ -83,7 +111,7 @@ namespace CG
 		return true;
 	}
 
-	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode)
+	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
@@ -114,7 +142,70 @@ namespace CG
 
 		// Switch back to the normal depth function
 		glDepthFunc(GL_LESS);
-	}
+		
+		if (environmentMap) {
+			glUseProgram(Ball_program);
+			glBindVertexArray(BallVAO);
+
+			glUniform3f(glGetUniformLocation(Ball_program, "cameraPos"), camX, camY, camZ);
+			glUniformMatrix4fv(ProID, 1, GL_FALSE, &camera.GetProjectionMatrix()[0][0]);
+			glUniformMatrix4fv(ViewID, 1, GL_FALSE, &camera.GetViewMatrix()[0][0]);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			glUniform1i(glGetUniformLocation(Ball_program, "environmentMap"), 0);
+
+			GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
+			for (int i = 0; i < 1; i++)
+			{
+				glUniformMatrix4fv(ModelID, 1, GL_FALSE, &Model[0][0]);
+
+				glBindBuffer(GL_ARRAY_BUFFER, BallVBO);
+				// 1rst attribute buffer : vertices
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(0,				//location
+					3,				//vec3
+					GL_FLOAT,			//type
+					GL_FALSE,			//not normalized
+					0,				//strip
+					(void*)offset[0]);//buffer offset
+				//(location,vec3,type,?ºå?é»????é»žç??ç§»??buffer point)
+				offset[0] += vertices_size[i] * sizeof(glm::vec3);
+
+				// 2nd attribute buffer : UVs
+				glEnableVertexAttribArray(1);//location 1 :vec2 UV
+				glBindBuffer(GL_ARRAY_BUFFER, BalluVBO);
+				glVertexAttribPointer(1,
+					2,
+					GL_FLOAT,
+					GL_FALSE,
+					0,
+					(void*)offset[1]);
+				//(location,vec2,type,?ºå?é»????é»žç??ç§»??point)
+				offset[1] += uvs_size[i] * sizeof(glm::vec2);
+
+				// 3rd attribute buffer : normals
+				glEnableVertexAttribArray(2);//location 2 :vec3 Normal
+				glBindBuffer(GL_ARRAY_BUFFER, BallnVBO);
+				glVertexAttribPointer(2,
+					3,
+					GL_FLOAT,
+					GL_FALSE,
+					0,
+					(void*)offset[2]);
+				//(location,vec3,type,?ºå?é»????é»žç??ç§»??point)
+				offset[2] += normals_size[i] * sizeof(glm::vec3);
+
+				int vertexIDoffset = 0;//glVertexID's offset 
+
+				for (int j = 0; j < mtls[i].size(); j++)
+				{
+					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
+					//we draw triangles by giving the glVertexID base and vertex count is face count*3
+					vertexIDoffset += faces[i][j + 1] * 3;//glVertexID's base offset is face count*3
+				}
+			}//end for loop for draw one part of the robot	
+		}
+	}//end for loop for updating and drawing model
 
 	void SkyBox::LoadModel()
 	{
@@ -190,5 +281,96 @@ namespace CG
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		glGenVertexArrays(1, &BallVAO);
+		glBindVertexArray(BallVAO);
+		glUseProgram(Ball_program);
+
+		ModelID = glGetUniformLocation(Ball_program, "model");
+		ProID = glGetUniformLocation(Ball_program, "projection");
+		ViewID = glGetUniformLocation(Ball_program, "view");
+
+		Load2Buffer("../../res/Parts/Ball.obj", 0);
+
+		GLuint totalSize[3] = { 0, 0, 0 };
+		GLuint offset[3] = { 0, 0, 0 };
+		for (int i = 0; i < 1; i++)
+		{
+			totalSize[0] += vertices_size[i] * sizeof(glm::vec3);
+			totalSize[1] += uvs_size[i] * sizeof(glm::vec2);
+			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
+		}
+
+		// ?Ÿæ? VBO
+		glGenBuffers(1, &BallVBO);
+		glGenBuffers(1, &BalluVBO);
+		glGenBuffers(1, &BallnVBO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, BallVBO);
+		glBufferData(GL_ARRAY_BUFFER, totalSize[0], NULL, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, BalluVBO);
+		glBufferData(GL_ARRAY_BUFFER, totalSize[1], NULL, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, BallnVBO);
+		glBufferData(GL_ARRAY_BUFFER, totalSize[2], NULL, GL_STATIC_DRAW);
+
+		for (int i = 0; i < 1; i++)
+		{
+			// è¤‡è£½?‚é?è³‡æ?
+			glBindBuffer(GL_COPY_WRITE_BUFFER, BallVBO);
+			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
+			offset[0] += vertices_size[i] * sizeof(glm::vec3);
+			glInvalidateBufferData(VBOs[i]); // ?‹æ”¾ VBO
+			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
+			// è¤‡è£½ UV è³‡æ?
+			glBindBuffer(GL_COPY_WRITE_BUFFER, BalluVBO);
+			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
+			offset[1] += uvs_size[i] * sizeof(glm::vec2);
+			glInvalidateBufferData(uVBOs[i]); // ?‹æ”¾ VBO
+			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
+			// è¤‡è£½æ³•ç?è³‡æ?
+			glBindBuffer(GL_COPY_WRITE_BUFFER, BallnVBO);
+			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+				0, offset[2], normals_size[i] * sizeof(glm::vec3));
+			offset[2] += normals_size[i] * sizeof(glm::vec3);
+			glInvalidateBufferData(nVBOs[i]); // ?‹æ”¾ VBO
+			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		}
+		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glEnableVertexAttribArray(0);
+	}
+
+	void SkyBox::Load2Buffer(const char* obj, int i)
+	{
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec2> uvs;
+		std::vector<glm::vec3> normals; // Won't be used at the moment.
+		std::vector<unsigned int> materialIndices;
+
+		bool res = LoadOBJ(obj, vertices, uvs, normals, faces[i], mtls[i]);
+		if (!res) printf("load failed\n");
+
+		glGenBuffers(1, &VBOs[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+		vertices_size[i] = vertices.size();
+
+		glGenBuffers(1, &uVBOs[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, uVBOs[i]);
+		glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+		uvs_size[i] = uvs.size();
+
+		glGenBuffers(1, &nVBOs[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, nVBOs[i]);
+		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
+		normals_size[i] = normals.size();
 	}
 }

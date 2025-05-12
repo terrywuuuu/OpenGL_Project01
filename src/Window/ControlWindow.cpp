@@ -151,14 +151,21 @@ namespace CG
 		}
 	}
 
+	int lastEffect = -1;
+	int effectNum = 4;
+	std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "Motion Blur" };
+	static std::map<std::string, bool> isActive;
+	std::vector<float> num = { 0, 2.0f, 1.0f, 1.0f};
+	std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0f,16.0f} };
+
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			int effectNum = 2;
-			std::vector<std::string> effectName = { "Vague", "Quantization" };
+			int effectNum = 6;
+			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "MotionBlur", "EnvironmentMap", "ToonShader"};
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
-			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f} };
+			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0,8.0} };
 
 			for (int i = 0; i < effectNum; i++) {
 				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
@@ -166,12 +173,17 @@ namespace CG
 				ImGui::SetNextItemWidth(100);
 				if (isActive[effectName[i]])
 				{
-					ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
-					targetScene->SetEffect(num[effectName[i]], i, true);
+					if (i == 4 || i == 5) {
+						targetScene->SetEffect(0, i, true);
+					}
+					else {
+						ImGui::SliderFloat("Strength", &num[effectName[i]], Range[i].first, Range[i].second, "%.3f");
+						targetScene->SetEffect(num[effectName[i]], i, true);
+					}
 				}
 				else
 				{
-					targetScene->SetEffect(num[effectName[i]], i, false);
+					targetScene->SetEffect(0, i, false);
 				}
 			}
 
@@ -341,45 +353,66 @@ namespace CG
 		if (io.WantCaptureKeyboard)
 			return;
 
-		//Key event A, D control eyes Angley
-		if (ImGui::IsKeyDown(ImGuiKey_A)) {
+		if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+			targetScene->OnMouseDownAndMove(io.MouseDelta.x, io.MouseDelta.y);
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_Q)) {
 			lastPressTime += io.DeltaTime;
 
 			if (lastPressTime > triggerInterval)
 			{
-				targetScene->OnKeyboard(0);
+				targetScene->OnKeyboard(10);
 				lastPressTime = 0.0f;
 			}
 		}
 
-		if (ImGui::IsKeyDown(ImGuiKey_D)) {
-
+		if (ImGui::IsKeyDown(ImGuiKey_E)) {
 			lastPressTime += io.DeltaTime;
 
 			if (lastPressTime > triggerInterval)
 			{
-				targetScene->OnKeyboard(1);
+				targetScene->OnKeyboard(11);
 				lastPressTime = 0.0f;
 			}
 		}
 
-		//Key event W, S control angle
-		if (ImGui::IsKeyDown(ImGuiKey_W)) {
+		if (ImGui::IsKeyDown(ImGuiKey_UpArrow)) {
 			lastPressTime += io.DeltaTime;
 
 			if (lastPressTime > triggerInterval)
 			{
-				targetScene->OnKeyboard(2);
+				targetScene->OnKeyboard(6);
 				lastPressTime = 0.0f;
 			}
 		}
 
-		if (ImGui::IsKeyDown(ImGuiKey_S)) {
+		if (ImGui::IsKeyDown(ImGuiKey_DownArrow)) {
 			lastPressTime += io.DeltaTime;
 
 			if (lastPressTime > triggerInterval)
 			{
-				targetScene->OnKeyboard(3);
+				targetScene->OnKeyboard(7);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(8);
+				lastPressTime = 0.0f;
+			}
+		}
+
+		if (ImGui::IsKeyDown(ImGuiKey_RightArrow)) {
+			lastPressTime += io.DeltaTime;
+
+			if (lastPressTime > triggerInterval)
+			{
+				targetScene->OnKeyboard(9);
 				lastPressTime = 0.0f;
 			}
 		}

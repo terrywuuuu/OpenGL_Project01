@@ -148,6 +148,7 @@
     <ClCompile Include="..\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\App\App.cpp" />
+    <ClCompile Include="..\src\Effects\Effects.cpp" />
     <ClCompile Include="..\src\Scene\Camera.cpp" />
     <ClCompile Include="..\src\Scene\MainScene.cpp" />
     <ClCompile Include="..\src\Scene\MusicPlayer.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="..\include\imgui\imgui.h" />
     <ClInclude Include="..\include\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\App\App.h" />
+    <ClInclude Include="..\src\Effects\Effects.h" />
     <ClInclude Include="..\src\Scene\Camera.h" />
     <ClInclude Include="..\src\Scene\MainScene.h" />
     <ClInclude Include="..\src\Scene\MusicPlayer.h" />
@@ -182,8 +184,16 @@
     <ClInclude Include="..\src\Window\ControlWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\res\shaders\Ball.fp" />
+    <None Include="..\res\shaders\Ball.vp" />
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Light.fp" />
+    <None Include="..\res\shaders\Light.vp" />
+    <None Include="..\res\shaders\Outline.fp" />
+    <None Include="..\res\shaders\Outline.vp" />
+    <None Include="..\res\shaders\Part_Effects.fp" />
+    <None Include="..\res\shaders\Part_Effects.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />
     <None Include="..\res\shaders\Scene_Material.vp" />
     <None Include="..\res\shaders\Post-Process.fp" />

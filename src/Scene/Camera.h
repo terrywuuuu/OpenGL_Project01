@@ -41,8 +41,11 @@ namespace CG
         {
             clipNear = near;
             clipFar = far;
-
             UpdateProjectionMatrix();
+        }
+
+        float GetFar() {
+            return clipFar;
         }
 
     private:

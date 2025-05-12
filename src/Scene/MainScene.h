@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "SkyBox.h"
+#include "Effects/Effects.h"
 #include "MusicPlayer.h"
 
 constexpr auto PARTSNUM = 11;
@@ -34,10 +35,18 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void Render(float aspect);
+		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint);
 		void Texture_Render();
 
 		void OnResize(int width, int height);
 		void OnKeyboard(int key);
+		void OnMouseDownAndMove(float deltaX, float deltaY) {
+			eyeAngley -= deltaX * 0.25f;
+			angle += deltaY * 0.25f;
+
+			if (angle >= 90) angle = 89;
+			if (angle <= -90) angle = -89;
+		}
 
 		void PlayMusic();
 
@@ -63,9 +72,6 @@ namespace CG
 		// Effect panel functions
 		void SetEffect(float num, int effect, bool isActive);
 		void SetMtl(int partsNum, std::string material);
-		// Initialize texture and framebuffer
-		void SetTexture();
-		void CreateScreenQuad();
 
 	private:
 		auto LoadScene() -> bool;
@@ -79,10 +85,18 @@ namespace CG
 		glm::mat4 bodyRotateMatrix(int body);
 
 		void HandleAction(const std::vector<JsonIO::FrameData>&, double, double);
+
+		// Initialize texture and framebuffer
+		void SetTexture();
+		void CreateScreenQuad();
+
+		void setLightCube();
+		void setLightTexture();
 	private:
 		Camera camera;
 		Scene *scene;
 		SkyBox *skyBox;
+		Effects* effect;
 		MusicPlayer* musicPlayer;
 
 		GLuint VAO;
@@ -91,15 +105,27 @@ namespace CG
 		GLuint nVBO;
 		GLuint mVBO;
 		GLuint UBO;
+		GLuint EBO;
+		GLuint lightVAO, lightVBO;
+		glm::mat4 lightModel = glm::mat4(1.0);
 		std::array<GLuint, PARTSNUM> VBOs;
 		std::array<GLuint, PARTSNUM> uVBOs;
 		std::array<GLuint, PARTSNUM> nVBOs;
+
 		GLuint screenQuadVAO, screenQuadVBO;
 		GLuint FBO;
 		GLuint texture;
+		GLuint motionTexture;
 		GLuint depth_texture;
+		GLuint depthCubemap;
+		GLuint depthMapFBO;
+		std::vector<glm::mat4> shadowTransforms;
 		GLuint program;
 		GLuint Post_Process;		// ¯S®ÄªºProgram
+		GLuint LightProgram;
+		GLuint debugCubeProgram;
+		GLuint OutlineProgram;
+		GLuint cubeVAO;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -111,7 +137,10 @@ namespace CG
 		float size = 1;
 		GLfloat movex, movey;
 		GLint MatricesIdx;
+		GLint PreViewId;
+		GLint PreProjectionId;
 		GLuint ModelID;
+		GLuint PreModelID;
 
 		bool keepMultipleActive = false;
 		int multipleMode = 0;
@@ -136,6 +165,9 @@ namespace CG
 
 		glm::mat4 Model;
 		glm::mat4 Models[PARTSNUM];
+		glm::mat4 PreModels[PARTSNUM];
+		glm::mat4 PreView;
+		glm::mat4 PreProjection;
 
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];
@@ -153,8 +185,17 @@ namespace CG
 
 		bool enableBlur = false;
 		bool enableQuan = false;
+		bool enableMosaic = false;
+		bool enableEnvironmentMap = false;
+		bool enableMotionBlur = false;
+		bool enableToonShader = false;
 		float blurStrength;
 		float quanStrength;
+		float mosaicStrength;
+		float motionBlurStrength;
+		std::map<std::string, float> effectTime;
+		bool isFirstAppear = true;
+		glm::vec3 LightPos = glm::vec3(0, 10, 50);
 
 		enum Body
 		{

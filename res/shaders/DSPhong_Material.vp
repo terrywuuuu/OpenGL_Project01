@@ -8,24 +8,42 @@ layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec2 vertexUV;
 layout(location = 2) in vec3 vertexNormal;
 
-vec3 vLightPosition = vec3(0,10,50);
+//vec3 vLightPosition = vec3(0,10,50);
+uniform vec3 vLightPosition;
 
 uniform MatVP{
 	mat4 View;
 	mat4 Projection;
 };
 
+uniform mat4 PreView;
+uniform mat4 PreProjection;
+
 uniform mat4 Model;
+uniform mat4 PreModel;
 uniform bool isInstanced;
 uniform int MultipleMode;
+uniform bool lightCube;
 
 // Color to fragment program
 out vec3 vVaryingNormal;
 out vec3 vVaryingLightDir;
 out vec2 UV;
+out vec3 lightPos;
+out vec3 FragPos;
+
+// for motion blur
+out vec4 ClipSpacePos0;
+out vec4 PrevClipSpacePos0;
 
 void main(void) 
 { 
+    if(lightCube){
+        gl_Position = Projection* View * Model * vec4(vPosition,1);
+        return;
+    }
+
+    lightPos = vLightPosition;
     mat4 newModel;
 
     if(isInstanced){
@@ -134,10 +152,21 @@ void main(void)
     vec4 vPosition4 = MV * vec4(vPosition,1);
     vec3 vPosition3 = vPosition4.xyz / vPosition4.w;
 
+    vec3 eyePos = (View * vec4(vLightPosition, 1.0)).xyz;
     // Get vector to light source
-    vVaryingLightDir = normalize(vLightPosition - vPosition3);
+    vVaryingLightDir = normalize(eyePos - vPosition3);
+
+    vec4 worldPos = newModel * vec4(vPosition, 1.0);
+    FragPos = worldPos.xyz;
 
 	UV = vertexUV;
+
     // Don't forget to transform the geometry!
+    
     gl_Position = MVP * vec4(vPosition,1);
+
+    ClipSpacePos0 = gl_Position;
+
+    PrevClipSpacePos0 = PreProjection * PreView * PreModel * vec4(vPosition, 1);
+
 }
