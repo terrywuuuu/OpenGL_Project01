@@ -105,6 +105,7 @@ namespace CG
 		glUseProgram(LightProgram);
 		camera.SetAspect(1.0);
 		camera.SetFov(90.0f);
+		camera.SetClip(0.1, 200);
 
 		for (int i = 0; i < 6; i++) {
 			glFramebufferTexture2D(
@@ -119,7 +120,7 @@ namespace CG
 			glReadBuffer(GL_NONE);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-			glUniformMatrix4fv(glGetUniformLocation(LightProgram, "shadowMatrices"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix() * shadowTransforms[i]));
+			glUniformMatrix4fv(glGetUniformLocation(LightProgram, "shadowMatrix"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix() * shadowTransforms[i]));
 			GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
 			RenderMainScene(aspect, camX, camY, camZ, true, depthCubemap, modelLoc);
 		}
@@ -131,8 +132,8 @@ namespace CG
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		glDisable(GL_CULL_FACE);
 		glUseProgram(program);
+		glUniform1i(glGetUniformLocation(program, "enableToonShader"), enableToonShader);
 		glBindVertexArray(lightVAO);
-
 
 		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
 		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
@@ -144,6 +145,7 @@ namespace CG
 		);
 		camera.SetFov(80.0f);
 		camera.SetAspect(aspect);
+		camera.SetClip(0.01, 1000);
 
 		PreView = camera.GetViewMatrix();
 		PreProjection = camera.GetProjectionMatrix();
@@ -165,6 +167,20 @@ namespace CG
 		// ------------------------------
 
 		RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, ModelID);
+
+		if (enableToonShader) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glUseProgram(OutlineProgram);
+
+			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "View"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "Projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
+			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
+			RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, modelLoc);
+			glCullFace(GL_BACK);
+		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Texture_Render();
 
@@ -251,16 +267,16 @@ namespace CG
 
 		}//end for loop for updating and drawing model
 
-		
+		glBindVertexArray(0);
 		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
 		if (!isDepth) {
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
 		}
 
-		if (effectTime["smoke"] != 0) {
+/*		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
 			effectTime["smoke"]--;
-		}
+		}*/
 	}
 
 	void MainScene::Texture_Render() {
@@ -488,6 +504,9 @@ namespace CG
 		case 4:
 			enableEnvironmentMap = isActive;
 			break;
+		case 5:
+			enableToonShader = isActive;
+			break;
 		}
 	}
 
@@ -657,6 +676,12 @@ namespace CG
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Light.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 		LightProgram = LoadShaders(Shader);
+
+		ShaderInfo Shaderss[] = {
+			{ GL_VERTEX_SHADER, "../../res/shaders/Outline.vp" },//vertex shader
+			{ GL_FRAGMENT_SHADER, "../../res/shaders/Outline.fp" },//fragment shader
+			{ GL_NONE, NULL } };
+		OutlineProgram = LoadShaders(Shaderss);
 		
 //		effect->setProgram(Post_Process);
     

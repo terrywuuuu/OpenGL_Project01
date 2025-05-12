@@ -34,7 +34,6 @@ namespace CG
 		void Load2Buffer(const char* obj, int i);
 	private:
 		Camera camera;
-
 		GLuint VAO;
 		GLuint VBO;
 		GLuint uVBO;

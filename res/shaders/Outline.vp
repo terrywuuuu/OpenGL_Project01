@@ -1,0 +1,20 @@
+#version 430 core
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec2 vertexUV;
+layout(location = 2) in vec3 aNormal;
+
+uniform mat4 Model;
+uniform mat4 View;
+uniform mat4 Projection;
+
+uniform mat4 PreModel;
+uniform bool isInstanced;
+uniform int MultipleMode;
+
+void main()
+{
+    // ªu normal ÂX±i¼Ò«¬
+    float width = 0.1f;
+    vec3 expandedPos = aPos + aNormal * width;
+    gl_Position = Projection * View * Model * vec4(expandedPos, 1.0);
+}

@@ -161,8 +161,8 @@ namespace CG
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			int effectNum = 5;
-			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "MotionBlur", "EnvironmentMap"};
+			int effectNum = 6;
+			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "MotionBlur", "EnvironmentMap", "ToonShader"};
 			static std::map<std::string, bool> isActive;
 			static std::map<std::string, float> num;
 			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0,8.0} };
@@ -173,7 +173,7 @@ namespace CG
 				ImGui::SetNextItemWidth(100);
 				if (isActive[effectName[i]])
 				{
-					if (i == 4) {
+					if (i == 4 || i == 5) {
 						targetScene->SetEffect(0, i, true);
 					}
 					else {

@@ -190,6 +190,8 @@
     <None Include="..\res\shaders\DSPhong_Material.vp" />
     <None Include="..\res\shaders\Light.fp" />
     <None Include="..\res\shaders\Light.vp" />
+    <None Include="..\res\shaders\Outline.fp" />
+    <None Include="..\res\shaders\Outline.vp" />
     <None Include="..\res\shaders\Part_Effects.fp" />
     <None Include="..\res\shaders\Part_Effects.vp" />
     <None Include="..\res\shaders\Scene_Material.fp" />

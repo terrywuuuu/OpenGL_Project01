@@ -34,6 +34,7 @@ in vec4 PrevClipSpacePos0;
 float Shininess = 128.0;//for material specular
 
 uniform bool isLightCube;
+uniform bool enableToonShader;
 
 void main(void)
 { 
@@ -46,9 +47,21 @@ void main(void)
     // Dot product gives us diffuse intensity
     float diff = max(0.0, dot(normalize(vVaryingNormal),
 					normalize(vVaryingLightDir)));
+    float toonDiff = diff;
+
+    if(enableToonShader){
+        if (diff > 0.95)
+            toonDiff = 1.0;
+        else if (diff > 0.5)
+            toonDiff = 0.7;
+        else if (diff > 0.25)
+            toonDiff = 0.4;
+        else
+            toonDiff = 0.1;   
+    }
 
     // Multiply intensity by diffuse color, force alpha to 1.0
-    vFragColor = diff * diffuseColor*vec4(Material.Kd,1);
+    vFragColor = toonDiff * diffuseColor*vec4(Material.Kd,1);
 
     // Add in ambient light
     vFragColor += ambientColor;
@@ -58,9 +71,14 @@ void main(void)
     vec3 vReflection = normalize(reflect(-normalize(vVaryingLightDir),
 								normalize(vVaryingNormal)));//反射角
     float spec = max(0.0, dot(normalize(vVaryingNormal), vReflection));
+
+    float toonSpec = spec;
+    if (spec > 0.95 && enableToonShader)
+        toonSpec = 1.0;
+
     if(diff != 0) {
-		spec = pow(spec, Shininess);
-		vFragColor += specularColor*vec4(Material.Ks,1)*spec;
+		toonSpec = pow(toonSpec, Shininess);
+		vFragColor += specularColor*vec4(Material.Ks,1)*toonSpec;
     }
     
     vec3 NDCPos = (ClipSpacePos0 / ClipSpacePos0.w).xyz;

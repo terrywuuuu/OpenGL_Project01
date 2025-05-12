@@ -124,6 +124,7 @@ namespace CG
 		GLuint Post_Process;		// ¯S®ÄªºProgram
 		GLuint LightProgram;
 		GLuint debugCubeProgram;
+		GLuint OutlineProgram;
 		GLuint cubeVAO;
 
 		int actionIndex = 0; // idle
@@ -187,6 +188,7 @@ namespace CG
 		bool enableMosaic = false;
 		bool enableEnvironmentMap = false;
 		bool enableMotionBlur = false;
+		bool enableToonShader = false;
 		float blurStrength;
 		float quanStrength;
 		float mosaicStrength;

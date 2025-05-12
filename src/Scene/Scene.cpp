@@ -103,7 +103,7 @@ namespace CG
 		}
 		else {
 			glUseProgram(program);//uniform參數數值前必須先use shader
-			glUniform1f(glGetUniformLocation(program, "far_plane"), cam.GetFar());
+			glUniform1f(glGetUniformLocation(program, "far_plane"), 200.0f);
 			glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
@@ -121,7 +121,7 @@ namespace CG
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
-		GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
+		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
 		for (int i = 0; i < SCENESUM; i++)
 		{
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &Models[i][0][0]);
@@ -304,7 +304,6 @@ namespace CG
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-
 	}
 
 	void Scene::Load2Buffer(const char* obj, int i)

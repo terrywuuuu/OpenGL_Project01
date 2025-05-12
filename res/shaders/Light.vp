@@ -14,7 +14,7 @@ uniform MatVP{
 	mat4 Projection;
 };
 
-uniform mat4 shadowMatrices;  // VP 矩陣
+uniform mat4 shadowMatrix;  // VP 矩陣
 
 out vec4 FragPosLightSpace;  // 傳給 Fragment shader，用來寫入深度
 
@@ -22,5 +22,5 @@ void main()
 {
     vec4 worldPos = Model * vec4(vPosition, 1.0);
 //    FragPosLightSpace = worldPos;
-    gl_Position = shadowMatrices * worldPos;
+    gl_Position = shadowMatrix * worldPos;
 }
