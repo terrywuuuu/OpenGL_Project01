@@ -55,6 +55,7 @@ namespace CG
 {
 	auto Effects::Initialize() -> bool
 	{
+		EffectInforms.resize(effectsNum);
 		return LoadTexture();
 	}
 
@@ -62,8 +63,9 @@ namespace CG
 	{
 		glCullFace(GL_BACK);
 		std::string parentDir = "../../res/Effects/";
-		std::string effectsTex[1] =
+		std::string effectsTex[2] =
 		{
+			parentDir + "smoke.png",
 			parentDir + "smoke.png"
 		};
 
@@ -89,13 +91,10 @@ namespace CG
 			{
 				std::cout << "Failed to load texture: " << effectsTex[i] << std::endl;
 			}
-
-			std::vector<glm::mat4> E;
-			for (int j = 0; j < 10; j++) {
-				glm::mat4 M = glm::mat4(1.0);
-				E.push_back(M);
+			std::cout << "123";
+			for (int j = 0; j < effectCount[i]; j++) {
+				EffectInforms[i].push_back({ glm::mat4(1.0), glm::vec3(0), 1.0f, 15.0, true });
 			}
-			EffectInforms.push_back({ E, glm::vec3(0), 1.0f, 15.0, true });
 		}
 
 		setupMesh();
@@ -125,7 +124,7 @@ namespace CG
 
 		glGenBuffers(1, &modelVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
-		glBufferData(GL_ARRAY_BUFFER, 10 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);  // 分配空間，但先不寫資料
+		glBufferData(GL_ARRAY_BUFFER, 10 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW); 
 
 		for (int i = 0; i < 4; i++) {
 			glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
@@ -145,8 +144,8 @@ namespace CG
 
 	void Effects::setAngle(std::string effect, float angle) {
 		if (effect == "smoke") {
-			for (int i = 0; i < EffectInforms[0].effect_Model.size(); i++) {
-				EffectInforms[0].effect_Model[i] *= rotate(angle, 0, 1, 0);
+			for (int i = 0; i < effectCount[0]; i++) {
+				EffectInforms[0][i].Model *= rotate(angle, 0, 1, 0);
 			}
 		}
 	}
@@ -155,15 +154,15 @@ namespace CG
 	{
 		if (!enable) {
 			for (int i = 0; i < effectsNum; i++) {
-				EffectInforms[i].firstAppear = true;
+				for (int j = 0; j < effectCount[i]; j++) {
+					EffectInforms[i][j].firstAppear = true;
+				}
 			}
 			return;
 		}
 
 		GLuint Program = program[index];
 		glUseProgram(Program);
-		// 綁定 VAO
-		glBindVertexArray(VAO);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
@@ -190,16 +189,17 @@ namespace CG
 			updateSmoke(time);
 			updateModel(0);
 //			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(effects_Model[0]));
-			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[0].alpha);
+			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[0][0].alpha);
 
 			// 綁定 Texture 到 level 0
-			glActiveTexture(GL_TEXTURE1);
+			glActiveTexture(GL_TEXTURE5);
 			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); // 假設使用煙霧特效的 Texture
-			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 1); // 告訴 Shader 紋理單元位置
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 5); // 告訴 Shader 紋理單元位置
 			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), enable);
 
 			// 繪製矩形（使用索引繪製）
 //			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 繪製兩個三角形形成的矩形
+			glBindVertexArray(VAO);
 			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 10);
 		}
 		
@@ -210,26 +210,30 @@ namespace CG
 	void Effects::updateModel(int num) {
 		glBindBuffer(GL_ARRAY_BUFFER, modelVBO);  // 綁定先前建好的 VBO
 
+		std::vector<glm::mat4> models;
 		// 假設 effects_Model[num] 是 std::vector<glm::mat4>
-		glBufferSubData(GL_ARRAY_BUFFER, 0, EffectInforms[num].effect_Model.size() * sizeof(glm::mat4), EffectInforms[num].effect_Model.data());
+		for (int i = 0; i < EffectInforms[num].size(); i++) {
+			models.push_back(EffectInforms[num][i].Model);
+		}
+		glBufferSubData(GL_ARRAY_BUFFER, 0, EffectInforms[num].size() * sizeof(glm::mat4), models.data());
 	}
 
 	void Effects::updateSmoke(float Time)
 	{
-		EffectInforms[0].alpha -= 1.0f / EffectInforms[0].time;
-		EffectInforms[0].trans.y += 1.0f / EffectInforms[0].time;
+		EffectInforms[0][0].alpha -= 1.0f / EffectInforms[0][0].time;
+		EffectInforms[0][0].trans.y += 1.0f / EffectInforms[0][0].time;
 
-		if (EffectInforms[0].alpha < 0.0f || Time <= 1) {
-			EffectInforms[0].trans = glm::vec3(0);
-			EffectInforms[0].alpha = 1.0f;
+		if (EffectInforms[0][0].alpha < 0.0f || Time <= 1) {
+			EffectInforms[0][0].trans = glm::vec3(0);
+			EffectInforms[0][0].alpha = 1.0f;
 		}
 
-		if (EffectInforms[0].firstAppear) {
-			for (int i = 0; i < EffectInforms[0].effect_Model.size(); i++) {
-				EffectInforms[0].effect_Model[i] *= translate(-250.0 + i * 50.0, EffectInforms[0].trans.y, 0);
+		if (EffectInforms[0][0].firstAppear) {
+			for (int i = 0; i < EffectInforms[0].size(); i++) {
+				EffectInforms[0][i].Model *= translate(-250.0 + i * 50.0, EffectInforms[0][0].trans.y, 0);
 			}
 
-			EffectInforms[0].firstAppear = false;
+			EffectInforms[0][0].firstAppear = false;
 		}
 	}
 }
