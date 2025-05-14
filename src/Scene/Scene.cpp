@@ -43,8 +43,8 @@ namespace CG
 	auto Scene::Initialize() -> bool
 	{
 		Models[0] *= scale(10, 10, 10);
-//		Models[0] *= rotate(10, 1, 0, 0);
-//		Models[0] *= translate(0, 0, -1);
+//		Models[0] *= translate(0, 0, 2);
+//		Models[0] *= rotate(60, 1, 0, 0);
 		return LoadScene();
 	}
 
@@ -92,23 +92,28 @@ namespace CG
 		return true;
 	}
 
-	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam)
+	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		GLuint modelLoc;
 
 		glBindVertexArray(VAO);
 		if (isDepth) {
+			glUseProgram(Program);
 			modelLoc = glGetUniformLocation(Program, "Model");
 		}
 		else {
 			glUseProgram(program);//uniform參數數值前必須先use shader
 			glUniform1f(glGetUniformLocation(program, "far_plane"), 200.0f);
 			glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-			glUniform1i(glGetUniformLocation(program, "depthCubemap"), 0);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glUniform1i(glGetUniformLocation(program, "shadowMap"), 1);
 			modelLoc = ModelID;
+			GLuint lightMatrixLoc = glGetUniformLocation(program, "lightSpaceMatrix");
+			glUniformMatrix4fv(lightMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+			GLuint cameraPosLoc = glGetUniformLocation(program, "cameraPos");
+			glUniform3f(cameraPosLoc, camX, camY, camZ);
 		}
 
 		camera = cam;
@@ -177,7 +182,9 @@ namespace CG
 				//          (primitive   , glVertexID base , vertex count    )
 				if (!isDepth && Textures[mtlname].hasTexture)
 				{
+					glActiveTexture(GL_TEXTURE0); // 使用 texture unit 0
 					glBindTexture(GL_TEXTURE_2D, Textures[mtlname].texture);
+					glUniform1i(glGetUniformLocation(program, "tex0"), 0);
 				}
 				if (instancedNum == 1) {
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);

@@ -37,20 +37,21 @@ namespace CG
 		GLuint EBO;
 		GLuint modelVBO;
 
-		GLuint Effect_Texture[1];
-		GLuint program[1];
-		int effectsNum = 1;	// 特效數
-		std::vector<std::string> enableEffects = { "enableSmoke" };
+		GLuint Effect_Texture[2];		// Texture's picture
+		GLuint program[1];				// Effects program
+		int effectsNum = 2;				// Number of effects
+		std::vector<std::string> enableEffects = { "enableSmoke", "enableFireWorks"};
+		std::vector<int> effectCount = { 10,50 };		// Number of particles of effects
 
 		struct EffectInform {
-			std::vector<glm::mat4> effect_Model;		// 每個特效的 model matrix
+			glm::mat4 Model;
 			glm::vec3 trans;										// 位移量
 			float alpha;												// 透明度
 			float time;													// 持續時間
 			bool firstAppear;
 		};
 
-		std::vector<EffectInform> EffectInforms;
+		std::vector<std::vector<EffectInform>> EffectInforms;
 
 		enum Enable
 		{

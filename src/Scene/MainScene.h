@@ -35,7 +35,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void Render(float aspect);
-		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint);
+		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthMap, GLuint);
 		void Texture_Render();
 
 		void OnResize(int width, int height);
@@ -117,7 +117,7 @@ namespace CG
 		GLuint texture;
 		GLuint motionTexture;
 		GLuint depth_texture;
-		GLuint depthCubemap;
+		GLuint depthMap;
 		GLuint depthMapFBO;
 		std::vector<glm::mat4> shadowTransforms;
 		GLuint program;
@@ -126,6 +126,7 @@ namespace CG
 		GLuint debugCubeProgram;
 		GLuint OutlineProgram;
 		GLuint cubeVAO;
+		glm::mat4 lightSpaceMatrix;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
