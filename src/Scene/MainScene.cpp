@@ -77,7 +77,6 @@ namespace CG
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
-		glDisable(GL_CULL_FACE);
 
 		float theta = glm::radians(eyeAngley);
 		float phi = glm::radians(angle);
@@ -86,46 +85,23 @@ namespace CG
 		float camY = eyedistance * sin(phi);
 		float camZ = eyedistance * cos(phi) * cos(theta);
 
-		shadowTransforms.clear();
-		camera.LookAt(LightPos, LightPos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
-		shadowTransforms.push_back(camera.GetViewMatrix()); // +X
-		camera.LookAt(LightPos, LightPos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
-		shadowTransforms.push_back(camera.GetViewMatrix()); // -X
-		camera.LookAt(LightPos, LightPos + glm::vec3(0, 1, 0), glm::vec3(0, 0, -1));
-		shadowTransforms.push_back(camera.GetViewMatrix());  // +Y
-		camera.LookAt(LightPos, LightPos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
-		shadowTransforms.push_back(camera.GetViewMatrix());  // -Y
-		camera.LookAt(LightPos, LightPos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
-		shadowTransforms.push_back(camera.GetViewMatrix());  // +Z
-		camera.LookAt(LightPos, LightPos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
-		shadowTransforms.push_back(camera.GetViewMatrix());  // -Z
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		float orthoSize = 50.0f;
+		glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 1000.0f);
+		camera.LookAt(LightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * camera.GetViewMatrix();
 		glUseProgram(LightProgram);
-		camera.SetAspect(1.0);
-		camera.SetFov(90.0f);
-		camera.SetClip(0.1, 200);
+		GLuint shadowMatrixLoc = glGetUniformLocation(LightProgram, "shadowMatrix");
+		glUniformMatrix4fv(shadowMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-		for (int i = 0; i < 6; i++) {
-			glFramebufferTexture2D(
-				GL_FRAMEBUFFER,
-				GL_DEPTH_ATTACHMENT,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				depthCubemap,
-				0
-			);
+		glViewport(0, 0, 1024, 1024);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-			glUniformMatrix4fv(glGetUniformLocation(LightProgram, "shadowMatrix"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix() * shadowTransforms[i]));
-			GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
-			RenderMainScene(aspect, camX, camY, camZ, true, depthCubemap, modelLoc);
-		}
+		GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
+		RenderMainScene(aspect, camX, camY, camZ, true, depthMap, modelLoc);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
+
+		glViewport(0, 0, screenWidth, screenHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,9 +119,7 @@ namespace CG
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 		);
-		camera.SetFov(80.0f);
 		camera.SetAspect(aspect);
-		camera.SetClip(0.01, 1000);
 
 		PreView = camera.GetViewMatrix();
 		PreProjection = camera.GetProjectionMatrix();
@@ -166,7 +140,7 @@ namespace CG
 		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
 		// ------------------------------
 
-		RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, ModelID);
+		RenderMainScene(aspect, camX, camY, camZ, false, depthMap, ModelID);
 
 		if (enableToonShader) {
 			glEnable(GL_CULL_FACE);
@@ -177,7 +151,7 @@ namespace CG
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "View"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "Projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
-			RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, modelLoc);
+			RenderMainScene(aspect, camX, camY, camZ, false, depthMap, modelLoc);
 			glCullFace(GL_BACK);
 		}
 
@@ -188,7 +162,7 @@ namespace CG
 
 	}
 
-	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint modelID) {
+	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthMap, GLuint modelID) {
 		glBindVertexArray(VAO);
 
 		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
@@ -268,15 +242,16 @@ namespace CG
 		}//end for loop for updating and drawing model
 
 		glBindVertexArray(0);
-		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
+		
 		if (!isDepth) {
+			scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthMap, LightPos, camera, lightSpaceMatrix);
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
 		}
 
-/*		if (effectTime["smoke"] != 0) {
+		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
 			effectTime["smoke"]--;
-		}*/
+		}
 	}
 
 	void MainScene::Texture_Render() {
@@ -550,25 +525,26 @@ namespace CG
 	}
 
 	void MainScene::setLightTexture() {
-		glGenTextures(1, &depthCubemap);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-		for (unsigned int i = 0; i < 6; ++i) {
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		
+		glGenTextures(1, &depthMap);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
 		glGenFramebuffers(1, &depthMapFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 
-/*		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			std::cerr << "Depth Framebuffer not complete!" << std::endl;
-		}*/
+		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 

@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
 
@@ -25,7 +26,7 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam);
+		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix);
 		void SetInstance(int instancedNum, int multipleMode);
 	private:
 		auto LoadScene() -> bool;

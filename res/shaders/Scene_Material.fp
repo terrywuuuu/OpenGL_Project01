@@ -13,8 +13,10 @@ struct MaterialInfo{
 uniform MaterialInfo Material;
 out vec4 vFragColor;
 
-uniform samplerCube depthCubemap;
+uniform sampler2D shadowMap;
 uniform float far_plane;
+uniform mat4 lightSpaceMatrix;
+uniform vec3 cameraPos;
 
 //lighting color
 vec4    ambientColor = vec4(0.1,0.1,0.1,1);
@@ -32,41 +34,45 @@ uniform sampler2D tex0;
 
 float ShadowCalculation(vec3 fragPos)
 {
-    vec3 fragToLight = fragPos - lightPos;
-    float currentDepth = length(fragToLight);
+    vec3 fragToLight = lightPos - fragPos;
 
-    // normalize direction for cubemap lookup
-    vec3 dir = normalize(fragToLight);
-    float closestDepth = texture(depthCubemap, dir).r * far_plane;
+    vec3 dir = normalize(fragToLight); 
 
-    // bias with surface angle to reduce acne
-    float bias = max(0.15 * (1.0 - dot(normalize(vVaryingNormal), dir)), 0.05);
-    float shadow = currentDepth - bias > closestDepth ? 0.5 : 0.0;
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5; // [-1, 1] -> [0, 1]
 
-    return shadow;
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias = max(0.005 * (1.0 - dot(vVaryingNormal, dir)), 0.001);
+
+    if (projCoords.z > 1.0) {
+        return 0.0;
+    }
+
+    return (currentDepth > closestDepth) ? 0.5 : 0.0;
 }
 
 void main(void)
-{ 
+{
     vec4 textureColor = texture(tex0, UV);
-    float shadow = ShadowCalculation(FragPos);
-    vec3 lightDir = normalize(lightPos - FragPos);
+    
+    vec3 lightDir = normalize(lightPos - FragPos); 
 
-	// Diffuse lighting
+    float shadow = ShadowCalculation(FragPos);
+
     float diff = max(0.0, dot(normalize(vVaryingNormal), lightDir));
     vec4 diffuse = diff * textureColor * vec4(Material.Kd, 1.0);
 
-    // Ambient
     vec4 ambient = ambientColor * vec4(Material.Ka, 1.0);
 
-    // Specular
-    vec3 viewDir = normalize(-FragPos); // 簡單假設 camera 在原點
+    vec3 viewDir = normalize(cameraPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, normalize(vVaryingNormal));
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), Shininess);
     vec4 specular = specularColor * vec4(Material.Ks, 1.0) * spec;
 
-    // Combine with shadow factor
+    // Combine lighting with shadow factor 
     vFragColor = ambient + ((1.0 - shadow * 0.8) * (diffuse + specular));
 }
-	
-    
+   
