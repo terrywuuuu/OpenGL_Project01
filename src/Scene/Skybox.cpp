@@ -66,8 +66,8 @@ namespace CG
 	auto SkyBox::Initialize() -> bool
 	{
 		Model = glm::mat4(1.0);
-		Model *= translate(80, 20, -50);
-		Model *= scale(20, 20, 20);
+		//Model *= translate(80, 20, -50);
+		//Model *= scale(20, 20, 20);
 		return LoadScene();
 	}
 
@@ -301,7 +301,6 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ?Ÿæ? VBO
 		glGenBuffers(1, &BallVBO);
 		glGenBuffers(1, &BalluVBO);
 		glGenBuffers(1, &BallnVBO);
@@ -317,31 +316,28 @@ namespace CG
 
 		for (int i = 0; i < 1; i++)
 		{
-			// è¤‡è£½?‚é?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BallVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(VBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// è¤‡è£½ UV è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BalluVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(uVBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// è¤‡è£½æ³•ç?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BallnVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(nVBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);

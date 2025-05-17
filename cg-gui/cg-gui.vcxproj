@@ -159,6 +159,7 @@
     <ClCompile Include="..\src\Utilty\miniaudio.cpp" />
     <ClCompile Include="..\src\Utilty\OBJLoader.cpp" />
     <ClCompile Include="..\src\Utilty\stb_image.cpp" />
+    <ClCompile Include="..\src\Water\Water.cpp" />
     <ClCompile Include="..\src\Window\ControlWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -181,6 +182,8 @@
     <ClInclude Include="..\src\Utilty\miniaudio.h" />
     <ClInclude Include="..\src\Utilty\OBJLoader.hpp" />
     <ClInclude Include="..\src\Utilty\stb_image.h" />
+    <ClInclude Include="..\src\Water\Water.h" />
+    <ClInclude Include="..\src\Water\WaterTile.h" />
     <ClInclude Include="..\src\Window\ControlWindow.h" />
   </ItemGroup>
   <ItemGroup>
@@ -200,6 +203,8 @@
     <None Include="..\res\shaders\Post-Process.vp" />
     <None Include="..\res\shaders\SkyBox.fp" />
     <None Include="..\res\shaders\SkyBox.vp" />
+    <None Include="..\res\shaders\Water.fp" />
+    <None Include="..\res\shaders\Water.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

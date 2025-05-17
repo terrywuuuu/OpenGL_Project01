@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "SkyBox.h"
+#include <Water/Water.h>
 #include "Effects/Effects.h"
 #include "MusicPlayer.h"
 
@@ -94,8 +95,9 @@ namespace CG
 		void setLightTexture();
 	private:
 		Camera camera;
-		Scene *scene;
-		SkyBox *skyBox;
+		Scene* scene;
+		SkyBox* skyBox;
+		Water* water;
 		Effects* effect;
 		MusicPlayer* musicPlayer;
 

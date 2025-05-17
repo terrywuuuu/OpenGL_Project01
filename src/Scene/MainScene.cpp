@@ -52,10 +52,12 @@ namespace CG
 		scene = new Scene();
 		skyBox = new SkyBox();
 		effect = new Effects();
+		water = new Water();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
+		water->Initialize();
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
@@ -143,9 +145,7 @@ namespace CG
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 		);
-		camera.SetFov(80.0f);
 		camera.SetAspect(aspect);
-		camera.SetClip(0.01, 1000);
 
 		PreView = camera.GetViewMatrix();
 		PreProjection = camera.GetProjectionMatrix();
@@ -268,12 +268,15 @@ namespace CG
 		}//end for loop for updating and drawing model
 
 		glBindVertexArray(0);
-		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
+
+		/*
+		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);*/
 		if (!isDepth) {
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
 		}
-
-/*		if (effectTime["smoke"] != 0) {
+		water->Render(camX, camY, camZ, aspect, mode);
+		/*
+		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
 			effectTime["smoke"]--;
 		}*/
