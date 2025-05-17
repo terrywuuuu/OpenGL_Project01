@@ -53,6 +53,7 @@ namespace CG
 		skyBox = new SkyBox();
 		effect = new Effects();
 		water = new Water();
+		waterFrameBuffer = new WaterFrameBuffer();
 		
 		scene->Initialize();
 		skyBox->Initialize();
@@ -70,7 +71,23 @@ namespace CG
 		UpdateModel();
 	}
 
-	void MainScene::Render(float aspect)
+	void MainScene::GenerateWaterFrameBufferAndRender(float aspect, float width, float height) {
+		// call mainScene->Render and set aspect
+		glEnable(GL_CLIP_DISTANCE0);
+		waterFrameBuffer->bindReflectionFrameBuffer();
+		Render(aspect, glm::vec4(0, 1, 0, water->getHeight()), CamerMode::reflection);
+
+
+		waterFrameBuffer->bindRefractionFrameBuffer();
+		Render(aspect, glm::vec4(0, -1, 0, water->getHeight()), CamerMode::refraction);
+
+		waterFrameBuffer->unbindCurrentFrameBuffer(width, height);
+
+		glDisable(GL_CLIP_DISTANCE0);
+		Render(aspect, glm::vec4(0, -1, 0, 5), CamerMode::normal);
+	}
+	//cameraMode: 0:normal 1:reflection
+	void MainScene::Render(float aspect, glm::vec4 plane, CamerMode cameraMode)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -80,13 +97,6 @@ namespace CG
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		glDisable(GL_CULL_FACE);
-
-		float theta = glm::radians(eyeAngley);
-		float phi = glm::radians(angle);
-
-		float camX = eyedistance * cos(phi) * sin(theta);
-		float camY = eyedistance * sin(phi);
-		float camZ = eyedistance * cos(phi) * cos(theta);
 
 		shadowTransforms.clear();
 		camera.LookAt(LightPos, LightPos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
@@ -108,6 +118,14 @@ namespace CG
 		camera.SetAspect(1.0);
 		camera.SetFov(90.0f);
 		camera.SetClip(0.1, 200);
+
+
+		float theta = glm::radians(eyeAngley);
+		float phi = glm::radians(angle);
+
+		float camX = eyedistance * cos(phi) * sin(theta);
+		float camY = eyedistance * sin(phi);
+		float camZ = eyedistance * cos(phi) * cos(theta);
 
 		for (int i = 0; i < 6; i++) {
 			glFramebufferTexture2D(
@@ -140,12 +158,32 @@ namespace CG
 		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
 		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
 
-		camera.LookAt(
-			glm::vec3(camX, camY, camZ),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0, 1, 0)
-		);
-		camera.SetAspect(aspect);
+		if (cameraMode == CamerMode::normal)
+		{
+			camera.LookAt(
+				glm::vec3(camX, camY, camZ),
+				glm::vec3(0, 0, 0),
+				glm::vec3(0, 1, 0)
+			);
+			camera.SetAspect(aspect);
+		}
+		else {
+			float invertedPhi = -phi;
+
+			camX = eyedistance * cos(invertedPhi) * sin(theta);
+			camY = eyedistance * sin(invertedPhi);
+			camZ = eyedistance * cos(invertedPhi) * cos(theta);
+
+			float distance = camY - water->getHeight();
+			float reflectedCamY = camY - 2 * distance;
+			float targetY = 0;
+			float reflectedTargetY = targetY - 2 * (targetY - water->getHeight());
+			camera.LookAt(
+				glm::vec3(camX, reflectedCamY, camZ),          // 鏡像後的位置
+				glm::vec3(0, reflectedTargetY, 0),              // 鏡像後的目標
+				glm::vec3(0, 1, 0)                              // 上方向維持不變
+			);
+		}
 
 		PreView = camera.GetViewMatrix();
 		PreProjection = camera.GetProjectionMatrix();
@@ -155,6 +193,8 @@ namespace CG
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &camera.GetViewMatrix()[0][0]);
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		glUniform4f(PlaneID, plane.x, plane.y, plane.z, plane.w);
 
 		// ---- 渲染光源 Cube ----
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, glm::value_ptr(lightModel));
@@ -700,6 +740,7 @@ namespace CG
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 		BackGround = glGetUniformLocation(program, "isInstanced");
 		MultipleMode = glGetUniformLocation(program, "MultipleMode");
+		PlaneID = glGetUniformLocation(program, "plane");
 
 		// Camera matrix
 

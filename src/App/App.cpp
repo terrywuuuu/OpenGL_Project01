@@ -188,8 +188,6 @@ namespace CG
 		else {
 			aspect = 1.0f;
 		}
-
-		// call mainScene->Render and set aspect
-		mainScene->Render(aspect);
+		mainScene->GenerateWaterFrameBufferAndRender(aspect, display_w, display_h);
 	}
 }

@@ -65,6 +65,9 @@
     <ClCompile Include="..\src\Water\Water.cpp">
       <Filter>Water</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Water\WaterFrameBuffer.cpp">
+      <Filter>Water</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -154,6 +157,9 @@
       <Filter>Water</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Water\WaterTile.h">
+      <Filter>Water</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Water\WaterFrameBuffer.h">
       <Filter>Water</Filter>
     </ClInclude>
   </ItemGroup>

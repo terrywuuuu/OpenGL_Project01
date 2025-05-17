@@ -23,6 +23,7 @@ namespace CG
 		auto Initialize() -> bool;
 		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
 
+		float getHeight() const { return height; }
 	private:
 		auto LoadScene() -> bool;
 	private:
@@ -40,5 +41,7 @@ namespace CG
 		std::vector <glm::mat4> Models;
 
 		std::vector<WaterTile> waterTiles;
+
+		float height = 0.0f;
 	};
 }

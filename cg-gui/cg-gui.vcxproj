@@ -160,6 +160,7 @@
     <ClCompile Include="..\src\Utilty\OBJLoader.cpp" />
     <ClCompile Include="..\src\Utilty\stb_image.cpp" />
     <ClCompile Include="..\src\Water\Water.cpp" />
+    <ClCompile Include="..\src\Water\WaterFrameBuffer.cpp" />
     <ClCompile Include="..\src\Window\ControlWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -183,6 +184,7 @@
     <ClInclude Include="..\src\Utilty\OBJLoader.hpp" />
     <ClInclude Include="..\src\Utilty\stb_image.h" />
     <ClInclude Include="..\src\Water\Water.h" />
+    <ClInclude Include="..\src\Water\WaterFrameBuffer.h" />
     <ClInclude Include="..\src\Water\WaterTile.h" />
     <ClInclude Include="..\src\Window\ControlWindow.h" />
   </ItemGroup>

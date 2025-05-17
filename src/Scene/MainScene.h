@@ -15,6 +15,7 @@
 #include "Scene.h"
 #include "SkyBox.h"
 #include <Water/Water.h>
+#include <Water/WaterFrameBuffer.h>
 #include "Effects/Effects.h"
 #include "MusicPlayer.h"
 
@@ -29,13 +30,20 @@ namespace CG
 {
 	class MainScene
 	{
+	private:
+		enum CamerMode {
+			normal = 0,
+			reflection = 1,
+			refraction = 2
+		};
 	public:
 		MainScene();
 		~MainScene();
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void Render(float aspect);
+		void GenerateWaterFrameBufferAndRender(float aspect, float width, float height);
+		void Render(float aspect, glm::vec4 plane, CamerMode cameraMode);
 		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint);
 		void Texture_Render();
 
@@ -93,13 +101,16 @@ namespace CG
 
 		void setLightCube();
 		void setLightTexture();
+
 	private:
 		Camera camera;
 		Scene* scene;
 		SkyBox* skyBox;
-		Water* water;
 		Effects* effect;
 		MusicPlayer* musicPlayer;
+
+		Water* water;
+		WaterFrameBuffer* waterFrameBuffer;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -137,6 +148,7 @@ namespace CG
 		float eyeAngley = 0.0;
 		float eyedistance = 65.0;
 		float size = 1;
+
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLint PreViewId;
@@ -159,6 +171,7 @@ namespace CG
 		GLuint M_KsID;
 		GLuint BackGround;
 		GLuint MultipleMode;
+		GLuint PlaneID;
 
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count

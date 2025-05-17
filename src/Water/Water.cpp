@@ -68,7 +68,7 @@ namespace CG
 				int index = i * GRIDSIZE + j;
 				float x = startX + j * tileSize; // calc waterTile x
 				float z = startZ + i * tileSize; // calc waterTile z
-				WaterTile waterTile(x, z, 0.0f);
+				WaterTile waterTile(x, z, height);
 				waterTiles.push_back(waterTile);
 				glm::mat4 model = createTransformationMatrix(
 					glm::vec3(waterTiles[index].getX(), waterTiles[index].getHeight(), waterTiles[index].getZ()),
