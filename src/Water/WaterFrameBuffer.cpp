@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "./WaterFrameBuffer.h"
 
 namespace CG
@@ -12,7 +14,7 @@ namespace CG
         glDeleteTextures(1, &reflectionTexture);
         glDeleteRenderbuffers(1, &reflectionDepthBuffer);
 
-        glDeleteFramebuffers(1, &reflectionFBO);
+        glDeleteFramebuffers(1, &refractionFBO);
         glDeleteTextures(1, &refractionTexture);
         glDeleteTextures(1, &refractionDepthTexture);
     }
@@ -22,7 +24,7 @@ namespace CG
 	}
 
 	void WaterFrameBuffer::bindRefractionFrameBuffer() {
-		bindFrameBuffer(reflectionFBO, REFRACTION_WIDTH, REFRACTION_HEIGHT);
+		bindFrameBuffer(refractionFBO, REFRACTION_WIDTH, REFRACTION_HEIGHT);
 	}
 
 	void WaterFrameBuffer::unbindCurrentFrameBuffer(int screenWidth, int screenHeight) {
@@ -34,17 +36,15 @@ namespace CG
 		reflectionFBO = createFrameBuffer();
 		reflectionTexture = createTextureAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
 		reflectionDepthBuffer = createDepthBufferAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
-		unbindCurrentFrameBuffer(1280, 720);
 	}
 
 	void WaterFrameBuffer::initialiseRefractionFrameBuffer() {
 		refractionFBO = createFrameBuffer();
 		refractionTexture = createTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
 		refractionDepthTexture = createDepthTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
-		unbindCurrentFrameBuffer(1280, 720);
 	}
 
-	void WaterFrameBuffer::bindFrameBuffer(unsigned int frameBuffer, int width, int height) {
+	void WaterFrameBuffer::bindFrameBuffer(GLuint frameBuffer, int width, int height) {
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		glViewport(0, 0, width, height);
@@ -54,7 +54,6 @@ namespace CG
 		GLuint FBO;
 		glGenFramebuffers(1, &FBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		return FBO;
 	}
 

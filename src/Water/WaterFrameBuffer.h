@@ -44,24 +44,24 @@ namespace CG
 		void initialiseReflectionFrameBuffer();
 		void initialiseRefractionFrameBuffer();
 
-		void bindFrameBuffer(unsigned int frameBuffer, int width, int height);
+		void bindFrameBuffer(GLuint frameBuffer, int width, int height);
 		GLuint createFrameBuffer();
 		GLuint createTextureAttachment(int width, int height);
 		GLuint createDepthTextureAttachment(int width, int height);
 		GLuint createDepthBufferAttachment(int width, int height);
-	private:
+	public:
 		static const int REFLECTION_WIDTH = 320;
 		static const int REFLECTION_HEIGHT = 180;
 
 		static const int REFRACTION_WIDTH = 1280;
 		static const int REFRACTION_HEIGHT = 720;
-
+	private:
 		GLuint reflectionFBO;
 		GLuint reflectionDepthBuffer;
 		GLuint reflectionTexture;
 		
 		GLuint refractionFBO;
-		GLuint refractionTexture;
 		GLuint refractionDepthTexture;
+		GLuint refractionTexture;
 	};
 }

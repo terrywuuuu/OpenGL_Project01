@@ -31,7 +31,7 @@ namespace CG
 	class MainScene
 	{
 	private:
-		enum CamerMode {
+		enum CameraMode {
 			normal = 0,
 			reflection = 1,
 			refraction = 2
@@ -43,8 +43,8 @@ namespace CG
 		auto Initialize() -> bool;
 		void Update(double dt);
 		void GenerateWaterFrameBufferAndRender(float aspect, float width, float height);
-		void Render(float aspect, glm::vec4 plane, CamerMode cameraMode);
-		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint);
+		void Render(float aspect, glm::vec4 plane, CameraMode cameraMode);
+		void RenderMainScene(float aspect, float camX, float camY, float camZ, glm::vec4 plane, bool isDepth, GLuint depthCubemap, GLuint);
 		void Texture_Render();
 
 		void OnResize(int width, int height);

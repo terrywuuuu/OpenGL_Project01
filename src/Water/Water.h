@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <array>
 #include <string>
 #include <map>
@@ -11,23 +12,27 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "./WaterTile.h"
+#include "./WaterFrameBuffer.h"
 #include <Scene/Camera.h>
 
-constexpr auto GRIDSIZE = 6;
+constexpr auto GRIDSIZE = 15;
+constexpr float WAVESPEED = 0.08f;
 
 namespace CG
 {
 	class Water
 	{
 	public:
-		auto Initialize() -> bool;
+		auto Initialize(WaterFrameBuffer& waterFrameBuffer) -> bool;
 		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
-
+		void Update(double dt);
 		float getHeight() const { return height; }
 	private:
 		auto LoadScene() -> bool;
 	private:
 		Camera camera;
+
+		WaterFrameBuffer *waterFrameBuffer;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -37,11 +42,19 @@ namespace CG
 
 		GLint MatricesIdx;
 		GLuint ModelID;
+		GLuint ReflectionTextureID;
+		GLuint RefractionTextureID;
+		GLuint dudvMapID;
+		GLuint moveFactorID;
 
 		std::vector <glm::mat4> Models;
 
 		std::vector<WaterTile> waterTiles;
 
-		float height = 0.0f;
+		GLuint dudvMapTexture;
+
+		float height = -10.0f;
+		float moveFactor = 0;
+
 	};
 }

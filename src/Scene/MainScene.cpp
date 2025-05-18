@@ -58,7 +58,7 @@ namespace CG
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
-		water->Initialize();
+		water->Initialize(*waterFrameBuffer);
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
@@ -67,6 +67,7 @@ namespace CG
 
 	void MainScene::Update(double dt)
 	{
+		water->Update(dt);
 		UpdateAction(dt);
 		UpdateModel();
 	}
@@ -74,20 +75,17 @@ namespace CG
 	void MainScene::GenerateWaterFrameBufferAndRender(float aspect, float width, float height) {
 		// call mainScene->Render and set aspect
 		glEnable(GL_CLIP_DISTANCE0);
-		waterFrameBuffer->bindReflectionFrameBuffer();
-		Render(aspect, glm::vec4(0, 1, 0, water->getHeight()), CamerMode::reflection);
+		Render(aspect, glm::vec4(0, 1, 0, -water->getHeight()), CameraMode::reflection);
+		waterFrameBuffer->unbindCurrentFrameBuffer(width, height);
 
-
-		waterFrameBuffer->bindRefractionFrameBuffer();
-		Render(aspect, glm::vec4(0, -1, 0, water->getHeight()), CamerMode::refraction);
-
+		Render(aspect, glm::vec4(0, -1, 0, water->getHeight()), CameraMode::refraction);
 		waterFrameBuffer->unbindCurrentFrameBuffer(width, height);
 
 		glDisable(GL_CLIP_DISTANCE0);
-		Render(aspect, glm::vec4(0, -1, 0, 5), CamerMode::normal);
+		Render(aspect, glm::vec4(0, 1, 0, -10), CameraMode::normal);
 	}
-	//cameraMode: 0:normal 1:reflection
-	void MainScene::Render(float aspect, glm::vec4 plane, CamerMode cameraMode)
+
+	void MainScene::Render(float aspect, glm::vec4 plane, CameraMode cameraMode)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -142,7 +140,7 @@ namespace CG
 
 			glUniformMatrix4fv(glGetUniformLocation(LightProgram, "shadowMatrix"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix() * shadowTransforms[i]));
 			GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
-			RenderMainScene(aspect, camX, camY, camZ, true, depthCubemap, modelLoc);
+			RenderMainScene(aspect, camX, camY, camZ, plane, true, depthCubemap, modelLoc);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		
@@ -158,7 +156,7 @@ namespace CG
 		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
 		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
 
-		if (cameraMode == CamerMode::normal)
+		if (cameraMode == CameraMode::normal || cameraMode == CameraMode::refraction)
 		{
 			camera.LookAt(
 				glm::vec3(camX, camY, camZ),
@@ -167,7 +165,7 @@ namespace CG
 			);
 			camera.SetAspect(aspect);
 		}
-		else {
+		else if (cameraMode == CameraMode::reflection) {
 			float invertedPhi = -phi;
 
 			camX = eyedistance * cos(invertedPhi) * sin(theta);
@@ -179,10 +177,11 @@ namespace CG
 			float targetY = 0;
 			float reflectedTargetY = targetY - 2 * (targetY - water->getHeight());
 			camera.LookAt(
-				glm::vec3(camX, reflectedCamY, camZ),          // 鏡像後的位置
-				glm::vec3(0, reflectedTargetY, 0),              // 鏡像後的目標
-				glm::vec3(0, 1, 0)                              // 上方向維持不變
+				glm::vec3(camX, reflectedCamY, camZ),          
+				glm::vec3(0, reflectedTargetY, 0),              
+				glm::vec3(0, 1, 0)                              
 			);
+			camera.SetAspect(aspect);
 		}
 
 		PreView = camera.GetViewMatrix();
@@ -206,7 +205,10 @@ namespace CG
 		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
 		// ------------------------------
 
-		RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, ModelID);
+		RenderMainScene(aspect, camX, camY, camZ, plane, false, depthCubemap, ModelID);
+		if (cameraMode == CameraMode::normal) {
+			water->Render(camX, camY, camZ, aspect, mode);
+		}
 
 		if (enableToonShader) {
 			glEnable(GL_CULL_FACE);
@@ -217,18 +219,28 @@ namespace CG
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "View"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "Projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
-			RenderMainScene(aspect, camX, camY, camZ, false, depthCubemap, modelLoc);
+			RenderMainScene(aspect, camX, camY, camZ, plane, false, depthCubemap, modelLoc);
 			glCullFace(GL_BACK);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if (cameraMode == CameraMode::reflection)
+		{
+			waterFrameBuffer->bindReflectionFrameBuffer();
+		}
+		else if (cameraMode == CameraMode::refraction)
+		{
+			waterFrameBuffer->bindRefractionFrameBuffer();
+		}
 		Texture_Render();
 
 		glFlush();
 
 	}
 
-	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthCubemap, GLuint modelID) {
+	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, glm::vec4 plane, bool isDepth, GLuint depthCubemap, GLuint modelID) {
+		
 		glBindVertexArray(VAO);
 
 		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
@@ -309,12 +321,10 @@ namespace CG
 
 		glBindVertexArray(0);
 
-		/*
-		scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);*/
+		scene->Render(plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
 		if (!isDepth) {
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
 		}
-		water->Render(camX, camY, camZ, aspect, mode);
 		/*
 		if (effectTime["smoke"] != 0) {
 			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);

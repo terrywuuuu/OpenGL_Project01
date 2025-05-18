@@ -2,7 +2,8 @@
 
 layout(location = 0) in vec3 position;
 
-//out vec2 textureCoords;
+out vec4 clipSpace;
+out vec2 textureCoords;
 
 uniform MatVP{
 	mat4 View;
@@ -10,9 +11,16 @@ uniform MatVP{
 };
 
 uniform mat4 Model;
+uniform float tileSize;
+uniform float gridSize;
+
+const float tiling = 0.5;
 
 void main(void) {
     gl_ClipDistance[0] = 1.0;
-    gl_Position = Projection * View * Model * vec4(position.x, 0.0, position.y, 1.0); // ­pºâ³Ì²×¦ì¸m
-    //textureCoords = vec2(position.x / 2.0 + 0.5, position.y / 2.0 + 0.5);
+    gl_Position = Projection * View * Model * vec4(position.x, 0.0, position.y, 1.0);
+    
+    clipSpace = gl_Position;
+    
+	textureCoords = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5) * tiling;
 }

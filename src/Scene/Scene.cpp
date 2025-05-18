@@ -43,8 +43,6 @@ namespace CG
 	auto Scene::Initialize() -> bool
 	{
 		Models[0] *= scale(10, 10, 10);
-//		Models[0] *= rotate(10, 1, 0, 0);
-//		Models[0] *= translate(0, 0, -1);
 		return LoadScene();
 	}
 
@@ -73,6 +71,7 @@ namespace CG
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 		IsInstanced = glGetUniformLocation(program, "isInstanced");
 		MultipleMode = glGetUniformLocation(program, "MultipleMode");
+		PlaneID = glGetUniformLocation(program, "plane");
 
 		// Camera matrix
 
@@ -92,7 +91,7 @@ namespace CG
 		return true;
 	}
 
-	void Scene::Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam)
+	void Scene::Render(glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		GLuint modelLoc;
@@ -121,6 +120,7 @@ namespace CG
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
+		glUniform4f(PlaneID, plane.x, plane.y, plane.z, plane.w);
 		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
 		for (int i = 0; i < SCENESUM; i++)
 		{
@@ -196,6 +196,7 @@ namespace CG
 
 		}//end for loop for updating and drawing model
 		glUseProgram(0);
+		glBindVertexArray(0);
 		glFlush();
 	}
 

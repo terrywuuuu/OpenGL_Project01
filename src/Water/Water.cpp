@@ -57,11 +57,14 @@ float vertices[] = {
 
 namespace CG
 {
-	auto Water::Initialize() -> bool
+	auto Water::Initialize(WaterFrameBuffer& waterFrameBuffer) -> bool
 	{
+		this->waterFrameBuffer = &waterFrameBuffer;
+
 		const float tileSize = WaterTile::TILE_SIZE;
-		const float startX = -(GRIDSIZE / 2) * tileSize;
-		const float startZ = -(GRIDSIZE / 2) * tileSize;
+		float totalSize = GRIDSIZE * tileSize;
+		const float startX = -totalSize / 2.0f + tileSize / 2.0f;
+		const float startZ = -totalSize / 2.0f + tileSize / 2.0f;
 
 		for (int i = 0; i < GRIDSIZE; ++i) {
 			for (int j = 0; j < GRIDSIZE; ++j) {
@@ -102,6 +105,10 @@ namespace CG
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
+		ReflectionTextureID = glGetUniformLocation(program, "reflectionTexture");
+		RefractionTextureID = glGetUniformLocation(program, "refractionTexture");
+		dudvMapID = glGetUniformLocation(program, "dudvMap");
+		moveFactorID = glGetUniformLocation(program, "moveFactor");
 
 		//UBO
 		glGenBuffers(1, &UBO);
@@ -113,6 +120,31 @@ namespace CG
 		//bind UBO to its idx
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, UBO, 0, UBOsize);
 		glUniformBlockBinding(program, MatricesIdx, 0);
+
+		std::string path = "../../res/Water/waterDUDV.png";
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
+		if (data)
+		{
+			std::cout << "load water texture: " << path << std::endl;
+			stbi_set_flip_vertically_on_load(false);
+			
+			glGenTextures(1, &dudvMapTexture);
+			glBindTexture(GL_TEXTURE_2D, dudvMapTexture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: " << path << std::endl;
+			stbi_image_free(data);
+		}
 
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -149,15 +181,40 @@ namespace CG
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 
+		glUniform1f(moveFactorID, moveFactor);
+
+		//bind reflectionTexture, refractionTexture
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, waterFrameBuffer->getReflectionTexture());
+		glUniform1i(ReflectionTextureID, 5);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, waterFrameBuffer->getRefractionTexture());
+		glUniform1i(RefractionTextureID, 6);
+
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, dudvMapTexture);
+		glUniform1i(dudvMapID, 7);
+
+
 		for (int i = 0; i < GRIDSIZE; ++i) {
 			for (int j = 0; j < GRIDSIZE; ++j) {
 				int index = i * GRIDSIZE + j;
 				glUniformMatrix4fv(ModelID, 1, GL_FALSE, &Models[index][0][0]);
+
+				glUniform2f(glGetUniformLocation(program, "gridIndex"), (float)j, (float)i);
+				glUniform1f(glGetUniformLocation(program, "tileSize"), WaterTile::TILE_SIZE);
+				glUniform1f(glGetUniformLocation(program, "gridSize"), GRIDSIZE);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
 		}
 
 		glBindVertexArray(0);
 		glFlush();
+	}
+
+	void Water::Update(double dt) {
+		moveFactor += WAVESPEED * dt;
+		moveFactor = fmod(moveFactor, 1.0);
 	}
 }
