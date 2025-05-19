@@ -85,6 +85,47 @@ namespace CG
 		float camY = eyedistance * sin(phi);
 		float camZ = eyedistance * cos(phi) * cos(theta);
 
+		camera.SetFov(90.0f);
+		camera.SetAspect(1.0);
+		glm::vec3 pos = glm::vec3(0, -50, 0);
+		std::vector<glm::mat4> captureViews;
+		camera.LookAt(pos, pos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		isEnviron = true;
+
+		glUseProgram(program);
+		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
+		glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
+		glViewport(0, 0, 512, 512); 
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		for (GLuint i = 0; i < 6; ++i) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			//update data to UBO for MVP
+			glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &captureViews[i][0][0]);
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+			RenderMainScene(aspect, camX, camY, camZ, false, depthMap, ModelID);
+		}
+		isEnviron = false;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		camera.SetFov(85.0f);
+		camera.SetAspect(aspect);
 		float orthoSize = 50.0f;
 		glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 1000.0f);
 		camera.LookAt(LightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
@@ -153,6 +194,16 @@ namespace CG
 			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
 			RenderMainScene(aspect, camX, camY, camZ, false, depthMap, modelLoc);
 			glCullFace(GL_BACK);
+		}
+
+		if (effectTime["smoke"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
+			effectTime["smoke"]--;
+		}
+
+		if (effectTime["fireWork"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireWork", effectTime["fireWork"], 0);
+			effectTime["fireWork"]--;
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -245,12 +296,7 @@ namespace CG
 		
 		if (!isDepth) {
 			scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthMap, LightPos, camera, lightSpaceMatrix);
-			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
-		}
-
-		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
-			effectTime["smoke"]--;
+			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
 	}
 
@@ -489,7 +535,6 @@ namespace CG
 		glGenFramebuffers(1, &FBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -522,6 +567,26 @@ namespace CG
 			std::cerr << "Framebuffer not complete!" << std::endl;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glGenTextures(1, &envCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+		for (GLuint i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
+				512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glGenFramebuffers(1, &captureFBO);
+		glGenRenderbuffers(1, &captureRBO);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 	}
 
 	void MainScene::setLightTexture() {
@@ -696,6 +761,9 @@ namespace CG
 		setLightTexture();
 
 		effectTime["smoke"] = 0;
+		isFirstAppear["smoke"] = true;
+
+		effectTime["fireWork"] = 0;
 
 		return true;
 	}
@@ -844,18 +912,26 @@ namespace CG
 			{
 				curInstancedNum = instancedNum;
 
-				if (isFirstAppear) 
+				if (isFirstAppear["smoke"])
 				{
 					effectTime["smoke"] = 10.0f;
-					isFirstAppear = false;
+					isFirstAppear["smoke"] = false;
 				}
 			}
 		}
 		else if (!this->keepMultipleActive)
 		{
 			curInstancedNum = 1;
-			isFirstAppear = true;
+			isFirstAppear["smoke"] = true;
 		}
+
+		if (curAction.name == "APT") {
+			if (frame == 0)
+			{
+				effectTime["fireWork"] = 100.0f;
+			}
+		}
+
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
 			HandleAction(curAction.FDs, frame, dt);

@@ -66,7 +66,7 @@ namespace CG
 	auto SkyBox::Initialize() -> bool
 	{
 		Model = glm::mat4(1.0);
-		Model *= translate(80, 20, -50);
+		Model *= translate(0, -50, 0);
 		Model *= scale(20, 20, 20);
 		return LoadScene();
 	}
@@ -111,7 +111,7 @@ namespace CG
 		return true;
 	}
 
-	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap)
+	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap, GLuint envCubemap, bool isEnv)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
@@ -143,7 +143,7 @@ namespace CG
 		// Switch back to the normal depth function
 		glDepthFunc(GL_LESS);
 		
-		if (environmentMap) {
+		if (environmentMap && !isEnv) {
 			glUseProgram(Ball_program);
 			glBindVertexArray(BallVAO);
 
@@ -151,7 +151,7 @@ namespace CG
 			glUniformMatrix4fv(ProID, 1, GL_FALSE, &camera.GetProjectionMatrix()[0][0]);
 			glUniformMatrix4fv(ViewID, 1, GL_FALSE, &camera.GetViewMatrix()[0][0]);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 			glUniform1i(glGetUniformLocation(Ball_program, "environmentMap"), 0);
 
 			GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals

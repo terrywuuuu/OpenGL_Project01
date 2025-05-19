@@ -45,6 +45,8 @@ float smokePosition[] = {
 	 -25.0f, 75.0f,  0.0f,  0.0f, 1.0f  // 左上角
 };
 
+float fireworkPosition[] = { 30.0f, 30.0f, -80.0f };
+
 // 繪製方形的index
 unsigned int indices[] = {
 	0, 1, 2,
@@ -66,7 +68,7 @@ namespace CG
 		std::string effectsTex[2] =
 		{
 			parentDir + "smoke.png",
-			parentDir + "smoke.png"
+			parentDir + "FireWork.png"
 		};
 
 		for (int i = 0; i < effectsNum; i++) {
@@ -91,46 +93,59 @@ namespace CG
 			{
 				std::cout << "Failed to load texture: " << effectsTex[i] << std::endl;
 			}
-			std::cout << "123";
+
 			for (int j = 0; j < effectCount[i]; j++) {
-				EffectInforms[i].push_back({ glm::mat4(1.0), glm::vec3(0), 1.0f, 15.0, true });
+				EffectInforms[i].push_back({ glm::mat4(1.0), glm::vec3(0), glm::vec2(0), 1.0f, 20.0, true });
 			}
 		}
 
+		effectInit();
 		setupMesh();
 		setProgram("../../res/shaders/Part_Effects.vp", "../../res/shaders/Part_Effects.fp", 0);
 		return true;
 	}
 
+	void Effects::effectInit() {
+		for (int i = 0; i < EffectInforms[1].size(); i++) {
+			EffectInforms[1][i].Model = glm::mat4(1.0);
+			EffectInforms[1][i].trans = glm::vec3(0);
+			EffectInforms[1][i].alpha = 1.0f;
+			EffectInforms[1][i].time = 100.0f;
+		}
+	}
+
 	void Effects::setupMesh()
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
+		glGenVertexArrays(1, &sVAO);
+		glGenBuffers(1, &sVBO);
+		glGenBuffers(1, &sEBO);
 
-		glBindVertexArray(VAO);
+		glGenVertexArrays(1, &fVAO);
+		glGenBuffers(1, &fVBO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(smokePosition), smokePosition, GL_STATIC_DRAW);
+		glGenBuffers(1, &instanceVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		glBufferData(GL_ARRAY_BUFFER, 1000 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-
-		glGenBuffers(1, &modelVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
-		glBufferData(GL_ARRAY_BUFFER, 10 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW); 
-
+		// === Set sVAO instance attribute ===
+		glBindVertexArray(sVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); 
 		for (int i = 0; i < 4; i++) {
 			glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
 			glEnableVertexAttribArray(2 + i);
-			glVertexAttribDivisor(2 + i, 1); // 一個 instance 更新一次
+			glVertexAttribDivisor(2 + i, 1);
 		}
+
+		// === Set fVAO instance attribute ===
+		glBindVertexArray(fVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		for (int i = 0; i < 4; i++) {
+			glVertexAttribPointer(2 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
+			glEnableVertexAttribArray(2 + i);
+			glVertexAttribDivisor(2 + i, 1);
+		}
+
+		glBindVertexArray(0);
 	}
 
 	void Effects::setProgram(std::string vPath, std::string fPath, int index) {
@@ -152,6 +167,7 @@ namespace CG
 
 	void Effects::renderEffects(bool enable, float camX, float camY, float camZ, float aspect, GLenum mode, std::string effects, float time, int index) 
 	{
+		std::mt19937 gen(rd());
 		if (!enable) {
 			for (int i = 0; i < effectsNum; i++) {
 				for (int j = 0; j < effectCount[i]; j++) {
@@ -186,21 +202,59 @@ namespace CG
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		if (effects == "smoke") {
+			glBindVertexArray(sVAO);
+
+			glBindBuffer(GL_ARRAY_BUFFER, sVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(smokePosition), smokePosition, GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sEBO);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+
 			updateSmoke(time);
 			updateModel(0);
 //			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(effects_Model[0]));
 			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[0][0].alpha);
 
 			// 綁定 Texture 到 level 0
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); // 假設使用煙霧特效的 Texture
-			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 5); // 告訴 Shader 紋理單元位置
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); 
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0); // Shader 紋理單元位置
 			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), enable);
+			glUniform1i(glGetUniformLocation(Program, enableEffects[1].c_str()), false);
 
-			// 繪製矩形（使用索引繪製）
-//			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 繪製兩個三角形形成的矩形
-			glBindVertexArray(VAO);
-			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 10);
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, EffectInforms[0].size());
+		}
+		else if (effects == "FireWork") {
+			glBindVertexArray(fVAO);
+			
+			glBindBuffer(GL_ARRAY_BUFFER, fVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(fireworkPosition), fireworkPosition, GL_DYNAMIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_POINT_SPRITE);
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			updateFireWork(time);
+			updateModel(1);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Effect_Texture[1]);
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0);
+			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[1][0].alpha);
+			glUniform1i(glGetUniformLocation(Program, enableEffects[1].c_str()), enable);
+			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), false);
+			glDrawArraysInstanced(GL_POINTS, 0, 1, EffectInforms[1].size());
+
+			glDisable(GL_PROGRAM_POINT_SIZE);
+			glDisable(GL_POINT_SPRITE);
 		}
 		
 		glDisable(GL_BLEND);
@@ -208,7 +262,7 @@ namespace CG
 	}
 
 	void Effects::updateModel(int num) {
-		glBindBuffer(GL_ARRAY_BUFFER, modelVBO);  // 綁定先前建好的 VBO
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);  // 綁定先前建好的 VBO	
 
 		std::vector<glm::mat4> models;
 		// 假設 effects_Model[num] 是 std::vector<glm::mat4>
@@ -228,12 +282,40 @@ namespace CG
 			EffectInforms[0][0].alpha = 1.0f;
 		}
 
-		if (EffectInforms[0][0].firstAppear) {
-			for (int i = 0; i < EffectInforms[0].size(); i++) {
-				EffectInforms[0][i].Model *= translate(-250.0 + i * 50.0, EffectInforms[0][0].trans.y, 0);
-			}
+		for (int i = 0; i < EffectInforms[0].size(); i++) {
+			EffectInforms[0][i].Model = translate(-250.0 + i * 50.0, EffectInforms[0][0].trans.y, 0);
+		}
+	}
 
-			EffectInforms[0][0].firstAppear = false;
+	void Effects::updateFireWork(float Time) {
+		EffectInforms[1][0].time--;
+
+		if (EffectInforms[1][0].time <= 0) {
+			effectInit(); 
+			std::uniform_real_distribution<> distX(-50.0, 50.0);
+			std::uniform_real_distribution<> distY(30.0, 80.0);
+			fireworkPosition[0] = distX(gen);
+			fireworkPosition[1] = distY(gen);
+
+			for (int i = 0; i < EffectInforms[1].size(); ++i) {
+				float num = i * 5.0;
+				float angle = glm::radians(num); 
+				EffectInforms[1][i].velocity.x = cos(angle) * (static_cast<float>(rand()) / RAND_MAX * 0.5f);  
+				EffectInforms[1][i].velocity.y = sin(angle) * (static_cast<float>(rand()) / RAND_MAX * 0.5f);
+				EffectInforms[1][i].alpha = 1.0f;
+			}
+		}
+
+		for (int i = 0; i < EffectInforms[1].size(); ++i) {
+			EffectInforms[1][i].trans.x += EffectInforms[1][i].velocity.x;
+			EffectInforms[1][i].trans.y += EffectInforms[1][i].velocity.y;
+
+			EffectInforms[1][i].velocity.y -= 0.005f;
+
+			EffectInforms[1][i].alpha -= 0.005f;
+			if (EffectInforms[1][i].alpha < 0.0f) EffectInforms[1][i].alpha = 0.0f;
+
+			EffectInforms[1][i].Model = translate(EffectInforms[1][i].trans.x, EffectInforms[1][i].trans.y, 0);
 		}
 	}
 }

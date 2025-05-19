@@ -127,6 +127,8 @@ namespace CG
 		GLuint OutlineProgram;
 		GLuint cubeVAO;
 		glm::mat4 lightSpaceMatrix;
+		GLuint envCubemap;
+		GLuint captureFBO, captureRBO;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -175,6 +177,7 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isEdit = false;
+		bool isEnviron;
 
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
@@ -195,7 +198,7 @@ namespace CG
 		float mosaicStrength;
 		float motionBlurStrength;
 		std::map<std::string, float> effectTime;
-		bool isFirstAppear = true;
+		std::map<std::string, bool> isFirstAppear;
 		glm::vec3 LightPos = glm::vec3(0, 10, 50);
 
 		enum Body
