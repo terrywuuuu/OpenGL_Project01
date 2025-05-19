@@ -91,7 +91,7 @@ namespace CG
 		return true;
 	}
 
-	void Scene::Render(glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix)
+	void Scene::Render(float camX, float camY, float camZ, float aspect, glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix)
   {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		GLuint modelLoc;

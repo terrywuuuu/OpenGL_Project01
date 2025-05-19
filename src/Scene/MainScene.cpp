@@ -136,7 +136,7 @@ namespace CG
 			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-			RenderMainScene(aspect, camX, camY, camZ, false, depthMap, ModelID);
+			RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, ModelID);
 		}
 		isEnviron = false;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -156,7 +156,7 @@ namespace CG
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
-		RenderMainScene(aspect, camX, camY, camZ, true, depthMap, modelLoc);
+		RenderMainScene(aspect, camX, camY, camZ, plane, true, depthMap, modelLoc);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glViewport(0, 0, screenWidth, screenHeight);
@@ -215,7 +215,7 @@ namespace CG
 		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
 		// ------------------------------
 
-		RenderMainScene(aspect, camX, camY, camZ, plane, false, depthCubemap, ModelID);
+		RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, ModelID);
 		if (cameraMode == CameraMode::normal && enableWater) {
 			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
@@ -230,7 +230,7 @@ namespace CG
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "Projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
 
-      RenderMainScene(aspect, camX, camY, camZ, plane, false, depthCubemap, modelLoc);
+			RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, modelLoc);
       
 			glCullFace(GL_BACK);
 		}
@@ -343,7 +343,7 @@ namespace CG
 		glBindVertexArray(0);
     
 		if (!isDepth) {
-		  scene->Render(plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera);
+			scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
 		/*
