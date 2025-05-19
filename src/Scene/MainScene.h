@@ -42,9 +42,11 @@ namespace CG
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void GenerateWaterFrameBufferAndRender(float aspect, float width, float height);
+
+    void GenerateWaterFrameBufferAndRender(float aspect, float width, float height);
 		void Render(float aspect, glm::vec4 plane, CameraMode cameraMode);
 		void RenderMainScene(float aspect, float camX, float camY, float camZ, glm::vec4 plane, bool isDepth, GLuint depthCubemap, GLuint);
+    
 		void Texture_Render();
 
 		void OnResize(int width, int height);
@@ -144,7 +146,7 @@ namespace CG
 		GLuint texture;
 		GLuint motionTexture;
 		GLuint depth_texture;
-		GLuint depthCubemap;
+		GLuint depthMap;
 		GLuint depthMapFBO;
 		std::vector<glm::mat4> shadowTransforms;
 		GLuint program;
@@ -153,6 +155,9 @@ namespace CG
 		GLuint debugCubeProgram;
 		GLuint OutlineProgram;
 		GLuint cubeVAO;
+		glm::mat4 lightSpaceMatrix;
+		GLuint envCubemap;
+		GLuint captureFBO, captureRBO;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -203,6 +208,7 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isEdit = false;
+		bool isEnviron;
 
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
@@ -223,7 +229,7 @@ namespace CG
 		float mosaicStrength;
 		float motionBlurStrength;
 		std::map<std::string, float> effectTime;
-		bool isFirstAppear = true;
+		std::map<std::string, bool> isFirstAppear;
 		glm::vec3 LightPos = glm::vec3(0, 10, 50);
 
 		bool enableWater = false;

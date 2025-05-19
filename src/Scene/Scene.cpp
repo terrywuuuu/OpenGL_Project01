@@ -17,7 +17,7 @@ static glm::mat4 scale(float x, float y, float z)
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?‡x,y,z=0?‚ä??½translate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?ïŠ,y,z=0?î¿—??ç·£ranslate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -60,9 +60,9 @@ namespace CG
 			{ GL_VERTEX_SHADER, "../../res/shaders/Scene_Material.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Scene_Material.fp" },//fragment shader
 			{ GL_NONE, NULL } };
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //è®€å–shader
 
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		ModelID = glGetUniformLocation(program, "Model");
@@ -91,23 +91,28 @@ namespace CG
 		return true;
 	}
 
-	void Scene::Render(glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthCubemap, glm::vec3 LightPos, Camera cam)
-	{
+	void Scene::Render(glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix)
+  {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 		GLuint modelLoc;
 
 		glBindVertexArray(VAO);
 		if (isDepth) {
+			glUseProgram(Program);
 			modelLoc = glGetUniformLocation(Program, "Model");
 		}
 		else {
-			glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+			glUseProgram(program);//uniformåƒæ•¸æ•¸å€¼å‰å¿…é ˆå…ˆuse shader
 			glUniform1f(glGetUniformLocation(program, "far_plane"), 200.0f);
 			glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-			glUniform1i(glGetUniformLocation(program, "depthCubemap"), 0);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glUniform1i(glGetUniformLocation(program, "shadowMap"), 1);
 			modelLoc = ModelID;
+			GLuint lightMatrixLoc = glGetUniformLocation(program, "lightSpaceMatrix");
+			glUniformMatrix4fv(lightMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+			GLuint cameraPosLoc = glGetUniformLocation(program, "cameraPos");
+			glUniform3f(cameraPosLoc, camX, camY, camZ);
 		}
 
 		camera = cam;
@@ -135,7 +140,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,buffer point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -147,7 +152,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec2,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -159,7 +164,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,©T©wÂI,³sÄòÂIªº°¾²¾¶q,point)
+			//(location,vec3,type,å›ºå®šé»,é€£çºŒé»çš„åç§»é‡,point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
@@ -177,7 +182,9 @@ namespace CG
 				//          (primitive   , glVertexID base , vertex count    )
 				if (!isDepth && Textures[mtlname].hasTexture)
 				{
+					glActiveTexture(GL_TEXTURE0); // ä½¿ç”¨ texture unit 0
 					glBindTexture(GL_TEXTURE_2D, Textures[mtlname].texture);
+					glUniform1i(glGetUniformLocation(program, "tex0"), 0);
 				}
 				if (instancedNum == 1) {
 					glDrawArrays(GL_TRIANGLES, vertexIDoffset, faces[i][j + 1] * 3);
@@ -249,7 +256,7 @@ namespace CG
 			}
 		}
 
-		// ¥[¸ü¦U³¡¥ó
+		// åŠ è¼‰å„éƒ¨ä»¶
 		Load2Buffer("../../res/Scene/Scene.obj", Type::Building);           // body
 
 		GLuint totalSize[3] = { 0, 0, 0 };
@@ -261,7 +268,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ¥Í¦¨ VBO
+		// ç”Ÿæˆ VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -277,31 +284,31 @@ namespace CG
 
 		for (int i = 0; i < SCENESUM; i++)
 		{
-			// ½Æ»s³»ÂI¸ê®Æ
+			// è¤‡è£½é ‚é»è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(VBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»s UV ¸ê®Æ
+			// è¤‡è£½ UV è³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(uVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// ½Æ»sªk½u¸ê®Æ
+			// è¤‡è£½æ³•ç·šè³‡æ–™
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ÄÀ©ñ VBO
+			glInvalidateBufferData(nVBOs[i]); // é‡‹æ”¾ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
