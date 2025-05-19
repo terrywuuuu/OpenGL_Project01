@@ -26,7 +26,7 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix);
+		void Render(glm::vec4 plane, GLenum mode, GLuint Program, bool isDepth, GLuint depthMap, glm::vec3 LightPos, Camera cam, glm::mat4 lightSpaceMatrix);
 		void SetInstance(int instancedNum, int multipleMode);
 	private:
 		auto LoadScene() -> bool;
@@ -48,6 +48,7 @@ namespace CG
 
 		GLint MatricesIdx;
 		GLuint ModelID;
+		GLuint PlaneID;
 
 		int vertices_size[SCENESUM];
 		int uvs_size[SCENESUM];
