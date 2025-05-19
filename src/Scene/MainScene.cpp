@@ -166,19 +166,13 @@ namespace CG
 			camera.SetAspect(aspect);
 		}
 		else if (cameraMode == CameraMode::reflection) {
-			float invertedPhi = -phi;
-
-			camX = eyedistance * cos(invertedPhi) * sin(theta);
-			camY = eyedistance * sin(invertedPhi);
-			camZ = eyedistance * cos(invertedPhi) * cos(theta);
-
 			float distance = camY - water->getHeight();
 			float reflectedCamY = camY - 2 * distance;
 			float targetY = 0;
 			float reflectedTargetY = targetY - 2 * (targetY - water->getHeight());
 			camera.LookAt(
 				glm::vec3(camX, reflectedCamY, camZ),          
-				glm::vec3(0, reflectedTargetY, 0),              
+				glm::vec3(0, reflectedTargetY, 0),
 				glm::vec3(0, 1, 0)                              
 			);
 			camera.SetAspect(aspect);
@@ -206,8 +200,8 @@ namespace CG
 		// ------------------------------
 
 		RenderMainScene(aspect, camX, camY, camZ, plane, false, depthCubemap, ModelID);
-		if (cameraMode == CameraMode::normal) {
-			water->Render(camX, camY, camZ, aspect, mode);
+		if (cameraMode == CameraMode::normal && enableWater) {
+			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
 
 		if (enableToonShader) {

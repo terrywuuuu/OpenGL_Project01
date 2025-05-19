@@ -82,6 +82,20 @@ namespace CG
 		void SetEffect(float num, int effect, bool isActive);
 		void SetMtl(int partsNum, std::string material);
 
+		//Water funciton
+		void SetWater(bool isActive) {
+			enableWater = isActive;
+		}
+		void SetWaterEffect(int effect, bool isActive) {
+			if (effect == 0)
+			{
+				enableWave = isActive;
+			}
+			else {
+				enableLightReflection = isActive;
+			}
+		}
+
 	private:
 		auto LoadScene() -> bool;
 
@@ -211,6 +225,10 @@ namespace CG
 		std::map<std::string, float> effectTime;
 		bool isFirstAppear = true;
 		glm::vec3 LightPos = glm::vec3(0, 10, 50);
+
+		bool enableWater = false;
+		bool enableWave = false;
+		bool enableLightReflection = false;
 
 		enum Body
 		{

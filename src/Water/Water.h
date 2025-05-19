@@ -15,7 +15,7 @@
 #include "./WaterFrameBuffer.h"
 #include <Scene/Camera.h>
 
-constexpr auto GRIDSIZE = 15;
+constexpr auto GRIDSIZE = 1;
 constexpr float WAVESPEED = 0.08f;
 
 namespace CG
@@ -24,7 +24,7 @@ namespace CG
 	{
 	public:
 		auto Initialize(WaterFrameBuffer& waterFrameBuffer) -> bool;
-		void Render(float camX, float camY, float camZ, float aspect, GLenum mode);
+		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, glm::vec3 LightPos, bool enableWave, bool enableLightReflection);
 		void Update(double dt);
 		float getHeight() const { return height; }
 	private:
@@ -45,13 +45,19 @@ namespace CG
 		GLuint ReflectionTextureID;
 		GLuint RefractionTextureID;
 		GLuint dudvMapID;
+		GLuint normalID;
 		GLuint moveFactorID;
+		GLuint cameraPositionID;
+		GLuint lightPosID;
+		GLuint enableWaveID;
+		GLuint enableLightReflectionID;
 
 		std::vector <glm::mat4> Models;
 
 		std::vector<WaterTile> waterTiles;
 
 		GLuint dudvMapTexture;
+		GLuint normalMapTexture;
 
 		float height = -10.0f;
 		float moveFactor = 0;

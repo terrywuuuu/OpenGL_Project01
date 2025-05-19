@@ -108,7 +108,12 @@ namespace CG
 		ReflectionTextureID = glGetUniformLocation(program, "reflectionTexture");
 		RefractionTextureID = glGetUniformLocation(program, "refractionTexture");
 		dudvMapID = glGetUniformLocation(program, "dudvMap");
+		normalID = glGetUniformLocation(program, "normalMap");
 		moveFactorID = glGetUniformLocation(program, "moveFactor");
+		cameraPositionID = glGetUniformLocation(program, "cameraPosition");
+		lightPosID = glGetUniformLocation(program, "lightPos");
+		enableWaveID = glGetUniformLocation(program, "enableWave");
+		enableLightReflectionID = glGetUniformLocation(program, "enableLightReflection");
 
 		//UBO
 		glGenBuffers(1, &UBO);
@@ -146,6 +151,30 @@ namespace CG
 			stbi_image_free(data);
 		}
 
+		path = "../../res/Water/normalMap.png";
+		data = stbi_load(path.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
+		if (data)
+		{
+			std::cout << "load water texture: " << path << std::endl;
+			stbi_set_flip_vertically_on_load(false);
+
+			glGenTextures(1, &normalMapTexture);
+			glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: " << path << std::endl;
+			stbi_image_free(data);
+		}
+
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
@@ -159,7 +188,7 @@ namespace CG
 		return true;
 	}
 
-	void Water::Render(float camX, float camY, float camZ, float aspect, GLenum mode)
+	void Water::Render(float camX, float camY, float camZ, float aspect, GLenum mode, glm::vec3 LightPos, bool enableWave, bool enableLightReflection)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
@@ -182,6 +211,11 @@ namespace CG
 
 
 		glUniform1f(moveFactorID, moveFactor);
+		glUniform3f(cameraPositionID, camX, camY, camZ);
+		glUniform3f(lightPosID, LightPos.x, LightPos.y, LightPos.z);
+
+		glUniform1i(enableWaveID, enableWave);
+		glUniform1i(enableLightReflectionID, enableLightReflection);
 
 		//bind reflectionTexture, refractionTexture
 		glActiveTexture(GL_TEXTURE5);
@@ -195,6 +229,10 @@ namespace CG
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, dudvMapTexture);
 		glUniform1i(dudvMapID, 7);
+
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+		glUniform1i(normalID, 8);
 
 
 		for (int i = 0; i < GRIDSIZE; ++i) {

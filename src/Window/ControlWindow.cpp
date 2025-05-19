@@ -10,6 +10,7 @@ namespace CG
 	{
 		showDemoWindow = false;
 		showMtlWindow = false;
+		showWaterWindow = false;
 		keepMultipleActive = false;
 		previousKeepMultipleActive = keepMultipleActive;
 		showEffectWindow = false;
@@ -30,6 +31,8 @@ namespace CG
 			ImGui::Checkbox("Demo Window", &showDemoWindow);
 			ImGui::Checkbox("Material Setting Window", &showMtlWindow);
 			ImGui::Checkbox("Special Effects Setting Window", &showEffectWindow);
+			ImGui::Checkbox("Show Water", &showWaterWindow);
+			targetScene->SetWater(showWaterWindow);
 
 			ImGui::SetNextItemWidth(150);
 
@@ -106,6 +109,8 @@ namespace CG
 			DisplayMtl();
 		if (showEffectWindow)
 			DisplayEffect();
+		if (showWaterWindow)
+			DisplayWater();
 		DisplayEditor(controlPos, controlSize);
 		//ToggleInput(0, 0);
 		HandleInput();
@@ -184,6 +189,32 @@ namespace CG
 				else
 				{
 					targetScene->SetEffect(0, i, false);
+				}
+			}
+
+			ImGui::End();
+		}
+	}
+
+
+	void ControlWindow::DisplayWater() {
+		ImGui::Begin("Water");
+		{
+			int effectNum = 2;
+			std::vector<std::string> effectName = { "Wave", "Light Reflection"};
+			static std::map<std::string, bool> isActive;
+
+			for (int i = 0; i < effectNum; i++) {
+				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
+
+				ImGui::SetNextItemWidth(100);
+				if (isActive[effectName[i]])
+				{
+					targetScene->SetWaterEffect(i, true);
+				}
+				else
+				{
+					targetScene->SetWaterEffect(i, false);
 				}
 			}
 
