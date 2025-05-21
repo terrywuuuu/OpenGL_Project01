@@ -236,13 +236,18 @@ namespace CG
 		}
 
 		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0, screenWidth, screenHeight);
 			effectTime["smoke"]--;
 		}
 
 		if (effectTime["fireWork"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireWork", effectTime["fireWork"], 0);
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireWork", effectTime["fireWork"], 0, screenWidth, screenHeight);
 			effectTime["fireWork"]--;
+		}
+
+		if (effectTime["fireBall"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 1, screenWidth, screenHeight);
+			effectTime["fireBall"]--;
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -346,11 +351,6 @@ namespace CG
 			scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
-		/*
-		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
-			effectTime["smoke"]--;
-		}*/
 	}
 
 	void MainScene::Texture_Render() {
@@ -483,7 +483,7 @@ namespace CG
 			musicPlayer->Stop();
 		}
 		else {
-			if (curAction.name == "multiple")
+			if (curAction.name == "multiple" || curAction.name == "fireBall")
 			{
 				musicPlayer->SetLooping(false);
 			}
@@ -818,6 +818,7 @@ namespace CG
 		isFirstAppear["smoke"] = true;
 
 		effectTime["fireWork"] = 0;
+		effectTime["fireBall"] = 0;
 
 		return true;
 	}
@@ -982,13 +983,24 @@ namespace CG
 		if (curAction.name == "APT") {
 			if (frame == 0)
 			{
-				effectTime["fireWork"] = 100.0f;
+				effectTime["fireWork"] = 120.0f;
 			}
+		}
+
+		if (curAction.name == "fireBall") {
+			if (frame >= end - 1)
+			{
+				fireBall = true;
+				effectTime["fireBall"] = 100.0f;
+			}
+		}
+		else {
+			fireBall = false;
 		}
 
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
-			HandleAction(curAction.FDs, frame, dt);
+			if(curAction.name != "fireBall" || !fireBall)		HandleAction(curAction.FDs, frame, dt);
 		}
 
 		frame += dt;

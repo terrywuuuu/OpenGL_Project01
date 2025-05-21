@@ -182,5 +182,7 @@
     <None Include="..\res\shaders\Outline.vp" />
     <None Include="..\res\shaders\Water.fp" />
     <None Include="..\res\shaders\Water.vp" />
+    <None Include="..\res\shaders\fireBall.fp" />
+    <None Include="..\res\shaders\fireBall.vp" />
   </ItemGroup>
 </Project>
