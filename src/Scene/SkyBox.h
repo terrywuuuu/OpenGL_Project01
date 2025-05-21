@@ -19,7 +19,7 @@ namespace CG
 	{
 	public:
 		auto Initialize() -> bool;
-		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap);
+		void Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap, GLuint envCubemap, bool isEnv);
 
 	private:
 		auto LoadScene() -> bool;

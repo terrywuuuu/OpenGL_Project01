@@ -6,7 +6,7 @@
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?áx,y,z=0?Ç‰??Ωtranslate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?Âôö,y,z=0?ÂÇô??Áµ´ranslate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -52,10 +52,13 @@ namespace CG
 		scene = new Scene();
 		skyBox = new SkyBox();
 		effect = new Effects();
+		water = new Water();
+		waterFrameBuffer = new WaterFrameBuffer();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
+		water->Initialize(*waterFrameBuffer);
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
@@ -64,11 +67,25 @@ namespace CG
 
 	void MainScene::Update(double dt)
 	{
+		water->Update(dt);
 		UpdateAction(dt);
 		UpdateModel();
 	}
 
-	void MainScene::Render(float aspect)
+	void MainScene::GenerateWaterFrameBufferAndRender(float aspect, float width, float height) {
+		// call mainScene->Render and set aspect
+		glEnable(GL_CLIP_DISTANCE0);
+		Render(aspect, glm::vec4(0, 1, 0, -water->getHeight()), CameraMode::reflection);
+		waterFrameBuffer->unbindCurrentFrameBuffer(width, height);
+
+		Render(aspect, glm::vec4(0, -1, 0, water->getHeight()), CameraMode::refraction);
+		waterFrameBuffer->unbindCurrentFrameBuffer(width, height);
+
+		glDisable(GL_CLIP_DISTANCE0);
+		Render(aspect, glm::vec4(0, 1, 0, -10), CameraMode::normal);
+	}
+
+	void MainScene::Render(float aspect, glm::vec4 plane, CameraMode cameraMode)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -77,7 +94,7 @@ namespace CG
 		glClearColor(0.0, 0.0, 0.0, 1); //black screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
-
+    
 		float theta = glm::radians(eyeAngley);
 		float phi = glm::radians(angle);
 
@@ -85,6 +102,47 @@ namespace CG
 		float camY = eyedistance * sin(phi);
 		float camZ = eyedistance * cos(phi) * cos(theta);
 
+		camera.SetFov(90.0f);
+		camera.SetAspect(1.0);
+		glm::vec3 pos = glm::vec3(0, -50, 0);
+		std::vector<glm::mat4> captureViews;
+		camera.LookAt(pos, pos + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		camera.LookAt(pos, pos + glm::vec3(0, 0, -1), glm::vec3(0, -1, 0));
+		captureViews.push_back(camera.GetViewMatrix());
+		isEnviron = true;
+
+		glUseProgram(program);
+		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
+		glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
+		glViewport(0, 0, 512, 512); 
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		for (GLuint i = 0; i < 6; ++i) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			//update data to UBO for MVP
+			glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &captureViews[i][0][0]);
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+			RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, ModelID);
+		}
+		isEnviron = false;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		camera.SetFov(85.0f);
+		camera.SetAspect(aspect);
 		float orthoSize = 50.0f;
 		glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 1000.0f);
 		camera.LookAt(LightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
@@ -98,7 +156,7 @@ namespace CG
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		GLuint modelLoc = glGetUniformLocation(LightProgram, "Model");
-		RenderMainScene(aspect, camX, camY, camZ, true, depthMap, modelLoc);
+		RenderMainScene(aspect, camX, camY, camZ, plane, true, depthMap, modelLoc);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glViewport(0, 0, screenWidth, screenHeight);
@@ -114,12 +172,27 @@ namespace CG
 		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
 		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
 
-		camera.LookAt(
-			glm::vec3(camX, camY, camZ),
-			glm::vec3(0, 0, 0),
-			glm::vec3(0, 1, 0)
-		);
-		camera.SetAspect(aspect);
+		if (cameraMode == CameraMode::normal || cameraMode == CameraMode::refraction)
+		{
+			camera.LookAt(
+				glm::vec3(camX, camY, camZ),
+				glm::vec3(0, 0, 0),
+				glm::vec3(0, 1, 0)
+			);
+			camera.SetAspect(aspect);
+		}
+		else if (cameraMode == CameraMode::reflection) {
+			float distance = camY - water->getHeight();
+			float reflectedCamY = camY - 2 * distance;
+			float targetY = 0;
+			float reflectedTargetY = targetY - 2 * (targetY - water->getHeight());
+			camera.LookAt(
+				glm::vec3(camX, reflectedCamY, camZ),          
+				glm::vec3(0, reflectedTargetY, 0),
+				glm::vec3(0, 1, 0)                              
+			);
+			camera.SetAspect(aspect);
+		}
 
 		PreView = camera.GetViewMatrix();
 		PreProjection = camera.GetProjectionMatrix();
@@ -130,7 +203,9 @@ namespace CG
 		glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &camera.GetProjectionMatrix()[0][0]);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-		// ---- ¥Ë¨V•˙∑Ω Cube ----
+		glUniform4f(PlaneID, plane.x, plane.y, plane.z, plane.w);
+
+		// ---- Á£ãÁêïÓûÄÊñπ Cube ----
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, glm::value_ptr(lightModel));
 		glUniform3f(glGetUniformLocation(program, "vLightPosition"), LightPos.x, LightPos.y, LightPos.z);
 		glUniform1f(glGetUniformLocation(program, "lightCube"), 1);
@@ -140,7 +215,10 @@ namespace CG
 		glUniform1f(glGetUniformLocation(program, "isLightCube"), 0);
 		// ------------------------------
 
-		RenderMainScene(aspect, camX, camY, camZ, false, depthMap, ModelID);
+		RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, ModelID);
+		if (cameraMode == CameraMode::normal && enableWater) {
+			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
+		}
 
 		if (enableToonShader) {
 			glEnable(GL_CULL_FACE);
@@ -151,18 +229,44 @@ namespace CG
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "View"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(OutlineProgram, "Projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 			GLuint modelLoc = glGetUniformLocation(OutlineProgram, "Model");
-			RenderMainScene(aspect, camX, camY, camZ, false, depthMap, modelLoc);
+
+			RenderMainScene(aspect, camX, camY, camZ, plane, false, depthMap, modelLoc);
+      
 			glCullFace(GL_BACK);
 		}
 
+		if (effectTime["smoke"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0, screenWidth, screenHeight);
+			effectTime["smoke"]--;
+		}
+
+		if (effectTime["fireWork"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireWork", effectTime["fireWork"], 0, screenWidth, screenHeight);
+			effectTime["fireWork"]--;
+		}
+
+		if (effectTime["fireBall"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 1, screenWidth, screenHeight);
+			effectTime["fireBall"]--;
+		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if (cameraMode == CameraMode::reflection)
+		{
+			waterFrameBuffer->bindReflectionFrameBuffer();
+		}
+		else if (cameraMode == CameraMode::refraction)
+		{
+			waterFrameBuffer->bindRefractionFrameBuffer();
+		}
 		Texture_Render();
 
 		glFlush();
 
 	}
 
-	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthMap, GLuint modelID) {
+	void MainScene::RenderMainScene(float aspect, float camX, float camY, float camZ, glm::vec4 plane, bool isDepth, GLuint depthCubemap, GLuint modelID) {
 		glBindVertexArray(VAO);
 
 		GLuint offset[3] = {0,0,0};//offset for vertices , uvs , normals
@@ -180,7 +284,7 @@ namespace CG
 				GL_FALSE,			//not normalized
 				0,				//strip
 				(void*)offset[0]);//buffer offset
-			//(location,vec3,type,?∫Â?Èª????ÈªûÁ??èÁßª??buffer point)
+			//(location,vec3,type,?ÂìÑ?Ê¶õ????Ê¶õÁÇµ??Âøï–©??buffer point)
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 			// 2nd attribute buffer : UVs
@@ -192,7 +296,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[1]);
-			//(location,vec2,type,?∫Â?Èª????ÈªûÁ??èÁßª??point)
+			//(location,vec2,type,?ÂìÑ?Ê¶õ????Ê¶õÁÇµ??Âøï–©??point)
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 			// 3rd attribute buffer : normals
@@ -204,7 +308,7 @@ namespace CG
 				GL_FALSE,
 				0,
 				(void*)offset[2]);
-			//(location,vec3,type,?∫Â?Èª????ÈªûÁ??èÁßª??point)
+			//(location,vec3,type,?ÂìÑ?Ê¶õ????Ê¶õÁÇµ??Âøï–©??point)
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 			int vertexIDoffset = 0;//glVertexID's offset 
@@ -242,15 +346,10 @@ namespace CG
 		}//end for loop for updating and drawing model
 
 		glBindVertexArray(0);
-		
+    
 		if (!isDepth) {
-			scene->Render(camX, camY, camZ, aspect, mode, LightProgram, isDepth, depthMap, LightPos, camera, lightSpaceMatrix);
-			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap);
-		}
-
-		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
-			effectTime["smoke"]--;
+			scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
+			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
 	}
 
@@ -279,8 +378,8 @@ namespace CG
 		glUniform1i(glGetUniformLocation(Post_Process, "enableMotionBlur"), enableMotionBlur);
 		glUniform1i(glGetUniformLocation(Post_Process, "motionBlurStrength"), motionBlurStrength);
 
-		// ¥Ë¨V´Ãπı•|√‰ßŒ≈„•‹µ≤™G
-		glDrawArrays(GL_TRIANGLES, 0, 6);  // ¥Ë¨V•|√‰ßŒ
+		// Á£ãÁêïÓÇâËæäÓöÇÂ®©Óû¨Èô™„ÉúÊå°Áã¶
+		glDrawArrays(GL_TRIANGLES, 0, 6);  // Á£ãÁêïÓöÇÂ®©Óû¨
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -384,7 +483,7 @@ namespace CG
 			musicPlayer->Stop();
 		}
 		else {
-			if (curAction.name == "multiple")
+			if (curAction.name == "multiple" || curAction.name == "fireBall")
 			{
 				musicPlayer->SetLooping(false);
 			}
@@ -489,7 +588,6 @@ namespace CG
 		glGenFramebuffers(1, &FBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -522,6 +620,26 @@ namespace CG
 			std::cerr << "Framebuffer not complete!" << std::endl;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glGenTextures(1, &envCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+		for (GLuint i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
+				512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glGenFramebuffers(1, &captureFBO);
+		glGenRenderbuffers(1, &captureRBO);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 	}
 
 	void MainScene::setLightTexture() {
@@ -661,7 +779,7 @@ namespace CG
 		
 //		effect->setProgram(Post_Process);
     
-		glUseProgram(program);//uniform?ÉÊï∏?∏ÂÄºÂ?ÂøÖÈ??àuse shader
+		glUseProgram(program);//uniform?ÂÜ©Êö©?Á®øÔøΩÁÖé?ËπáÂë¥??Âù≤se shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 		PreViewId = glGetUniformLocation(program, "PreView");
@@ -673,6 +791,7 @@ namespace CG
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
 		BackGround = glGetUniformLocation(program, "isInstanced");
 		MultipleMode = glGetUniformLocation(program, "MultipleMode");
+		PlaneID = glGetUniformLocation(program, "plane");
 
 		// Camera matrix
 
@@ -696,6 +815,10 @@ namespace CG
 		setLightTexture();
 
 		effectTime["smoke"] = 0;
+		isFirstAppear["smoke"] = true;
+
+		effectTime["fireWork"] = 0;
+		effectTime["fireBall"] = 0;
 
 		return true;
 	}
@@ -714,7 +837,7 @@ namespace CG
 			KDs[mtlname] = Kds[i];
 		}
 
-		// ?†Ë??ÑÈÉ®‰ª?
+		// ?Áä∫??ÂãØÂÑ¥Êµ†?
 		Load2Buffer("../../res/Parts/body.obj", Body::body);           // body
 		Load2Buffer("../../res/Parts/left_arm.obj", Body::left_arm);      // upper left arm
 		Load2Buffer("../../res/Parts/left_hand.obj", Body::left_hand);       // down left arm
@@ -736,7 +859,7 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ?üÊ? VBO
+		// ?ÁÜ∏? VBO
 		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &uVBO);
 		glGenBuffers(1, &nVBO);
@@ -752,31 +875,31 @@ namespace CG
 
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			// Ë§áË£Ω?ÇÈ?Ë≥áÊ?
+			// ÁëúÂõ™Ôºù?ÂÇû?Áí©Âõ®?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, VBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ?ãÊîæ VBO
+			glInvalidateBufferData(VBOs[i]); // ?Â¨´ÊñÅ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// Ë§áË£Ω UV Ë≥áÊ?
+			// ÁëúÂõ™Ôºù UV Áí©Âõ®?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, uVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ?ãÊîæ VBO
+			glInvalidateBufferData(uVBOs[i]); // ?Â¨´ÊñÅ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// Ë§áË£ΩÊ≥ïÁ?Ë≥áÊ?
+			// ÁëúÂõ™ÔºùÂ®âÊõ†?Áí©Âõ®?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, nVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ?ãÊîæ VBO
+			glInvalidateBufferData(nVBOs[i]); // ?Â¨´ÊñÅ VBO
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
@@ -844,21 +967,40 @@ namespace CG
 			{
 				curInstancedNum = instancedNum;
 
-				if (isFirstAppear) 
+				if (isFirstAppear["smoke"])
 				{
 					effectTime["smoke"] = 10.0f;
-					isFirstAppear = false;
+					isFirstAppear["smoke"] = false;
 				}
 			}
 		}
 		else if (!this->keepMultipleActive)
 		{
 			curInstancedNum = 1;
-			isFirstAppear = true;
+			isFirstAppear["smoke"] = true;
 		}
+
+		if (curAction.name == "APT") {
+			if (frame == 0)
+			{
+				effectTime["fireWork"] = 120.0f;
+			}
+		}
+
+		if (curAction.name == "fireBall") {
+			if (frame >= end - 1)
+			{
+				fireBall = true;
+				effectTime["fireBall"] = 100.0f;
+			}
+		}
+		else {
+			fireBall = false;
+		}
+
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
-			HandleAction(curAction.FDs, frame, dt);
+			if(curAction.name != "fireBall" || !fireBall)		HandleAction(curAction.FDs, frame, dt);
 		}
 
 		frame += dt;
@@ -948,7 +1090,7 @@ namespace CG
 	void MainScene::CreateScreenQuad()
 	{
 		GLfloat quadVertices[] = {
-			// ø√πıÆyº–  // UV
+			// Ê£µËæäÁïíÂ§π  // UV
 			-1.0f,  1.0f,  0.0f, 1.0f, 
 			-1.0f, -1.0f,  0.0f, 0.0f, 
 			1.0f, -1.0f,  1.0f, 0.0f, 
@@ -1012,11 +1154,11 @@ namespace CG
 		glGenBuffers(1, &EBO);
 		glBindVertexArray(lightVAO);
 
-		// ≥ª¬I∏ÍÆ∆
+		// ÈÉ¥Áø¥ÊààÓÜù
 		glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		// Ø¡§ﬁ∏ÍÆ∆
+		// Óá∂„ÅæÊààÓÜù
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 

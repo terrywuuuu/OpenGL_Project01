@@ -10,6 +10,8 @@ uniform MatVP{
 
 void main()
 {
+    gl_ClipDistance[0] = 1.0;
+    
     mat4 viewWithoutTranslation = mat4(mat3(View));
 
     vec4 pos = Projection * viewWithoutTranslation * vec4(aPos, 1.0f);

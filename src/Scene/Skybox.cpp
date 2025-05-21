@@ -7,7 +7,7 @@
 
 static glm::mat4 translate(float x, float y, float z)
 {
-	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?‡x,y,z=0?‚ä??½translate
+	glm::vec4 t = glm::vec4(x, y, z, 1);//w = 1 ,?â€¡x,y,z=0?â€šÃ¤??Â½translate
 	glm::vec4 c1 = glm::vec4(1, 0, 0, 0);
 	glm::vec4 c2 = glm::vec4(0, 1, 0, 0);
 	glm::vec4 c3 = glm::vec4(0, 0, 1, 0);
@@ -41,22 +41,22 @@ float skyboxVertices[] =
 
 unsigned int skyboxIndices[] =
 {
-	// Right (­±´Â +x)
+	// Right (Â­Â±Â´Ã‚ +x)
 	2, 1, 5,
 	5, 6, 2,
-	// Left (­±´Â -x)
+	// Left (Â­Â±Â´Ã‚ -x)
 	0, 3, 7,
 	7, 4, 0,
-	// Top (­±´Â +y)
+	// Top (Â­Â±Â´Ã‚ +y)
 	4, 7, 6,
 	6, 5, 4,
-	// Bottom (­±´Â -y)
+	// Bottom (Â­Â±Â´Ã‚ -y)
 	3, 0, 1,
 	1, 2, 3,
-	// Back (­±´Â -z)
+	// Back (Â­Â±Â´Ã‚ -z)
 	3, 2, 6,
 	6, 7, 3,
-	// Front (­±´Â +z)
+	// Front (Â­Â±Â´Ã‚ +z)
 	0, 4, 5,
 	5, 1, 0
 };
@@ -66,7 +66,7 @@ namespace CG
 	auto SkyBox::Initialize() -> bool
 	{
 		Model = glm::mat4(1.0);
-		Model *= translate(80, 20, -50);
+		Model *= translate(0, -50, 0);
 		Model *= scale(20, 20, 20);
 		return LoadScene();
 	}
@@ -82,16 +82,16 @@ namespace CG
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/SkyBox.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 
-		program = LoadShaders(shaders); //Åª¨úshader
+		program = LoadShaders(shaders); //Ã…ÂªÂ¨Ãºshader
 
 		ShaderInfo Shaders[] = {
 			{ GL_VERTEX_SHADER, "../../res/shaders/Ball.vp" },//vertex shader
 			{ GL_FRAGMENT_SHADER, "../../res/shaders/Ball.fp" },//fragment shader
 			{ GL_NONE, NULL } };
 
-		Ball_program = LoadShaders(Shaders); //Åª¨úshader
+		Ball_program = LoadShaders(Shaders); //Ã…ÂªÂ¨Ãºshader
 
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformÂ°Ã‘Â¼Ã†Â¼Ã†Â­ÃˆÂ«eÂ¥Â²Â¶Â·Â¥Ã½use shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
 
@@ -111,12 +111,12 @@ namespace CG
 		return true;
 	}
 
-	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap)
+	void SkyBox::Render(float camX, float camY, float camZ, float aspect, GLenum mode, bool environmentMap, GLuint envCubemap, bool isEnv)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, mode);// mode = 0, fill
 
 		glBindVertexArray(VAO);
-		glUseProgram(program);//uniform°Ñ¼Æ¼Æ­È«e¥²¶·¥ıuse shader
+		glUseProgram(program);//uniformÂ°Ã‘Â¼Ã†Â¼Ã†Â­ÃˆÂ«eÂ¥Â²Â¶Â·Â¥Ã½use shader
 
 		camera.LookAt(
 			glm::vec3(camX, camY, camZ),
@@ -143,7 +143,7 @@ namespace CG
 		// Switch back to the normal depth function
 		glDepthFunc(GL_LESS);
 		
-		if (environmentMap) {
+		if (environmentMap && !isEnv) {
 			glUseProgram(Ball_program);
 			glBindVertexArray(BallVAO);
 
@@ -151,7 +151,7 @@ namespace CG
 			glUniformMatrix4fv(ProID, 1, GL_FALSE, &camera.GetProjectionMatrix()[0][0]);
 			glUniformMatrix4fv(ViewID, 1, GL_FALSE, &camera.GetViewMatrix()[0][0]);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 			glUniform1i(glGetUniformLocation(Ball_program, "environmentMap"), 0);
 
 			GLuint offset[3] = { 0,0,0 };//offset for vertices , uvs , normals
@@ -168,7 +168,7 @@ namespace CG
 					GL_FALSE,			//not normalized
 					0,				//strip
 					(void*)offset[0]);//buffer offset
-				//(location,vec3,type,?ºå?é»????é»ç??ç§»??buffer point)
+				//(location,vec3,type,?ÂºÃ¥?Ã©Â»????Ã©Â»Å¾Ã§??ÂÃ§Â§Â»??buffer point)
 				offset[0] += vertices_size[i] * sizeof(glm::vec3);
 
 				// 2nd attribute buffer : UVs
@@ -180,7 +180,7 @@ namespace CG
 					GL_FALSE,
 					0,
 					(void*)offset[1]);
-				//(location,vec2,type,?ºå?é»????é»ç??ç§»??point)
+				//(location,vec2,type,?ÂºÃ¥?Ã©Â»????Ã©Â»Å¾Ã§??ÂÃ§Â§Â»??point)
 				offset[1] += uvs_size[i] * sizeof(glm::vec2);
 
 				// 3rd attribute buffer : normals
@@ -192,7 +192,7 @@ namespace CG
 					GL_FALSE,
 					0,
 					(void*)offset[2]);
-				//(location,vec3,type,?ºå?é»????é»ç??ç§»??point)
+				//(location,vec3,type,?ÂºÃ¥?Ã©Â»????Ã©Â»Å¾Ã§??ÂÃ§Â§Â»??point)
 				offset[2] += normals_size[i] * sizeof(glm::vec3);
 
 				int vertexIDoffset = 0;//glVertexID's offset 
@@ -301,7 +301,6 @@ namespace CG
 			totalSize[2] += normals_size[i] * sizeof(glm::vec3);
 		}
 
-		// ?Ÿæ? VBO
 		glGenBuffers(1, &BallVBO);
 		glGenBuffers(1, &BalluVBO);
 		glGenBuffers(1, &BallnVBO);
@@ -317,31 +316,28 @@ namespace CG
 
 		for (int i = 0; i < 1; i++)
 		{
-			// è¤‡è£½?‚é?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BallVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, VBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[0], vertices_size[i] * sizeof(glm::vec3));
 			offset[0] += vertices_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(VBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(VBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// è¤‡è£½ UV è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BalluVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, uVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[1], uvs_size[i] * sizeof(glm::vec2));
 			offset[1] += uvs_size[i] * sizeof(glm::vec2);
-			glInvalidateBufferData(uVBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(uVBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-			// è¤‡è£½æ³•ç?è³‡æ?
 			glBindBuffer(GL_COPY_WRITE_BUFFER, BallnVBO);
 			glBindBuffer(GL_COPY_READ_BUFFER, nVBOs[i]);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
 				0, offset[2], normals_size[i] * sizeof(glm::vec3));
 			offset[2] += normals_size[i] * sizeof(glm::vec3);
-			glInvalidateBufferData(nVBOs[i]); // ?‹æ”¾ VBO
+			glInvalidateBufferData(nVBOs[i]);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 		}
 		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);

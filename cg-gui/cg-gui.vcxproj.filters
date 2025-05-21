@@ -62,6 +62,12 @@
     <ClCompile Include="..\src\Utilty\miniaudio.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Water\Water.cpp">
+      <Filter>Water</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Water\WaterFrameBuffer.cpp">
+      <Filter>Water</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -84,6 +90,9 @@
     </Filter>
     <Filter Include="Effects">
       <UniqueIdentifier>{6b0ccd94-8aff-432d-9bc7-77079063cd24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Water">
+      <UniqueIdentifier>{460d4e95-3b9a-4126-a27d-5927a412c39c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -144,6 +153,15 @@
     <ClInclude Include="..\src\Utilty\miniaudio.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Water\Water.h">
+      <Filter>Water</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Water\WaterTile.h">
+      <Filter>Water</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Water\WaterFrameBuffer.h">
+      <Filter>Water</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
@@ -162,5 +180,9 @@
     <None Include="..\res\shaders\Ball.vp" />
     <None Include="..\res\shaders\Outline.fp" />
     <None Include="..\res\shaders\Outline.vp" />
+    <None Include="..\res\shaders\Water.fp" />
+    <None Include="..\res\shaders\Water.vp" />
+    <None Include="..\res\shaders\fireBall.fp" />
+    <None Include="..\res\shaders\fireBall.vp" />
   </ItemGroup>
 </Project>

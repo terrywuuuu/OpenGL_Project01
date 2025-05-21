@@ -26,8 +26,12 @@ out vec2 UV;
 out vec3 FragPos;
 out vec3 lightPos;
 
+uniform vec4 plane;
+
 void main(void) 
 { 
+    gl_ClipDistance[0] = dot(Model * vec4(vPosition,1), plane);
+
     mat4 newModel;
 
     if(isInstanced){

@@ -25,6 +25,8 @@ uniform bool isInstanced;
 uniform int MultipleMode;
 uniform bool lightCube;
 
+uniform vec4 plane;
+
 // Color to fragment program
 out vec3 vVaryingNormal;
 out vec3 vVaryingLightDir;
@@ -38,6 +40,8 @@ out vec4 PrevClipSpacePos0;
 
 void main(void) 
 { 
+    gl_ClipDistance[0] = dot(Model * vec4(vPosition,1), plane);
+
     if(lightCube){
         gl_Position = Projection* View * Model * vec4(vPosition,1);
         return;

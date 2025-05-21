@@ -18,6 +18,7 @@ namespace CG
 		void DisplayEditorItem(bool& isEdit, float curFrame, JsonIO::FrameData& curFD, JsonIO::Action& actionData);
 		void DisplayModleControl(bool& isEdit, float curFrame, JsonIO::FrameData& curFD);
 		void DisplayEffect();
+		void DisplayWater();
 		void SetActionData();
     
 		void HandleInput();
@@ -25,6 +26,7 @@ namespace CG
 	private:
 		bool showDemoWindow;
 		bool showMtlWindow;
+		bool showWaterWindow;
 
 		bool isKeyboardEnable;
 		bool keepMultipleActive;

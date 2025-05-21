@@ -14,6 +14,8 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "SkyBox.h"
+#include <Water/Water.h>
+#include <Water/WaterFrameBuffer.h>
 #include "Effects/Effects.h"
 #include "MusicPlayer.h"
 
@@ -28,14 +30,23 @@ namespace CG
 {
 	class MainScene
 	{
+	private:
+		enum CameraMode {
+			normal = 0,
+			reflection = 1,
+			refraction = 2
+		};
 	public:
 		MainScene();
 		~MainScene();
 
 		auto Initialize() -> bool;
 		void Update(double dt);
-		void Render(float aspect);
-		void RenderMainScene(float aspect, float camX, float camY, float camZ, bool isDepth, GLuint depthMap, GLuint);
+
+    void GenerateWaterFrameBufferAndRender(float aspect, float width, float height);
+		void Render(float aspect, glm::vec4 plane, CameraMode cameraMode);
+		void RenderMainScene(float aspect, float camX, float camY, float camZ, glm::vec4 plane, bool isDepth, GLuint depthCubemap, GLuint);
+    
 		void Texture_Render();
 
 		void OnResize(int width, int height);
@@ -73,6 +84,20 @@ namespace CG
 		void SetEffect(float num, int effect, bool isActive);
 		void SetMtl(int partsNum, std::string material);
 
+		//Water funciton
+		void SetWater(bool isActive) {
+			enableWater = isActive;
+		}
+		void SetWaterEffect(int effect, bool isActive) {
+			if (effect == 0)
+			{
+				enableWave = isActive;
+			}
+			else {
+				enableLightReflection = isActive;
+			}
+		}
+
 	private:
 		auto LoadScene() -> bool;
 
@@ -92,12 +117,16 @@ namespace CG
 
 		void setLightCube();
 		void setLightTexture();
+
 	private:
 		Camera camera;
-		Scene *scene;
-		SkyBox *skyBox;
+		Scene* scene;
+		SkyBox* skyBox;
 		Effects* effect;
 		MusicPlayer* musicPlayer;
+
+		Water* water;
+		WaterFrameBuffer* waterFrameBuffer;
 
 		GLuint VAO;
 		GLuint VBO;
@@ -127,6 +156,8 @@ namespace CG
 		GLuint OutlineProgram;
 		GLuint cubeVAO;
 		glm::mat4 lightSpaceMatrix;
+		GLuint envCubemap;
+		GLuint captureFBO, captureRBO;
 
 		int actionIndex = 0; // idle
 		GLenum mode = 0; // fill
@@ -136,6 +167,7 @@ namespace CG
 		float eyeAngley = 0.0;
 		float eyedistance = 65.0;
 		float size = 1;
+
 		GLfloat movex, movey;
 		GLint MatricesIdx;
 		GLint PreViewId;
@@ -147,7 +179,7 @@ namespace CG
 		int multipleMode = 0;
 		int curInstancedNum = 1;
 		int instancedNum = 100;
-
+		bool fireBall;
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
 		int normals_size[PARTSNUM];
@@ -158,6 +190,7 @@ namespace CG
 		GLuint M_KsID;
 		GLuint BackGround;
 		GLuint MultipleMode;
+		GLuint PlaneID;
 
 		std::vector<std::string> mtls[PARTSNUM];//use material
 		std::vector<unsigned int> faces[PARTSNUM];//face count
@@ -175,6 +208,7 @@ namespace CG
 		float gammas[PARTSNUM];
 		float position[3];
 		bool isEdit = false;
+		bool isEnviron;
 
 		std::vector<JsonIO::Action> actionDatas;
 		JsonIO::Action curAction;
@@ -195,8 +229,12 @@ namespace CG
 		float mosaicStrength;
 		float motionBlurStrength;
 		std::map<std::string, float> effectTime;
-		bool isFirstAppear = true;
+		std::map<std::string, bool> isFirstAppear;
 		glm::vec3 LightPos = glm::vec3(0, 10, 50);
+
+		bool enableWater = false;
+		bool enableWave = false;
+		bool enableLightReflection = false;
 
 		enum Body
 		{
