@@ -49,6 +49,8 @@ float smokePosition[] = {
 
 float fireworkPosition[] = { 30.0f, 30.0f, -80.0f };
 
+float fireballPosition[] = { 0.0f, 30.0f, 1.5f };
+
 // 繪製方形的index
 unsigned int indices[] = {
 	0, 1, 2,
@@ -71,7 +73,7 @@ namespace CG
 		{
 			parentDir + "smoke.png",
 			parentDir + "FireWork.png",
-			parentDir + "FireWork.png"
+			parentDir + "FireBall.png"
 		};
 
 		for (int i = 0; i < effectsNum; i++) {
@@ -102,6 +104,7 @@ namespace CG
 			}
 		}
 
+		fireBallInit();
 		effectInit();
 		setupMesh();
 		setProgram("../../res/shaders/Part_Effects.vp", "../../res/shaders/Part_Effects.fp", 0);
@@ -114,7 +117,7 @@ namespace CG
 		std::uniform_real_distribution<float> blueDist(0.5f, 1.0f);
 		std::uniform_real_distribution<float> greenDist(0.0f, 0.2f);
 
-		for (int j = 1; j < 3; j++) {
+		for (int j = 1; j < 2; j++) {
 			for (int i = 0; i < EffectInforms[j].size(); i++) {
 				EffectInforms[j][i].Model = glm::mat4(1.0);
 				EffectInforms[j][i].trans = glm::vec3(0);
@@ -129,6 +132,57 @@ namespace CG
 		}
 	}
 
+	void Effects::fireBallInit() {
+		for (int i = 0; i < 900; i += 9) {
+			for (int j = i; j < i + 9; j++) {
+				EffectInforms[2][j].alpha = 1.0f;
+				EffectInforms[2][j].time = 1500.0f;
+				int choose = j % 9;
+				float tranz = i / 9 * 0.4;
+				float offset = 0.1;
+
+				switch (choose) {
+				case 0:
+					EffectInforms[2][j].trans = glm::vec3(0, 0, tranz);
+					break;
+				case 1:
+					EffectInforms[2][j].trans = glm::vec3(-2 * offset, 0, tranz);
+					break;
+				case 2:
+					EffectInforms[2][j].trans = glm::vec3(-offset, offset, tranz);
+					break;
+				case 3:
+					EffectInforms[2][j].trans = glm::vec3(0, 2 * offset, tranz);
+					break;
+				case 4:
+					EffectInforms[2][j].trans = glm::vec3(offset, offset, tranz);
+					break;
+				case 5:
+					EffectInforms[2][j].trans = glm::vec3(2 * offset, 0, tranz);
+					break;
+				case 6:
+					EffectInforms[2][j].trans = glm::vec3(offset, -offset, tranz);
+					break;
+				case 7:
+					EffectInforms[2][j].trans = glm::vec3(0, -2 * offset, tranz);
+					break;
+				case 8:
+					EffectInforms[2][j].trans = glm::vec3(-offset, -offset, tranz);
+					break;
+				}
+
+				EffectInforms[2][j].Model = translate(EffectInforms[2][j].trans.x, EffectInforms[2][j].trans.y, EffectInforms[2][j].trans.z);
+			}
+		}
+
+		for (int i = 900; i < 5000; i++) {
+			EffectInforms[2][i].alpha = 1.0f;
+			EffectInforms[2][i].time = 1500.0f;
+			EffectInforms[2][i].Model = glm::mat4(1.0);
+			EffectInforms[2][i].trans = glm::vec3(0);
+		}
+	}
+
 	void Effects::setupMesh()
 	{
 		glGenVertexArrays(1, &sVAO);
@@ -138,6 +192,9 @@ namespace CG
 		glGenVertexArrays(1, &fVAO);
 		glGenBuffers(1, &fVBO);
 		glGenBuffers(1, &colorVBO);
+
+		glGenVertexArrays(1, &bVAO);
+		glGenBuffers(1, &bVBO);
 
 		glGenBuffers(1, &instanceVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
@@ -161,42 +218,16 @@ namespace CG
 			glVertexAttribDivisor(3 + i, 1);
 		}
 
+		// === Set bVAO instance attribute ===
+		glBindVertexArray(bVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		for (int i = 0; i < 4; i++) {
+			glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4) * i));
+			glEnableVertexAttribArray(3 + i);
+			glVertexAttribDivisor(3 + i, 1);
+		}
+
 		glBindVertexArray(0);
-
-		glGenVertexArrays(1, &bVAO);
-		glGenVertexArrays(1, &sphereVAO);
-		glGenBuffers(1, &bVBO);
-		glGenBuffers(1, &bEBO);
-
-		// 頂點位置計算
-		for (unsigned int y = 0; y <= Y_SEGMENTS; ++y) {
-			for (unsigned int x = 0; x <= X_SEGMENTS; ++x) {
-				float xSegment = (float)x / X_SEGMENTS;
-				float ySegment = (float)y / Y_SEGMENTS;
-				float xPos = std::cos(xSegment * 2.0f * glm::pi<float>()) * std::sin(ySegment * glm::pi<float>());
-				float yPos = std::cos(ySegment * glm::pi<float>());
-				float zPos = std::sin(xSegment * 2.0f * glm::pi<float>()) * std::sin(ySegment * glm::pi<float>());
-
-				positions.emplace_back(xPos, yPos, zPos);
-			}
-		}
-
-		// 索引（三角形）
-		bool oddRow = false;
-		for (unsigned int y = 0; y < Y_SEGMENTS; ++y) {
-			for (unsigned int x = 0; x < X_SEGMENTS; ++x) {
-				int i0 = y * (X_SEGMENTS + 1) + x;
-				int i1 = (y + 1) * (X_SEGMENTS + 1) + x;
-
-				indic.push_back(i0);
-				indic.push_back(i1);
-				indic.push_back(i0 + 1);
-
-				indic.push_back(i1);
-				indic.push_back(i1 + 1);
-				indic.push_back(i0 + 1);
-			}
-		}
 	}
 
 	void Effects::setProgram(std::string vPath, std::string fPath, int index) {
@@ -274,7 +305,7 @@ namespace CG
 			// 綁定 Texture 到 level 0
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Effect_Texture[0]); 
-			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0); // Shader 紋理單元位置
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0);
 			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), enable);
 			glUniform1i(glGetUniformLocation(Program, enableEffects[1].c_str()), false);
 			glUniform1i(glGetUniformLocation(Program, enableEffects[2].c_str()), false);
@@ -322,15 +353,28 @@ namespace CG
 			glDisable(GL_POINT_SPRITE);
 		}
 		else if (effects == "FireBall") {
+			glDisable(GL_CULL_FACE);
+			glEnable(GL_POINT_SPRITE);
+			glEnable(GL_PROGRAM_POINT_SIZE);
+			glBindVertexArray(bVAO);
+
 			updateFireBall(time);
-			GLuint modelLoc = glGetUniformLocation(Program, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(EffectInforms[2][0].Model));
-			glUniform1f(glGetUniformLocation(Program, "time"), EffectInforms[2][0].time);
-			glUniform2f(glGetUniformLocation(Program, "resolution"), (float)width, (float)height);
-			sphereVAO = CreateSphereVAO();
-			glBindVertexArray(sphereVAO);
-			
-			glDrawElements(GL_TRIANGLES, sphereIndexCount, GL_UNSIGNED_INT, 0);
+			updateModel(2);
+			glBindBuffer(GL_ARRAY_BUFFER, bVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(fireballPosition), fireballPosition, GL_DYNAMIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Effect_Texture[2]);
+			glUniform1i(glGetUniformLocation(Program, "effectTexture"), 0); // Shader 紋理單元位置
+			glUniform1i(glGetUniformLocation(Program, enableEffects[2].c_str()), false);
+			glUniform1i(glGetUniformLocation(Program, enableEffects[1].c_str()), false);
+			glUniform1i(glGetUniformLocation(Program, enableEffects[0].c_str()), false);
+			glUniform1f(glGetUniformLocation(Program, "PointSize"), 10.0);
+			glUniform1f(glGetUniformLocation(Program, "alpha"), EffectInforms[2][0].alpha);
+			glDrawArraysInstanced(GL_POINTS, 0, 1, fireBallNum);
 		}
 		
 		glDisable(GL_BLEND);
@@ -427,31 +471,41 @@ namespace CG
 	void Effects::updateFireBall(float Time)
 	{
 		EffectInforms[2][0].time--;
-		EffectInforms[2][0].trans.z += 0.1;
 
 		if (EffectInforms[2][0].time <= 0) {
-
+			for (int i = 0; i < EffectInforms[2].size(); i++) {
+				EffectInforms[2][i].alpha -= 0.005;
+			}
+			return;
 		}
 
-		EffectInforms[2][0].Model = translate(0, 20, EffectInforms[2][0].trans.z);
-		EffectInforms[2][0].Model *= scale(10, 10, 10);
+		if (EffectInforms[2][0].time >= 600) {
+			int Num = (900 - (EffectInforms[2][0].time - 600)) / 10 * 9;
+			fireBallNum = Num;
+		}
+		else {
+			fireBallNum = 5000;
+			int time = EffectInforms[2][0].time;
+			if (time % 100 == 0) {
+				for (int i = 900; i < EffectInforms[2].size(); i++) {
+					glm::vec3 offset = randomPointOnSphere(8.0f);
+					glm::vec3 fireballCenter = glm::vec3(fireballPosition[0], fireballPosition[1] - 30, fireballPosition[2] + 36);
+					EffectInforms[2][i].trans = fireballCenter + offset;
+
+					EffectInforms[2][i].Model = translate(EffectInforms[2][i].trans.x, EffectInforms[2][i].trans.y, EffectInforms[2][i].trans.z);
+				}
+			}
+		}
 	}
 
-	GLuint Effects::CreateSphereVAO()
-	{
-		glBindVertexArray(bVAO);
+	glm::vec3 Effects::randomPointOnSphere(float radius) {
+		float theta = static_cast<float>(rand()) / RAND_MAX * 2.0f * glm::pi<float>();
+		float phi = acos(1.0f - 2.0f * static_cast<float>(rand()) / RAND_MAX);
 
-		glBindBuffer(GL_ARRAY_BUFFER, bVBO);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+		float x = radius * sin(phi) * cos(theta);
+		float y = radius * cos(phi);
+		float z = radius * sin(phi) * sin(theta);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indic.size() * sizeof(unsigned int), indic.data(), GL_STATIC_DRAW);
-
-		glBindVertexArray(0);
-
-		sphereIndexCount = indic.size(); 
-		return bVAO;
+		return glm::vec3(x, y, z);
 	}
 }

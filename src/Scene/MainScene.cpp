@@ -246,7 +246,7 @@ namespace CG
 		}
 
 		if (effectTime["fireBall"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 1, screenWidth, screenHeight);
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 0, screenWidth, screenHeight);
 			effectTime["fireBall"]--;
 		}
 
@@ -991,7 +991,7 @@ namespace CG
 			if (frame >= end - 1)
 			{
 				fireBall = true;
-				effectTime["fireBall"] = 100.0f;
+				effectTime["fireBall"] = 1500.0f;
 			}
 		}
 		else {

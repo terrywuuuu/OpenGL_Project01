@@ -30,4 +30,8 @@ void main(void)
     else if (enableTrail){
         FragColor = vec4(color, 0.8);
     }
+    else{
+        vec4 texColor = texture(effectTexture, gl_PointCoord);
+        FragColor = vec4(texColor.rgb, texColor.a * alpha);
+    }
 }

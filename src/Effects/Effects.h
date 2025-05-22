@@ -27,6 +27,7 @@ namespace CG
 		void setupMesh();
 		void setAngle(std::string effect, float angle);
 		void effectInit();
+		void fireBallInit();
 
 	private:
 		auto LoadTexture() -> bool;
@@ -38,6 +39,7 @@ namespace CG
 		void updateModel(int);
 		void updateTrail();
 		GLuint CreateSphereVAO();		// For fireBall
+		glm::vec3 randomPointOnSphere(float radius);
 	private:
 		Camera camera;
 	
@@ -57,7 +59,7 @@ namespace CG
 		GLuint program[2];				// Effects program
 		int effectsNum = 3;				// Number of effects
 		std::vector<std::string> enableEffects = { "enableSmoke", "enableFireWorks", "enableTrail", "enableFireBall" };
-		std::vector<int> effectCount = { 10, 300, 1 };		// Number of particles of effects
+		std::vector<int> effectCount = { 10, 300, 5000 };		// Number of particles of effects
 
 		struct EffectInform {
 			glm::mat4 Model;
@@ -86,9 +88,6 @@ namespace CG
 		std::vector<GLsizei> trailVertexCounts;
 		std::vector<GLsizei> baseVertexOffsets;
 
-		enum Enable
-		{
-			Smoke = 0
-		};
+		int fireBallNum = 9;
 	};
 }
