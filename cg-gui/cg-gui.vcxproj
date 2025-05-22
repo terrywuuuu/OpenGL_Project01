@@ -149,6 +149,7 @@
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\App\App.cpp" />
     <ClCompile Include="..\src\Effects\Effects.cpp" />
+    <ClCompile Include="..\src\Effects\Electricity .cpp" />
     <ClCompile Include="..\src\Scene\Camera.cpp" />
     <ClCompile Include="..\src\Scene\MainScene.cpp" />
     <ClCompile Include="..\src\Scene\MusicPlayer.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="..\include\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\App\App.h" />
     <ClInclude Include="..\src\Effects\Effects.h" />
+    <ClInclude Include="..\src\Effects\Electricity.h" />
     <ClInclude Include="..\src\Scene\Camera.h" />
     <ClInclude Include="..\src\Scene\MainScene.h" />
     <ClInclude Include="..\src\Scene\MusicPlayer.h" />
@@ -193,6 +195,8 @@
     <None Include="..\res\shaders\Ball.vp" />
     <None Include="..\res\shaders\DSPhong_Material.fp" />
     <None Include="..\res\shaders\DSPhong_Material.vp" />
+    <None Include="..\res\shaders\Electricity.fp" />
+    <None Include="..\res\shaders\Electricity.vp" />
     <None Include="..\res\shaders\fireBall.fp" />
     <None Include="..\res\shaders\fireBall.vp" />
     <None Include="..\res\shaders\Light.fp" />

@@ -68,6 +68,9 @@
     <ClCompile Include="..\src\Water\WaterFrameBuffer.cpp">
       <Filter>Water</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Effects\Electricity .cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
@@ -162,6 +165,9 @@
     <ClInclude Include="..\src\Water\WaterFrameBuffer.h">
       <Filter>Water</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Effects\Electricity.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\DSPhong_Material.fp" />
@@ -184,5 +190,7 @@
     <None Include="..\res\shaders\Water.vp" />
     <None Include="..\res\shaders\fireBall.fp" />
     <None Include="..\res\shaders\fireBall.vp" />
+    <None Include="..\res\shaders\Electricity.fp" />
+    <None Include="..\res\shaders\Electricity.vp" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,114 @@
+#version 430 core
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 aTexCoord;
+
+out vec2 textureCoords;
+
+uniform MatVP{
+	mat4 View;
+	mat4 Projection;
+};
+
+uniform mat4 Model;
+uniform float aspect;
+uniform int rows;
+uniform int cols;
+uniform int totalFrames;
+uniform int nowFrame;
+uniform int instanceCount;
+uniform int isBall;
+
+float rand(float seed, float range) {
+    return fract(sin(seed) * 43758.5453123) * range;
+}
+
+void main(void) {
+    gl_ClipDistance[0] = 1.0;
+    vec4 aPosition = vec4(position.x * aspect, position.yz, 1.0);
+
+    if(isBall > 0) {
+        vec4 worldPosition = Model * aPosition;
+        gl_Position = Projection * View * worldPosition;
+    
+        // instance 專屬的隨機起始 frame（固定不變）
+        int frame = nowFrame;
+
+        int col = frame % cols;
+        int row = frame / cols;
+        
+        // 每張 sprite 占的 UV 大小
+        vec2 spriteSize = vec2(1.0 / float(cols), 1.0 / float(rows));
+        vec2 spriteOffset = vec2(float(col), float(row)) * spriteSize;
+
+        textureCoords = aTexCoord * spriteSize + spriteOffset;
+    }else {
+        int id =gl_InstanceID;
+    
+        // per layer add instanceCount * layer robot
+        int pointsPerRing = instanceCount;
+
+        // calc layer
+        int layer = 1;
+        int count = 1;
+        while (count + layer * pointsPerRing <= id) {
+            count += layer * pointsPerRing;
+            layer++;
+        }
+
+        int index = id - count;
+        int totalPoints = layer * pointsPerRing;
+
+        float radius = float(layer) * 15.0;
+        // angle = index / totalPoints * 2π(360 deg)
+        float angle = float(index) / float(totalPoints) * 6.2831853;
+
+        float offsetx = cos(angle) * radius;
+        float offsetz = sin(angle) * radius;
+                
+        // final translation 
+        vec3 instancePosition = vec3(offsetx, 0.0, offsetz);
+
+        mat4 translationMatrix = mat4(1.0);
+        translationMatrix[3] = vec4(instancePosition, 1.0);
+
+        vec3 toCenter = normalize(-instancePosition);
+        float RotateAngle = atan(toCenter.x, toCenter.z);
+                
+        // final rotation, rotating around the Y-axis
+        mat4 rotationY = mat4(
+            cos(RotateAngle), 0.0, -sin(RotateAngle), 0.0,
+            0.0,        1.0,  0.0,        0.0,
+            sin(RotateAngle), 0.0,  cos(RotateAngle), 0.0,
+            0.0,        0.0,  0.0,        1.0
+        );
+
+        float tiltAngle = radians(-35.0);
+        mat4 rotationX = mat4(
+            1.0, 0.0,           0.0,          0.0,
+            0.0, cos(tiltAngle), -sin(tiltAngle), 0.0,
+            0.0, sin(tiltAngle),  cos(tiltAngle), 0.0,
+            0.0, 0.0,           0.0,          1.0
+        );
+
+        mat4 newModel = translationMatrix * rotationY * rotationX * Model;
+
+        vec4 worldPosition = newModel * aPosition;
+        gl_Position = Projection * View * worldPosition;
+    
+        // instance 專屬的隨機起始 frame（固定不變）
+        int frame = int(rand(float(gl_InstanceID), float(totalFrames)));
+        frame = (frame + nowFrame) % totalFrames;
+
+        // 計算 UV offset
+        int col = frame % cols;
+        int row = frame / cols;
+        
+        // 每張 sprite 占的 UV 大小
+        vec2 spriteSize = vec2(1.0 / float(cols), 1.0 / float(rows));
+        vec2 spriteOffset = vec2(float(col), float(row)) * spriteSize;
+
+        textureCoords = aTexCoord * spriteSize + spriteOffset;
+    }
+
+}

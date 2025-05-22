@@ -54,11 +54,13 @@ namespace CG
 		effect = new Effects();
 		water = new Water();
 		waterFrameBuffer = new WaterFrameBuffer();
+		electricity = new Electricity();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
 		water->Initialize(*waterFrameBuffer);
+		electricity->Initialize();
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
@@ -67,6 +69,7 @@ namespace CG
 
 	void MainScene::Update(double dt)
 	{
+		electricity->Update(dt);
 		water->Update(dt);
 		UpdateAction(dt);
 		UpdateModel();
@@ -219,6 +222,9 @@ namespace CG
 		if (cameraMode == CameraMode::normal && enableWater) {
 			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
+		if (curAction.name == "dame") {
+			electricity->Render(camX, camY, camZ, aspect, mode);
+		}
 
 		if (enableToonShader) {
 			glEnable(GL_CULL_FACE);
@@ -246,7 +252,7 @@ namespace CG
 		}
 
 		if (effectTime["fireBall"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 1, screenWidth, screenHeight);
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "FireBall", effectTime["fireBall"], 0, screenWidth, screenHeight);
 			effectTime["fireBall"]--;
 		}
 
@@ -991,7 +997,7 @@ namespace CG
 			if (frame >= end - 1)
 			{
 				fireBall = true;
-				effectTime["fireBall"] = 100.0f;
+				effectTime["fireBall"] = 1500.0f;
 			}
 		}
 		else {
