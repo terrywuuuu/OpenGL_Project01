@@ -54,11 +54,13 @@ namespace CG
 		effect = new Effects();
 		water = new Water();
 		waterFrameBuffer = new WaterFrameBuffer();
+		electricity = new Electricity();
 		
 		scene->Initialize();
 		skyBox->Initialize();
 		effect->Initialize();
 		water->Initialize(*waterFrameBuffer);
+		electricity->Initialize();
 
 		//Initialize MusicPlayer
 		musicPlayer = new MusicPlayer();
@@ -67,6 +69,7 @@ namespace CG
 
 	void MainScene::Update(double dt)
 	{
+		electricity->Update(dt);
 		water->Update(dt);
 		UpdateAction(dt);
 		UpdateModel();
@@ -219,6 +222,9 @@ namespace CG
 		if (cameraMode == CameraMode::normal && enableWater) {
 			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
+		if (curAction.name == "dame") {
+			electricity->Render(camX, camY, camZ, aspect, mode);
+		}
 
 		if (enableToonShader) {
 			glEnable(GL_CULL_FACE);
@@ -348,9 +354,14 @@ namespace CG
 		glBindVertexArray(0);
     
 		if (!isDepth) {
-			scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
+			//scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
+		/*
+		if (effectTime["smoke"] != 0) {
+			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
+			effectTime["smoke"]--;
+		}*/
 	}
 
 	void MainScene::Texture_Render() {

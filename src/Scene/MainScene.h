@@ -17,6 +17,7 @@
 #include <Water/Water.h>
 #include <Water/WaterFrameBuffer.h>
 #include "Effects/Effects.h"
+#include <Effects/Electricity.h>
 #include "MusicPlayer.h"
 
 constexpr auto PARTSNUM = 11;
@@ -123,6 +124,7 @@ namespace CG
 		Scene* scene;
 		SkyBox* skyBox;
 		Effects* effect;
+		Electricity* electricity;
 		MusicPlayer* musicPlayer;
 
 		Water* water;
