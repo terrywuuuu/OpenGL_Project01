@@ -354,14 +354,9 @@ namespace CG
 		glBindVertexArray(0);
     
 		if (!isDepth) {
-			//scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
+			scene->Render(camX, camY, camZ, aspect, plane, mode, LightProgram, isDepth, depthCubemap, LightPos, camera, lightSpaceMatrix);
 			skyBox->Render(camX, camY, camZ, aspect, mode, enableEnvironmentMap, envCubemap, isEnviron);
 		}
-		/*
-		if (effectTime["smoke"] != 0) {
-			effect->renderEffects(true, camX, camY, camZ, aspect, mode, "smoke", effectTime["smoke"], 0);
-			effectTime["smoke"]--;
-		}*/
 	}
 
 	void MainScene::Texture_Render() {
