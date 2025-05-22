@@ -1,0 +1,65 @@
+{
+  "action": [
+    {
+      "body": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "frame": 0.0,
+      "head": {
+        "alpha": 3.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "left_arm": {
+        "alpha": -50.0,
+        "beta": -0.0,
+        "gamma": -90.0
+      },
+      "left_foot": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "left_hand": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "left_leg": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "position": {
+        "x": -2.0,
+        "y": -1.100000023841858,
+        "z": -8.0
+      },
+      "right_arm": {
+        "alpha": -50.0,
+        "beta": 0.0,
+        "gamma": 90.0
+      },
+      "right_foot": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      },
+      "right_hand": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 40.0
+      },
+      "right_leg": {
+        "alpha": 0.0,
+        "beta": 0.0,
+        "gamma": 0.0
+      }
+    }
+  ],
+  "musicName": "walk.mp3",
+  "name": "dame",
+  "speed": 8.300000190734863
+}
