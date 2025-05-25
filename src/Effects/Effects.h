@@ -89,5 +89,6 @@ namespace CG
 		std::vector<GLsizei> baseVertexOffsets;
 
 		int fireBallNum = 9;
+		float Radius = 3.0f;
 	};
 }

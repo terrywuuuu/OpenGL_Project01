@@ -474,12 +474,12 @@ namespace CG
 
 		if (EffectInforms[2][0].time <= 0) {
 			for (int i = 0; i < EffectInforms[2].size(); i++) {
-				EffectInforms[2][i].alpha -= 0.005;
+				EffectInforms[2][i].alpha -= 0.002;
 			}
 			return;
 		}
 
-		if (EffectInforms[2][0].time >= 600) {
+		if (EffectInforms[2][0].time >= 500) {
 			int Num = (900 - (EffectInforms[2][0].time - 600)) / 10 * 9;
 			fireBallNum = Num;
 		}
@@ -488,12 +488,13 @@ namespace CG
 			int time = EffectInforms[2][0].time;
 			if (time % 100 == 0) {
 				for (int i = 900; i < EffectInforms[2].size(); i++) {
-					glm::vec3 offset = randomPointOnSphere(8.0f);
+					glm::vec3 offset = randomPointOnSphere(Radius);
 					glm::vec3 fireballCenter = glm::vec3(fireballPosition[0], fireballPosition[1] - 30, fireballPosition[2] + 36);
 					EffectInforms[2][i].trans = fireballCenter + offset;
 
 					EffectInforms[2][i].Model = translate(EffectInforms[2][i].trans.x, EffectInforms[2][i].trans.y, EffectInforms[2][i].trans.z);
 				}
+				Radius += 3;
 			}
 		}
 	}
