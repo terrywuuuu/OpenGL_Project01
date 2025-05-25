@@ -172,8 +172,9 @@ namespace CG
 		glUniform1i(glGetUniformLocation(program, "enableToonShader"), enableToonShader);
 		glBindVertexArray(lightVAO);
 
-		glUniformMatrix4fv(PreViewId, 1, GL_FALSE, &PreView[0][0]);
-		glUniformMatrix4fv(PreProjectionId, 1, GL_FALSE, &PreProjection[0][0]);
+		glUniformMatrix4fv(PreViewId, 6, GL_FALSE, &PreViews[0][0][0]);
+		glUniformMatrix4fv(PreProjectionId, 6, GL_FALSE, &PreProjections[0][0][0]);
+
 
 		if (cameraMode == CameraMode::normal || cameraMode == CameraMode::refraction)
 		{
@@ -183,6 +184,26 @@ namespace CG
 				glm::vec3(0, 1, 0)
 			);
 			camera.SetAspect(aspect);
+
+			if (cameraMode == CameraMode::normal) {
+				glm::mat4 PreView = camera.GetViewMatrix();
+				glm::mat4 PreProjection = camera.GetProjectionMatrix();
+				if (isFirstFrame) {
+					for (int i = 0; i < 6; i ++) {
+						PreViews[i] = PreView;
+						PreProjections[i] = PreProjection;
+					}
+					isFirstFrame = false;
+				}
+				else {
+					for (int i = 5; i > 0; --i) {
+						PreViews[i] = PreViews[i - 1];
+						PreProjections[i] = PreProjections[i - 1];
+					}
+					PreViews[0] = PreView;
+					PreProjections[0] = PreProjection;
+				}
+			}
 		}
 		else if (cameraMode == CameraMode::reflection) {
 			float distance = camY - water->getHeight();
@@ -196,9 +217,6 @@ namespace CG
 			);
 			camera.SetAspect(aspect);
 		}
-
-		PreView = camera.GetViewMatrix();
-		PreProjection = camera.GetProjectionMatrix();
 
 		//update data to UBO for MVP
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
@@ -222,7 +240,7 @@ namespace CG
 		if (cameraMode == CameraMode::normal && enableWater) {
 			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
-		if (curAction.name == "dame") {
+		if (curAction.name == "damn" && damn) {
 			electricity->Render(camX, camY, camZ, aspect, mode);
 		}
 
@@ -279,7 +297,7 @@ namespace CG
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			glUniformMatrix4fv(modelID, 1, GL_FALSE, &Models[i][0][0]);
-			glUniformMatrix4fv(PreModelID, 1, GL_FALSE, &PreModels[i][0][0]);
+			glUniformMatrix4fv(PreModelID, 6, GL_FALSE, &PreModels[i][0][0][0]);
 
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			// 1rst attribute buffer : vertices
@@ -489,7 +507,7 @@ namespace CG
 			musicPlayer->Stop();
 		}
 		else {
-			if (curAction.name == "multiple" || curAction.name == "fireBall")
+			if (curAction.name == "multiple" || curAction.name == "fireBall" || curAction.name == "damn")
 			{
 				musicPlayer->SetLooping(false);
 			}
@@ -788,10 +806,10 @@ namespace CG
 		glUseProgram(program);//uniform?冩暩?稿�煎?蹇呴??坲se shader
 
 		MatricesIdx = glGetUniformBlockIndex(program, "MatVP");
-		PreViewId = glGetUniformLocation(program, "PreView");
-		PreProjectionId = glGetUniformLocation(program, "PreProjection");
+		PreViewId = glGetUniformLocation(program, "PreViews");
+		PreProjectionId = glGetUniformLocation(program, "PreProjections");
 		ModelID = glGetUniformLocation(program, "Model");
-		PreModelID = glGetUniformLocation(program, "PreModel");
+		PreModelID = glGetUniformLocation(program, "PreModels");
 		M_KaID = glGetUniformLocation(program, "Material.Ka");
 		M_KdID = glGetUniformLocation(program, "Material.Kd");
 		M_KsID = glGetUniformLocation(program, "Material.Ks");
@@ -1004,12 +1022,27 @@ namespace CG
 			fireBall = false;
 		}
 
+		if (curAction.name == "damn") {
+			if (frame >= end - 1)
+			{
+				damn = true;
+			}
+		}
+		else {
+			damn = false;
+		}
+
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
-			if(curAction.name != "fireBall" || !fireBall)		HandleAction(curAction.FDs, frame, dt);
+			if (curAction.name != "fireBall" || !fireBall) {
+				if (curAction.name != "damn" || !damn) {
+					HandleAction(curAction.FDs, frame, dt);
+				}
+			}
 		}
 
 		frame += dt;
+
 		if (frame > end) {
 			frame = 0.0;
 		}
@@ -1024,10 +1057,18 @@ namespace CG
 
 	void MainScene::UpdateModel()
 	{
+
+		for (int z = 5; z > 0; --z) {
+			for (int i = 0; i < PARTSNUM; i++)
+			{
+				PreModels[i][z] = PreModels[i][z - 1];
+			}
+		}
 		for (int i = 0; i < PARTSNUM; i++)
 		{
-			PreModels[i] = Models[i];
+			PreModels[i][0] = Models[i];
 		}
+
 		for (int i = 0; i < PARTSNUM; i++)
 		{
 			Models[i] = glm::mat4(1.0f);

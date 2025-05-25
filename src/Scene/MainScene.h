@@ -182,6 +182,7 @@ namespace CG
 		int curInstancedNum = 1;
 		int instancedNum = 100;
 		bool fireBall;
+		bool damn;
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
 		int normals_size[PARTSNUM];
@@ -201,9 +202,11 @@ namespace CG
 
 		glm::mat4 Model;
 		glm::mat4 Models[PARTSNUM];
-		glm::mat4 PreModels[PARTSNUM];
-		glm::mat4 PreView;
-		glm::mat4 PreProjection;
+		bool isFirstFrameForModel = true;
+		glm::mat4 PreModels[PARTSNUM][6];
+		bool isFirstFrame = true;
+		glm::mat4 PreViews[6];
+		glm::mat4 PreProjections[6];
 
 		float alphas[PARTSNUM];
 		float betas[PARTSNUM];

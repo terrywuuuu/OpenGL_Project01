@@ -29,7 +29,7 @@ in vec3 FragPos;
 
 // for motion blur
 in vec4 ClipSpacePos0;
-in vec4 PrevClipSpacePos0;
+in vec4 PrevClipSpacePos0[6];
 
 float Shininess = 128.0;//for material specular
 
@@ -81,9 +81,19 @@ void main(void)
 		vFragColor += specularColor*vec4(Material.Ks,1)*toonSpec;
     }
     
+
+    vec2 totalMotion = vec2(0.0);
+    float weightTotal = 0.0;
+
+    float weights[6] = float[](0.4, 0.25, 0.15, 0.1, 0.06, 0.04);
+    
     vec3 NDCPos = (ClipSpacePos0 / ClipSpacePos0.w).xyz;
-    vec3 PrevNDCPos = (PrevClipSpacePos0 / PrevClipSpacePos0.w).xyz;
-    MotionVector = (NDCPos - PrevNDCPos).xy;
+    for (int i = 0; i < 6; ++i) {
+        vec3 PrevNDCPos = (PrevClipSpacePos0[i] / PrevClipSpacePos0[i].w).xyz;
+        totalMotion += (NDCPos - PrevNDCPos).xy * weights[i];
+        weightTotal += weights[i];
+    }
+    MotionVector = totalMotion / weightTotal;
 
 }
 	
