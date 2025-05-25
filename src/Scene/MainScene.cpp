@@ -222,7 +222,7 @@ namespace CG
 		if (cameraMode == CameraMode::normal && enableWater) {
 			water->Render(camX, camY, camZ, aspect, mode, LightPos, enableWave, enableLightReflection);
 		}
-		if (curAction.name == "dame") {
+		if (curAction.name == "damn" && damn) {
 			electricity->Render(camX, camY, camZ, aspect, mode);
 		}
 
@@ -489,7 +489,7 @@ namespace CG
 			musicPlayer->Stop();
 		}
 		else {
-			if (curAction.name == "multiple" || curAction.name == "fireBall")
+			if (curAction.name == "multiple" || curAction.name == "fireBall" || curAction.name == "damn")
 			{
 				musicPlayer->SetLooping(false);
 			}
@@ -1004,12 +1004,27 @@ namespace CG
 			fireBall = false;
 		}
 
+		if (curAction.name == "damn") {
+			if (frame >= end - 1)
+			{
+				damn = true;
+			}
+		}
+		else {
+			damn = false;
+		}
+
 		scene->SetInstance(curInstancedNum, multipleMode);
 		if (isEdit || curInstancedNum == 1 || (curInstancedNum != 1 && curAction.name != "multiple")) {
-			if(curAction.name != "fireBall" || !fireBall)		HandleAction(curAction.FDs, frame, dt);
+			if (curAction.name != "fireBall" || !fireBall) {
+				if (curAction.name != "damn" || !damn) {
+					HandleAction(curAction.FDs, frame, dt);
+				}
+			}
 		}
 
 		frame += dt;
+
 		if (frame > end) {
 			frame = 0.0;
 		}

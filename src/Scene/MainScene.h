@@ -182,6 +182,7 @@ namespace CG
 		int curInstancedNum = 1;
 		int instancedNum = 100;
 		bool fireBall;
+		bool damn;
 		int vertices_size[PARTSNUM];
 		int uvs_size[PARTSNUM];
 		int normals_size[PARTSNUM];
