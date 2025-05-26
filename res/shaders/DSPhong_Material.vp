@@ -171,7 +171,6 @@ void main(void)
 
     ClipSpacePos0 = gl_Position;
 
-    
     for (int i = 0; i < 6; ++i) {
         PrevClipSpacePos0[i] = PreProjections[i] * PreViews[i] * PreModels[i] * vec4(vPosition, 1);
     }

@@ -166,13 +166,6 @@ namespace CG
 	void ControlWindow::DisplayEffect() {
 		ImGui::Begin("Special Effect");
 		{
-			/*
-			int effectNum = 6;
-			std::vector<std::string> effectName = { "Vague", "Quantization", "Mosaic", "MotionBlur", "EnvironmentMap", "ToonShader"};
-			static std::map<std::string, bool> isActive;
-			static std::map<std::string, float> num;
-			std::vector<std::pair<float, float >> Range = { {0,3.0f},{2.0f,8.0f}, {1.0f,16.0f}, {1.0,8.0} };
-			*/
 			for (int i = 0; i < effectNum; i++) {
 				ImGui::Checkbox(effectName[i].c_str(), &isActive[effectName[i]]);
 

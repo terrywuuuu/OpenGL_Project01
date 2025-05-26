@@ -48,7 +48,7 @@ vec3 applyMosaic() {
 void main(void)
 { 
     if(enableMotionBlur) {
-        vec2 MotionVector = texture(motionTexture, TexCoords).xy;
+        vec2 MotionVector = texture(motionTexture, TexCoords).xy / 1.5;
 
         vec4 Color = vec4(0.0);
 
