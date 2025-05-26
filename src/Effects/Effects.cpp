@@ -470,7 +470,7 @@ namespace CG
 
 	void Effects::updateFireBall(float Time)
 	{
-		EffectInforms[2][0].time--;
+		EffectInforms[2][0].time -= 10;
 
 		if (EffectInforms[2][0].time <= 0) {
 			for (int i = 0; i < EffectInforms[2].size(); i++) {
