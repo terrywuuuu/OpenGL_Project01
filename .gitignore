@@ -6,6 +6,22 @@ obj/
 *.exe
 *.pdb
 
+# 忽略 Visual Studio C++ 編譯中間檔
+/cg-gui/x64/
+*.ilk
+*.idb
+*.ipch
+*.recipe
+*.tlog/
+*.lastbuildstate
+*.iobj
+*.ipdb
+*.VC.db
+*.VC.VC.opendb
+
+# ImGui 視窗配置是執行時產生的
+/build/*x64/imgui.ini
+
 # 忽略編譯生成的 Debug 目錄
 /cg-gui/x64/Debug
 build/Debugx64/cg-gui.exe
