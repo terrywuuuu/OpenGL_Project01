@@ -14,7 +14,6 @@ uniform sampler2D normalMap;
 
 uniform bool enableWave;
 uniform bool enableLightReflection;
-
 uniform float moveFactor;
 
 const float waveStrength = 0.04;
@@ -60,7 +59,7 @@ void main(void) {
 		specular = pow(specular, shineDamper);
 		vec3 specularHighlights = lightColor * specular * reflectivity;
 
-		out_Color = mix(out_Color, vec4(0.0, 0.3, 0.5, 1.0), 0.2) + vec4(specularHighlights, 0.0);
+		out_Color = out_Color + vec4(specularHighlights, 0.0);
 	}
 
 }

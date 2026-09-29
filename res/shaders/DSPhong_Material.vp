@@ -16,11 +16,11 @@ uniform MatVP{
 	mat4 Projection;
 };
 
-uniform mat4 PreView;
-uniform mat4 PreProjection;
+uniform mat4 PreViews[6];
+uniform mat4 PreProjections[6];
 
 uniform mat4 Model;
-uniform mat4 PreModel;
+uniform mat4 PreModels[6];
 uniform bool isInstanced;
 uniform int MultipleMode;
 uniform bool lightCube;
@@ -36,7 +36,7 @@ out vec3 FragPos;
 
 // for motion blur
 out vec4 ClipSpacePos0;
-out vec4 PrevClipSpacePos0;
+out vec4 PrevClipSpacePos0[6];
 
 void main(void) 
 { 
@@ -171,6 +171,8 @@ void main(void)
 
     ClipSpacePos0 = gl_Position;
 
-    PrevClipSpacePos0 = PreProjection * PreView * PreModel * vec4(vPosition, 1);
+    for (int i = 0; i < 6; ++i) {
+        PrevClipSpacePos0[i] = PreProjections[i] * PreViews[i] * PreModels[i] * vec4(vPosition, 1);
+    }
 
 }
